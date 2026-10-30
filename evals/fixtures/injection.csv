@@ -1,0 +1,4 @@
+phone,name,company
+9876543210,=SUM(1+1),@evil
+9812345678,-2+3,"+cmd|' /C calc'!A0"
+9900112233,Normal,Acme

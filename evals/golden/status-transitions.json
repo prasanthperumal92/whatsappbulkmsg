@@ -1,0 +1,22 @@
+{
+  "$spec": "SPEC.md §7.8 (status handling), §8.1, §8.4",
+  "description": "Webhook status precedence. Given a campaign_messages row in `current` and an incoming webhook status, the row must end in `expect`. Rule: forward only (accepted → sent → delivered → read); failed overrides accepted/sent; unknown is resolved by any status. Timestamps for statuses that arrive out of order must still be recorded (e.g. delivered_at is set even when the row is already read).",
+  "cases": [
+    { "id": "ST-01", "current": "accepted",  "incoming": "sent",      "expect": "sent" },
+    { "id": "ST-02", "current": "sent",      "incoming": "delivered", "expect": "delivered" },
+    { "id": "ST-03", "current": "delivered", "incoming": "read",      "expect": "read" },
+    { "id": "ST-04", "current": "accepted",  "incoming": "read",      "expect": "read", "note": "Skipped statuses: jump forward" },
+    { "id": "ST-05", "current": "read",      "incoming": "delivered", "expect": "read", "also": "delivered_at is set if null", "note": "Out-of-order delivery must not move backwards" },
+    { "id": "ST-06", "current": "delivered", "incoming": "sent",      "expect": "delivered" },
+    { "id": "ST-07", "current": "read",      "incoming": "read",      "expect": "read", "note": "Duplicate webhook is a no-op" },
+    { "id": "ST-08", "current": "accepted",  "incoming": "failed",    "expect": "failed" },
+    { "id": "ST-09", "current": "sent",      "incoming": "failed",    "expect": "failed" },
+    { "id": "ST-10", "current": "delivered", "incoming": "failed",    "expect": "delivered", "note": "failed only overrides accepted/sent" },
+    { "id": "ST-11", "current": "read",      "incoming": "failed",    "expect": "read" },
+    { "id": "ST-12", "current": "unknown",   "incoming": "sent",      "expect": "sent", "note": "§8.3: webhook resolves unknown" },
+    { "id": "ST-13", "current": "unknown",   "incoming": "delivered", "expect": "delivered" },
+    { "id": "ST-14", "current": "unknown",   "incoming": "failed",    "expect": "failed" },
+    { "id": "ST-15", "current": "failed",    "incoming": "delivered", "expect": "failed", "note": "SPEC GAP G-05: can a later delivered/read override failed? Assumed no." },
+    { "id": "ST-16", "current": "skipped",   "incoming": "delivered", "expect": "skipped", "note": "Row was never sent; webhook cannot match a wamid it does not have. Should be logged as unmatched." }
+  ]
+}

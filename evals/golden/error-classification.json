@@ -1,0 +1,32 @@
+{
+  "$spec": "SPEC.md §7.6, §7.7, §8.5",
+  "description": "Graph API error code → engine action. Actions: pause_campaign | stop_all_campaigns | retry_backoff (exponential + jitter, halve rate for 5 min) | retry_after_60s | retry_transient (max 3 attempts) | failed | failed_manual_retry_after_24h | failed_and_suppress. `retryable_by_retry_failed` is whether the S-08 'Retry failed' button includes the row.",
+  "cases": [
+    { "id": "EC-01", "code": 0,      "action": "pause_campaign", "banner": "token" },
+    { "id": "EC-02", "code": 190,    "action": "pause_campaign", "banner": "token" },
+    { "id": "EC-03", "code": 10,     "action": "pause_campaign", "banner": "permission" },
+    { "id": "EC-04", "code": 200,    "action": "pause_campaign", "banner": "permission" },
+    { "id": "EC-05", "code": 4,      "action": "retry_backoff" },
+    { "id": "EC-06", "code": 80007,  "action": "retry_backoff" },
+    { "id": "EC-07", "code": 130429, "action": "retry_backoff" },
+    { "id": "EC-08", "code": 131056, "action": "retry_after_60s" },
+    { "id": "EC-09", "code": 131026, "action": "failed", "retryable_by_retry_failed": false },
+    { "id": "EC-10", "code": 131049, "action": "failed_manual_retry_after_24h", "retryable_by_retry_failed": "only when failed_at < now - 24h" },
+    { "id": "EC-11", "code": 131050, "action": "failed_and_suppress", "suppression_reason": "error_131050", "retryable_by_retry_failed": false },
+    { "id": "EC-12", "code": 131047, "action": "failed", "retryable_by_retry_failed": false },
+    { "id": "EC-13", "code": 132000, "action": "pause_campaign", "note": "Mapping bug that affects every recipient" },
+    { "id": "EC-14", "code": 132001, "action": "pause_campaign" },
+    { "id": "EC-15", "code": 132015, "action": "pause_campaign", "banner": "quality" },
+    { "id": "EC-16", "code": 132016, "action": "pause_campaign", "banner": "quality" },
+    { "id": "EC-17", "code": 131031, "action": "stop_all_campaigns" },
+    { "id": "EC-18", "code": 368,    "action": "stop_all_campaigns" },
+    { "id": "EC-19", "http_status": 503, "action": "retry_transient", "max_attempts": 3 },
+    { "id": "EC-20", "network_error": "ETIMEDOUT_BEFORE_REQUEST_SENT", "action": "retry_transient", "max_attempts": 3 },
+    { "id": "EC-21", "network_error": "TIMEOUT_AFTER_REQUEST_SENT", "action": "unknown", "note": "§8.3 says ambiguous sends must not be resent. SPEC GAP G-06: §7.7 says 'network timeout → retry up to 3 times', which conflicts with §8.3 when the request may have reached Meta." },
+    { "id": "EC-22", "code": 999999, "action": "failed", "note": "Unlisted code: SPEC GAP G-07, default assumed to be failed (not retried, not paused); full error stored" }
+  ],
+  "persistence": {
+    "description": "Every failure stores these fields from the Graph error object (§7.7)",
+    "fields": ["error_code", "error_subcode", "error_title", "error_detail", "fbtrace_id"]
+  }
+}

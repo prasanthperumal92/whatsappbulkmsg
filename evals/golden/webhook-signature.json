@@ -1,0 +1,114 @@
+{
+  "$spec": "SPEC.md §7.8, §12",
+  "description": "X-Hub-Signature-256 = \"sha256=\" + hex(HMAC-SHA256(app_secret, raw request body bytes)). Valid → processed. Invalid → stored in webhook_events with signature_ok=false, NOT processed, still respond 200 (or 401 — SPEC GAP G-13: §7.8 only fixes the response for processing errors). Bodies are given exactly; do not re-serialise.",
+  "app_secret": "test_app_secret_do_not_use",
+  "cases": [
+    {
+      "id": "WS-01",
+      "note": "Valid signature",
+      "body": "{\"object\":\"whatsapp_business_account\",\"entry\":[{\"id\":\"102290129340398\",\"changes\":[{\"field\":\"messages\",\"value\":{\"messaging_product\":\"whatsapp\",\"metadata\":{\"display_phone_number\":\"15550783881\",\"phone_number_id\":\"106540352242922\"},\"statuses\":[{\"id\":\"wamid.HBgLMTY1MDM4Nzk0MzkVAgARGBJDQjZCMzlEQUE4OTJBMTE4RTUA\",\"status\":\"delivered\",\"timestamp\":\"1761800000\",\"recipient_id\":\"919876543210\"}]}}]}]}",
+      "header": "sha256=8dba79a58bc4caf99dca257adb3b182414b98fc96210fb694e45088efc8ec081",
+      "valid": true
+    },
+    {
+      "id": "WS-02",
+      "note": "Body tampered (delivered→read) with original signature",
+      "body": "{\"object\":\"whatsapp_business_account\",\"entry\":[{\"id\":\"102290129340398\",\"changes\":[{\"field\":\"messages\",\"value\":{\"messaging_product\":\"whatsapp\",\"metadata\":{\"display_phone_number\":\"15550783881\",\"phone_number_id\":\"106540352242922\"},\"statuses\":[{\"id\":\"wamid.HBgLMTY1MDM4Nzk0MzkVAgARGBJDQjZCMzlEQUE4OTJBMTE4RTUA\",\"status\":\"read\",\"timestamp\":\"1761800000\",\"recipient_id\":\"919876543210\"}]}}]}]}",
+      "header": "sha256=8dba79a58bc4caf99dca257adb3b182414b98fc96210fb694e45088efc8ec081",
+      "valid": false
+    },
+    {
+      "id": "WS-03",
+      "note": "Same JSON, re-serialised with whitespace: signature of the compact body must not verify — proves the raw body is used",
+      "body": "{\n  \"object\": \"whatsapp_business_account\",\n  \"entry\": [\n    {\n      \"id\": \"102290129340398\",\n      \"changes\": [\n        {\n          \"field\": \"messages\",\n          \"value\": {\n            \"messaging_product\": \"whatsapp\",\n            \"metadata\": {\n              \"display_phone_number\": \"15550783881\",\n              \"phone_number_id\": \"106540352242922\"\n            },\n            \"statuses\": [\n              {\n                \"id\": \"wamid.HBgLMTY1MDM4Nzk0MzkVAgARGBJDQjZCMzlEQUE4OTJBMTE4RTUA\",\n                \"status\": \"delivered\",\n                \"timestamp\": \"1761800000\",\n                \"recipient_id\": \"919876543210\"\n              }\n            ]\n          }\n        }\n      ]\n    }\n  ]\n}",
+      "header": "sha256=8dba79a58bc4caf99dca257adb3b182414b98fc96210fb694e45088efc8ec081",
+      "valid": false
+    },
+    {
+      "id": "WS-04",
+      "note": "Pretty body with its own correct signature",
+      "body": "{\n  \"object\": \"whatsapp_business_account\",\n  \"entry\": [\n    {\n      \"id\": \"102290129340398\",\n      \"changes\": [\n        {\n          \"field\": \"messages\",\n          \"value\": {\n            \"messaging_product\": \"whatsapp\",\n            \"metadata\": {\n              \"display_phone_number\": \"15550783881\",\n              \"phone_number_id\": \"106540352242922\"\n            },\n            \"statuses\": [\n              {\n                \"id\": \"wamid.HBgLMTY1MDM4Nzk0MzkVAgARGBJDQjZCMzlEQUE4OTJBMTE4RTUA\",\n                \"status\": \"delivered\",\n                \"timestamp\": \"1761800000\",\n                \"recipient_id\": \"919876543210\"\n              }\n            ]\n          }\n        }\n      ]\n    }\n  ]\n}",
+      "header": "sha256=98fa092a599e369b5c4dbcd10fd386d2f840f2941b916d80cc2f9ee1f234eb1c",
+      "valid": true
+    },
+    {
+      "id": "WS-05",
+      "note": "Signed with a different secret",
+      "body": "{\"object\":\"whatsapp_business_account\",\"entry\":[{\"id\":\"102290129340398\",\"changes\":[{\"field\":\"messages\",\"value\":{\"messaging_product\":\"whatsapp\",\"metadata\":{\"display_phone_number\":\"15550783881\",\"phone_number_id\":\"106540352242922\"},\"statuses\":[{\"id\":\"wamid.HBgLMTY1MDM4Nzk0MzkVAgARGBJDQjZCMzlEQUE4OTJBMTE4RTUA\",\"status\":\"delivered\",\"timestamp\":\"1761800000\",\"recipient_id\":\"919876543210\"}]}}]}]}",
+      "header": "sha256=0a7afa4c4da5902dbdec7d09e2f8f3f3fede18ee848a4fc9c2a714394acae808",
+      "valid": false
+    },
+    {
+      "id": "WS-06",
+      "note": "Header missing",
+      "body": "{\"object\":\"whatsapp_business_account\",\"entry\":[{\"id\":\"102290129340398\",\"changes\":[{\"field\":\"messages\",\"value\":{\"messaging_product\":\"whatsapp\",\"metadata\":{\"display_phone_number\":\"15550783881\",\"phone_number_id\":\"106540352242922\"},\"statuses\":[{\"id\":\"wamid.HBgLMTY1MDM4Nzk0MzkVAgARGBJDQjZCMzlEQUE4OTJBMTE4RTUA\",\"status\":\"delivered\",\"timestamp\":\"1761800000\",\"recipient_id\":\"919876543210\"}]}}]}]}",
+      "header": null,
+      "valid": false
+    },
+    {
+      "id": "WS-07",
+      "note": "Header without sha256= prefix",
+      "body": "{\"object\":\"whatsapp_business_account\",\"entry\":[{\"id\":\"102290129340398\",\"changes\":[{\"field\":\"messages\",\"value\":{\"messaging_product\":\"whatsapp\",\"metadata\":{\"display_phone_number\":\"15550783881\",\"phone_number_id\":\"106540352242922\"},\"statuses\":[{\"id\":\"wamid.HBgLMTY1MDM4Nzk0MzkVAgARGBJDQjZCMzlEQUE4OTJBMTE4RTUA\",\"status\":\"delivered\",\"timestamp\":\"1761800000\",\"recipient_id\":\"919876543210\"}]}}]}]}",
+      "header": "8dba79a58bc4caf99dca257adb3b182414b98fc96210fb694e45088efc8ec081",
+      "valid": false
+    },
+    {
+      "id": "WS-08",
+      "note": "Truncated digest (must not throw on length mismatch in timingSafeEqual)",
+      "body": "{\"object\":\"whatsapp_business_account\",\"entry\":[{\"id\":\"102290129340398\",\"changes\":[{\"field\":\"messages\",\"value\":{\"messaging_product\":\"whatsapp\",\"metadata\":{\"display_phone_number\":\"15550783881\",\"phone_number_id\":\"106540352242922\"},\"statuses\":[{\"id\":\"wamid.HBgLMTY1MDM4Nzk0MzkVAgARGBJDQjZCMzlEQUE4OTJBMTE4RTUA\",\"status\":\"delivered\",\"timestamp\":\"1761800000\",\"recipient_id\":\"919876543210\"}]}}]}]}",
+      "header": "sha256=8dba79a58bc4caf99dca257adb3b18241",
+      "valid": false
+    },
+    {
+      "id": "WS-09",
+      "note": "sha1 header (old X-Hub-Signature format)",
+      "body": "{\"object\":\"whatsapp_business_account\",\"entry\":[{\"id\":\"102290129340398\",\"changes\":[{\"field\":\"messages\",\"value\":{\"messaging_product\":\"whatsapp\",\"metadata\":{\"display_phone_number\":\"15550783881\",\"phone_number_id\":\"106540352242922\"},\"statuses\":[{\"id\":\"wamid.HBgLMTY1MDM4Nzk0MzkVAgARGBJDQjZCMzlEQUE4OTJBMTE4RTUA\",\"status\":\"delivered\",\"timestamp\":\"1761800000\",\"recipient_id\":\"919876543210\"}]}}]}]}",
+      "header": "sha1=e85ec073c5ec2f003a4cb06deead719b0b43566c",
+      "valid": false
+    }
+  ],
+  "handshake": [
+    {
+      "id": "WH-01",
+      "query": {
+        "hub.mode": "subscribe",
+        "hub.verify_token": "vt_123",
+        "hub.challenge": "1158201444"
+      },
+      "configured_token": "vt_123",
+      "status": 200,
+      "body": "1158201444"
+    },
+    {
+      "id": "WH-02",
+      "query": {
+        "hub.mode": "subscribe",
+        "hub.verify_token": "wrong",
+        "hub.challenge": "1158201444"
+      },
+      "configured_token": "vt_123",
+      "status": 403
+    },
+    {
+      "id": "WH-03",
+      "query": {
+        "hub.mode": "unsubscribe",
+        "hub.verify_token": "vt_123",
+        "hub.challenge": "1158201444"
+      },
+      "configured_token": "vt_123",
+      "status": 403
+    },
+    {
+      "id": "WH-04",
+      "query": {
+        "hub.mode": "subscribe",
+        "hub.verify_token": "",
+        "hub.challenge": "1"
+      },
+      "configured_token": null,
+      "status": 403,
+      "note": "No token configured must never match an empty token"
+    }
+  ]
+}

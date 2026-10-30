@@ -1,0 +1,18 @@
+{
+  "$spec": "SPEC.md §12 (CSV export injection)",
+  "description": "Cell value → exported CSV cell content (before CSV quoting). Cells starting with = + - @ TAB or CR are prefixed with a single quote.",
+  "cases": [
+    { "id": "CE-01", "value": "=SUM(A1:A9)",         "expect": "'=SUM(A1:A9)" },
+    { "id": "CE-02", "value": "=HYPERLINK(\"http://x\")", "expect": "'=HYPERLINK(\"http://x\")" },
+    { "id": "CE-03", "value": "+cmd|' /C calc'!A0",  "expect": "'+cmd|' /C calc'!A0" },
+    { "id": "CE-04", "value": "-2+3",                "expect": "'-2+3" },
+    { "id": "CE-05", "value": "@SUM(1)",             "expect": "'@SUM(1)" },
+    { "id": "CE-06", "value": "\t=1",                "expect": "'\t=1" },
+    { "id": "CE-07", "value": "\r=1",                "expect": "'\r=1" },
+    { "id": "CE-08", "value": "Asha",                "expect": "Asha" },
+    { "id": "CE-09", "value": "a=b",                 "expect": "a=b", "note": "Only the first character matters" },
+    { "id": "CE-10", "value": "",                    "expect": "" },
+    { "id": "CE-11", "column": "phone_e164", "value": "+919876543210", "expect": "'+919876543210", "note": "SPEC GAP G-10: §12 says phones are 'exported as text' but the + prefix triggers the injection rule. Decide: prefix (safe; Excel shows +91…) or exempt the phone column. This golden assumes the rule applies uniformly." },
+    { "id": "CE-12", "column": "wa_to", "value": "919876543210", "expect": "919876543210", "note": "Digits only, no prefix needed" }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "$spec": "SPEC.md §7.4, §5.8 step 3 (variable mapping, fallbacks), FR-CMP-02",
+  "description": "Template + variable mapping + contact → rendered params and the exact /messages request body. `skip_reason` means the recipient is skipped (empty variable, no fallback).",
+  "cases": [
+    {
+      "id": "SP-01",
+      "note": "Named template with image header, body vars and URL suffix (spec example)",
+      "template": { "name": "festive_offer_nov26", "language": "en", "parameter_format": "NAMED", "header_format": "IMAGE", "body_vars": ["first_name", "discount"], "url_button_index": 0 },
+      "mapping": { "header": { "media_id": "<media_id>" }, "first_name": { "field": "first_name", "fallback": "there" }, "discount": { "static": "15%" }, "button_0": { "attribute": "offer_code" } },
+      "contact": { "wa_to": "919876543210", "first_name": "Asha", "attributes": { "offer_code": "FEST15" } },
+      "expect_body": {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": "919876543210",
+        "type": "template",
+        "template": {
+          "name": "festive_offer_nov26",
+          "language": { "code": "en" },
+          "components": [
+            { "type": "header", "parameters": [ { "type": "image", "image": { "id": "<media_id>" } } ] },
+            { "type": "body", "parameters": [
+              { "type": "text", "parameter_name": "first_name", "text": "Asha" },
+              { "type": "text", "parameter_name": "discount", "text": "15%" } ] },
+            { "type": "button", "sub_type": "url", "index": "0", "parameters": [ { "type": "text", "text": "FEST15" } ] }
+          ]
+        }
+      }
+    },
+    {
+      "id": "SP-02",
+      "note": "Fallback used when first_name is empty or whitespace",
+      "template": { "name": "welcome", "language": "en", "parameter_format": "NAMED", "body_vars": ["first_name"] },
+      "mapping": { "first_name": { "field": "first_name", "fallback": "there" } },
+      "contact": { "wa_to": "919812345678", "first_name": "  " },
+      "expect_body": {
+        "messaging_product": "whatsapp", "recipient_type": "individual", "to": "919812345678", "type": "template",
+        "template": { "name": "welcome", "language": { "code": "en" },
+          "components": [ { "type": "body", "parameters": [ { "type": "text", "parameter_name": "first_name", "text": "there" } ] } ] }
+      }
+    },
+    {
+      "id": "SP-03",
+      "note": "Positional template: no parameter_name, ordered {{1}}..{{n}}",
+      "template": { "name": "promo_pos", "language": "en", "parameter_format": "POSITIONAL", "body_vars": ["1", "2"] },
+      "mapping": { "1": { "field": "first_name" }, "2": { "field": "city" } },
+      "contact": { "wa_to": "919876543210", "first_name": "Ravi", "city": "Pune" },
+      "expect_body": {
+        "messaging_product": "whatsapp", "recipient_type": "individual", "to": "919876543210", "type": "template",
+        "template": { "name": "promo_pos", "language": { "code": "en" },
+          "components": [ { "type": "body", "parameters": [ { "type": "text", "text": "Ravi" }, { "type": "text", "text": "Pune" } ] } ] }
+      }
+    },
+    {
+      "id": "SP-04",
+      "note": "Empty variable with no fallback → recipient skipped, never sent with an empty string",
+      "template": { "name": "welcome", "language": "en", "parameter_format": "NAMED", "body_vars": ["first_name"] },
+      "mapping": { "first_name": { "field": "first_name" } },
+      "contact": { "wa_to": "919876543210", "first_name": null },
+      "expect_skip_reason": "EMPTY_VARIABLE"
+    },
+    {
+      "id": "SP-05",
+      "note": "Template with no variables: body component omitted entirely",
+      "template": { "name": "static_promo", "language": "en", "parameter_format": "NAMED", "body_vars": [] },
+      "mapping": {},
+      "contact": { "wa_to": "919876543210" },
+      "expect_body": {
+        "messaging_product": "whatsapp", "recipient_type": "individual", "to": "919876543210", "type": "template",
+        "template": { "name": "static_promo", "language": { "code": "en" } }
+      }
+    },
+    {
+      "id": "SP-06",
+      "note": "Values with WhatsApp formatting chars and newlines are passed through; newlines/tabs in params are rejected by Meta (error 132000-family) so they must be replaced with a space",
+      "template": { "name": "welcome", "language": "en", "parameter_format": "NAMED", "body_vars": ["first_name"] },
+      "mapping": { "first_name": { "field": "first_name" } },
+      "contact": { "wa_to": "919876543210", "first_name": "Asha\nRao\t*VIP*" },
+      "expect_body": {
+        "messaging_product": "whatsapp", "recipient_type": "individual", "to": "919876543210", "type": "template",
+        "template": { "name": "welcome", "language": { "code": "en" },
+          "components": [ { "type": "body", "parameters": [ { "type": "text", "parameter_name": "first_name", "text": "Asha Rao *VIP*" } ] } ] }
+      },
+      "spec_gap": "G-14: parameter sanitisation (newlines, tabs, > 4 consecutive spaces) is not in the spec"
+    }
+  ]
+}

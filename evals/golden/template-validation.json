@@ -1,0 +1,780 @@
+{
+  "$spec": "SPEC.md §5.7 (editor fields, live validation), FR-TPL-02",
+  "description": "Template draft → blocking error codes and warning codes (order-insensitive sets). Codes are this suite's vocabulary; map them to the implementation's codes in one place. A case with empty errors and warnings must validate clean.",
+  "codes": {
+    "errors": [
+      "E_BODY_EMPTY",
+      "E_LENGTH_BODY",
+      "E_LENGTH_HEADER",
+      "E_LENGTH_FOOTER",
+      "E_LENGTH_BUTTON",
+      "E_NAME",
+      "E_MISSING_SAMPLE",
+      "E_POSITIONAL_SEQUENCE",
+      "E_NAMED_FORMAT",
+      "E_VARIABLE_AT_EDGE",
+      "E_FOOTER_VARIABLE",
+      "E_HEADER_VARIABLES",
+      "E_BUTTON_LIMIT",
+      "E_BUTTON_URL"
+    ],
+    "warnings": [
+      "W_ADJACENT_VARIABLES",
+      "W_NO_OPT_OUT",
+      "W_URL_SHORTENER",
+      "W_VARIABLE_DENSITY"
+    ]
+  },
+  "cases": [
+    {
+      "id": "TV-01",
+      "note": "Baseline from §7.3: valid, no warnings",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha",
+          "discount": "15%"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": [
+          {
+            "type": "URL",
+            "text": "View offer",
+            "url": "https://example.com/offer/{{1}}",
+            "example": "https://example.com/offer/FEST15"
+          },
+          {
+            "type": "QUICK_REPLY",
+            "text": "Stop promotions"
+          }
+        ]
+      },
+      "expect": {
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-02",
+      "note": "Empty body",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "",
+        "samples": {},
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [
+          "E_BODY_EMPTY"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-03",
+      "note": "Body exactly 1024 chars is allowed",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hello there, xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "samples": {},
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-04",
+      "note": "Body 1025 chars",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hello there, xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "samples": {},
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [
+          "E_LENGTH_BODY"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-05",
+      "note": "Name with uppercase/space/punctuation (validator must block even though the UI slugifies)",
+      "draft": {
+        "name": "Festive Offer!",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha",
+          "discount": "15%"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [
+          "E_NAME"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-06",
+      "note": "Name 513 chars",
+      "draft": {
+        "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha",
+          "discount": "15%"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [
+          "E_NAME"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-07",
+      "note": "Variable without a sample",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [
+          "E_MISSING_SAMPLE"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-08",
+      "note": "Positional variables not sequential from {{1}}",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "POSITIONAL",
+        "body": "Hi {{1}}, get {{3}} off this week.",
+        "samples": {
+          "1": "Asha",
+          "3": "15%"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [
+          "E_POSITIONAL_SEQUENCE"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-09",
+      "note": "Positional starting at {{2}}",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "POSITIONAL",
+        "body": "Hi {{2}}, welcome back.",
+        "samples": {
+          "2": "Asha"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [
+          "E_POSITIONAL_SEQUENCE"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-10",
+      "note": "Valid positional",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "POSITIONAL",
+        "body": "Hi {{1}}, get {{2}} off this week.",
+        "samples": {
+          "1": "Asha",
+          "2": "15%"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-11",
+      "note": "Named variable not matching ^[a-z][a-z0-9_]*$",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{FirstName}}, welcome back.",
+        "samples": {
+          "FirstName": "Asha"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [
+          "E_NAMED_FORMAT"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-12",
+      "note": "Named variable starting with digit",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{1st_name}}, welcome back.",
+        "samples": {
+          "1st_name": "Asha"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [
+          "E_NAMED_FORMAT"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-13",
+      "note": "Body starts with a variable",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "{{first_name}}, our offer is live.",
+        "samples": {
+          "first_name": "Asha"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [
+          "E_VARIABLE_AT_EDGE"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-14",
+      "note": "Body ends with a variable",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Your discount code is {{code}}",
+        "samples": {
+          "code": "FEST15"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [
+          "E_VARIABLE_AT_EDGE"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-15",
+      "note": "Body ends with variable followed by a period is allowed",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Your discount code is {{code}}.",
+        "samples": {
+          "code": "FEST15"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-16",
+      "note": "Footer 61 chars",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha",
+          "discount": "15%"
+        },
+        "footer": "Reply STOP to unsubscribe. yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [
+          "E_LENGTH_FOOTER"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-17",
+      "note": "Footer with a variable",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha",
+          "discount": "15%"
+        },
+        "footer": "Reply STOP {{first_name}}",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [
+          "E_FOOTER_VARIABLE"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-18",
+      "note": "Text header 61 chars",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha",
+          "discount": "15%"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": [],
+        "header": {
+          "format": "TEXT",
+          "text": "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
+        }
+      },
+      "expect": {
+        "errors": [
+          "E_LENGTH_HEADER"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-19",
+      "note": "Text header with two variables",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha",
+          "discount": "15%"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": [],
+        "header": {
+          "format": "TEXT",
+          "text": "Hi {{first_name}} {{discount}}"
+        }
+      },
+      "expect": {
+        "errors": [
+          "E_HEADER_VARIABLES"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-20",
+      "note": "11 buttons",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha",
+          "discount": "15%"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": [
+          {
+            "type": "QUICK_REPLY",
+            "text": "Option 1"
+          },
+          {
+            "type": "QUICK_REPLY",
+            "text": "Option 2"
+          },
+          {
+            "type": "QUICK_REPLY",
+            "text": "Option 3"
+          },
+          {
+            "type": "QUICK_REPLY",
+            "text": "Option 4"
+          },
+          {
+            "type": "QUICK_REPLY",
+            "text": "Option 5"
+          },
+          {
+            "type": "QUICK_REPLY",
+            "text": "Option 6"
+          },
+          {
+            "type": "QUICK_REPLY",
+            "text": "Option 7"
+          },
+          {
+            "type": "QUICK_REPLY",
+            "text": "Option 8"
+          },
+          {
+            "type": "QUICK_REPLY",
+            "text": "Option 9"
+          },
+          {
+            "type": "QUICK_REPLY",
+            "text": "Option 10"
+          },
+          {
+            "type": "QUICK_REPLY",
+            "text": "Option 11"
+          }
+        ]
+      },
+      "expect": {
+        "errors": [
+          "E_BUTTON_LIMIT"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-21",
+      "note": "Two call-phone buttons",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha",
+          "discount": "15%"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": [
+          {
+            "type": "PHONE_NUMBER",
+            "text": "Call us",
+            "phone_number": "+919876543210"
+          },
+          {
+            "type": "PHONE_NUMBER",
+            "text": "Call sales",
+            "phone_number": "+919812345678"
+          }
+        ]
+      },
+      "expect": {
+        "errors": [
+          "E_BUTTON_LIMIT"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-22",
+      "note": "Two copy-code buttons",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha",
+          "discount": "15%"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": [
+          {
+            "type": "COPY_CODE",
+            "example": "FEST15"
+          },
+          {
+            "type": "COPY_CODE",
+            "example": "FEST20"
+          }
+        ]
+      },
+      "expect": {
+        "errors": [
+          "E_BUTTON_LIMIT"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-23",
+      "note": "Quick reply 26 chars",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha",
+          "discount": "15%"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": [
+          {
+            "type": "QUICK_REPLY",
+            "text": "qqqqqqqqqqqqqqqqqqqqqqqqqq"
+          }
+        ]
+      },
+      "expect": {
+        "errors": [
+          "E_LENGTH_BUTTON"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-24",
+      "note": "Quick replies not grouped (QR, URL, QR) — must be regrouped on save, not rejected (expect.normalized_button_order = QUICK_REPLY, QUICK_REPLY, URL)",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha",
+          "discount": "15%"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": [
+          {
+            "type": "QUICK_REPLY",
+            "text": "Yes"
+          },
+          {
+            "type": "URL",
+            "text": "View offer",
+            "url": "https://example.com/o"
+          },
+          {
+            "type": "QUICK_REPLY",
+            "text": "Stop promotions"
+          }
+        ]
+      },
+      "expect": {
+        "errors": [],
+        "warnings": [],
+        "normalized_button_order": [
+          "QUICK_REPLY",
+          "QUICK_REPLY",
+          "URL"
+        ]
+      }
+    },
+    {
+      "id": "TV-25",
+      "note": "URL button with two {{1}} suffixes / variable not at end",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha",
+          "discount": "15%"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": [
+          {
+            "type": "URL",
+            "text": "View",
+            "url": "https://example.com/{{1}}/x",
+            "example": "https://example.com/a/x"
+          }
+        ]
+      },
+      "expect": {
+        "errors": [
+          "E_BUTTON_URL"
+        ],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-26",
+      "note": "Two variables next to each other",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}} {{last_name}}, our offer is live.",
+        "samples": {
+          "first_name": "Asha",
+          "last_name": "Rao"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [],
+        "warnings": [
+          "W_ADJACENT_VARIABLES"
+        ]
+      }
+    },
+    {
+      "id": "TV-27",
+      "note": "No opt-out wording and no Stop promotions button",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha",
+          "discount": "15%"
+        },
+        "footer": null,
+        "buttons": []
+      },
+      "expect": {
+        "errors": [],
+        "warnings": [
+          "W_NO_OPT_OUT"
+        ]
+      }
+    },
+    {
+      "id": "TV-28",
+      "note": "Opt-out via Stop promotions button only (no footer) is enough",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha",
+          "discount": "15%"
+        },
+        "footer": null,
+        "buttons": [
+          {
+            "type": "QUICK_REPLY",
+            "text": "Stop promotions"
+          }
+        ]
+      },
+      "expect": {
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "id": "TV-29",
+      "note": "URL shortener in a button",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.",
+        "samples": {
+          "first_name": "Asha",
+          "discount": "15%"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": [
+          {
+            "type": "URL",
+            "text": "View offer",
+            "url": "https://bit.ly/abc"
+          }
+        ]
+      },
+      "expect": {
+        "errors": [],
+        "warnings": [
+          "W_URL_SHORTENER"
+        ]
+      }
+    },
+    {
+      "id": "TV-30",
+      "note": "Too many variables for the text. SPEC GAP G-12: threshold undefined; Meta guidance is roughly ≥ 3 words per variable — pick and document a ratio",
+      "draft": {
+        "name": "festive_offer_nov26",
+        "parameter_format": "NAMED",
+        "body": "Hi {{a}} and {{b}} and {{c}} and {{d}} ok.",
+        "samples": {
+          "a": "1",
+          "b": "2",
+          "c": "3",
+          "d": "4"
+        },
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [],
+        "warnings": [
+          "W_VARIABLE_DENSITY"
+        ]
+      }
+    },
+    {
+      "id": "TV-31",
+      "note": "Multiple errors are all reported, not just the first",
+      "draft": {
+        "name": "Bad Name",
+        "parameter_format": "NAMED",
+        "body": "{{x}} hi",
+        "samples": {},
+        "footer": "Reply STOP to unsubscribe",
+        "buttons": []
+      },
+      "expect": {
+        "errors": [
+          "E_NAME",
+          "E_MISSING_SAMPLE",
+          "E_VARIABLE_AT_EDGE"
+        ],
+        "warnings": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "$spec": "SPEC.md §5.3, §4.5, §6.1, §12 (upload limits)",
+  "description": "Expected analyze/validate/commit results for each fixture in evals/fixtures (generate them first). `store` is the contact store state before the import. Counts use the validate summary metrics from §5.3 step 3.",
+  "cases": [
+    {
+      "id": "IS-01", "fixture": "basic.csv", "store": "empty",
+      "detect": { "encoding": "utf-8", "delimiter": ",", "header_row": true },
+      "auto_mapping": { "Mobile No": "phone", "Name": "first_name", "Segment": "tags", "Notes": null },
+      "acceptance": "FR-IMP-03: 'Mobile No' auto-mapped to Phone; FR-IMP-07: rejects.csv has reject_reason",
+      "mapping_note": "Notes has no synonym → Ignore. Name → first_name assumed (SPEC GAP G-18: 'Name' could map to display_name)",
+      "options": { "tag_separator": ";" },
+      "validate": { "total": 8, "valid_new": 4, "valid_existing": 0, "duplicates_in_file": 1, "suppressed": 0,
+        "invalid": { "INVALID_PHONE": 1, "SCIENTIFIC_NOTATION": 1, "EMPTY_PHONE": 1 } },
+      "commit": { "new_rows": 4, "store_version_delta": 1,
+        "rows": [
+          { "phone_e164": "+919876543210", "first_name": "Asha", "tags": ["steel", "export"], "note": "First occurrence kept, not 'Asha R'" },
+          { "phone_e164": "+919845012345", "first_name": "Ravi", "tags": ["steel"] },
+          { "phone_e164": "+917012345678", "first_name": "Priya", "tags": ["export"] },
+          { "phone_e164": "+447911123456", "first_name": "Tom", "tags": ["export"], "country_iso": "GB" }
+        ] },
+      "rejects_csv": { "rows": 3, "has_column": "reject_reason", "keeps_original_columns": true }
+    },
+    {
+      "id": "IS-02", "fixture": "basic.csv", "store": "after IS-01",
+      "register": { "duplicate_of": "IS-01 import", "message_contains": "already imported" },
+      "validate": { "total": 8, "valid_new": 0, "valid_existing": 4, "duplicates_in_file": 1 },
+      "commit": { "new_rows": 0 },
+      "acceptance": "FR-IMP-06: re-importing the same file creates 0 new rows"
+    },
+    {
+      "id": "IS-03", "fixture": "semicolon-win1252.csv", "store": "empty",
+      "detect": { "encoding": "windows-1252", "delimiter": ";" },
+      "preview_rows": [ ["9876543210", "José", "Pune"], ["9812345678", "Müller", "Köln"], ["9900112233", "Peña", "Goa"] ],
+      "preview_headers": ["Téléphone", "Nom", "Ville"],
+      "validate": { "total": 3, "valid_new": 3 },
+      "acceptance": "FR-IMP-02: no mojibake (no 'Ã©', no U+FFFD), CRLF not left in the last column"
+    },
+    {
+      "id": "IS-04", "fixture": "bom-utf8.csv", "store": "empty",
+      "detect": { "encoding": "utf-8", "bom_stripped": true },
+      "auto_mapping": { "phone": "phone", "first_name": "first_name", "email": "email" },
+      "validate": { "total": 2, "valid_new": 2 },
+      "commit": { "rows": [ { "phone_e164": "+919812345678", "email": null, "note": "Invalid email is dropped (or kept with a warning) but does not reject the row. SPEC GAP G-19" } ] }
+    },
+    {
+      "id": "IS-05", "fixture": "utf16le.csv", "store": "empty",
+      "detect": { "encoding": "utf-16le" },
+      "auto_mapping": { "Mobile": "phone", "Name": "first_name" },
+      "validate": { "total": 2, "valid_new": 2 }
+    },
+    {
+      "id": "IS-06", "fixture": "quoted-newlines.csv", "store": "empty",
+      "validate": { "total": 3, "valid_new": 3 },
+      "commit": { "rows": [
+        { "phone_e164": "+919876543210", "first_name": "Rao, Asha" },
+        { "phone_e164": "+919812345678", "first_name": "Ravi" }
+      ] },
+      "note": "Embedded newlines must not create extra rows, both in the browser preview and in server validation"
+    },
+    {
+      "id": "IS-07", "fixture": "tab-delimited.txt", "store": "empty",
+      "detect": { "delimiter": "\t" },
+      "auto_mapping": { "WhatsApp": "phone", "First Name": "first_name", "City": "city" },
+      "validate": { "total": 2, "valid_new": 2 }
+    },
+    {
+      "id": "IS-08", "fixture": "opt-in-column.csv", "store": "empty",
+      "options": { "opt_in_column": "consent", "consent_confirmed": true },
+      "commit": { "opt_in_status_by_phone": {
+        "+919876543210": "opted_in", "+919812345678": "opted_in", "+919900112233": "opted_in", "+919123456780": "opted_in",
+        "+919845012345": "opted_in", "+917012345678": "opted_in", "+918123456789": "unknown", "+916000000000": "unknown" } },
+      "note": "Y and TRUE assume case-insensitive matching; 'no' assumed unknown, not opted_out. SPEC GAP G-15",
+      "also": "Without the consent checkbox, commit is refused (HTTP 4xx) when any row would be opted_in"
+    },
+    {
+      "id": "IS-09", "fixture": "injection.csv", "store": "empty",
+      "validate": { "total": 3, "valid_new": 3 },
+      "export_round_trip": { "first_name": ["'=SUM(1+1)", "'-2+3", "Normal"], "company": ["'@evil", "'+cmd|' /C calc'!A0", "Acme"] },
+      "note": "Stored values are unchanged; escaping applies only on export"
+    },
+    {
+      "id": "IS-10", "fixture": "update-existing.csv", "store": "after IS-01",
+      "validate": { "total": 2, "valid_new": 0, "valid_existing": 2 },
+      "by_policy": {
+        "fill_empty": { "+919876543210": { "first_name": "Asha", "company": "Acme Steel", "tags": ["steel", "export", "retail"] },
+                        "+919845012345": { "first_name": "Ravi", "company": "Ravi Traders", "tags": ["steel"] } },
+        "overwrite":  { "+919876543210": { "first_name": "Asha Kumar", "company": "Acme Steel", "tags": ["steel", "export", "retail"] },
+                        "+919845012345": { "first_name": "Ravi", "company": "Ravi Traders", "tags": ["steel"] } },
+        "skip":       { "+919876543210": { "first_name": "Asha", "company": null, "tags": ["steel", "export", "retail"] },
+                        "+919845012345": { "first_name": "Ravi", "company": null, "tags": ["steel"] } }
+      },
+      "notes": [
+        "Overwrite with an empty cell keeps the old value (Ravi). SPEC GAP G-17",
+        "Skip still unions tags because §5.3 says 'Tags are always unioned'. SPEC GAP G-16: confirm this applies to Skip"
+      ]
+    },
+    {
+      "id": "IS-11", "fixture": "too-many-columns.csv", "store": "empty",
+      "analyze": { "rejected": true, "reason_contains": "200" }
+    },
+    {
+      "id": "IS-12", "fixture": "no-header.csv", "store": "empty",
+      "options": { "header_row": false },
+      "validate": { "total": 2, "valid_new": 2 },
+      "note": "Column names shown as Col A / Col B; with header_row=true the summary would be total 1"
+    },
+    {
+      "id": "IS-13", "fixture": "preamble.csv", "store": "empty",
+      "options": { "rows_to_skip": 2 },
+      "validate": { "total": 1, "valid_new": 1 }
+    },
+    {
+      "id": "IS-14", "fixture": "large-50k.csv", "store": "empty",
+      "options": { "opt_in_column": "opt_in", "consent_confirmed": true, "tag_separator": ";" },
+      "validate": { "total": 50000, "valid_new": 50000, "duplicates_in_file": 0 },
+      "commit": { "new_rows": 50000 },
+      "nfr": "NFR-IMPORT: validate + commit < 60 s on production-like infrastructure (G1)"
+    },
+    {
+      "id": "IS-15", "fixture": "basic.csv", "store": "empty; +919845012345 in suppression_list",
+      "options": { "opt_in_value_for_file": "opted_in", "consent_confirmed": true },
+      "validate": { "suppressed": 1 },
+      "commit": { "opt_in_status_by_phone": { "+919845012345": "opted_out", "+919876543210": "opted_in" } },
+      "acceptance": "FR-IMP-10: suppressed number is imported but stays opted-out"
+    }
+  ]
+}

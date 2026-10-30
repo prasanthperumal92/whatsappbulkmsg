@@ -1,0 +1,29 @@
+{
+  "$spec": "SPEC.md §7.8 (inbound messages), §5.2 (opt-out keywords), FR-CMP-07",
+  "description": "Inbound message → should the sender be suppressed? Default keywords: STOP, UNSUBSCRIBE, STOP PROMOTIONS. Match is case-insensitive on the trimmed text (whole message, not substring).",
+  "keywords": ["STOP", "UNSUBSCRIBE", "STOP PROMOTIONS"],
+  "cases": [
+    { "id": "OO-01", "type": "text", "body": "STOP", "suppress": true },
+    { "id": "OO-02", "type": "text", "body": "stop", "suppress": true },
+    { "id": "OO-03", "type": "text", "body": "  Stop \n", "suppress": true, "note": "Trimmed" },
+    { "id": "OO-04", "type": "text", "body": "Unsubscribe", "suppress": true },
+    { "id": "OO-05", "type": "text", "body": "STOP PROMOTIONS", "suppress": true },
+    { "id": "OO-06", "type": "text", "body": "stop promotions", "suppress": true },
+    { "id": "OO-07", "type": "button", "payload": "Stop promotions", "text": "Stop promotions", "suppress": true, "note": "Quick-reply button from the template" },
+    { "id": "OO-08", "type": "interactive", "button_reply_title": "Stop promotions", "suppress": true },
+    { "id": "OO-09", "type": "text", "body": "please stop", "suppress": false, "note": "Whole-message match only" },
+    { "id": "OO-10", "type": "text", "body": "stopped", "suppress": false },
+    { "id": "OO-11", "type": "text", "body": "Don't stop the offers!", "suppress": false },
+    { "id": "OO-12", "type": "text", "body": "STOP!", "suppress": true, "note": "SPEC GAP G-08: trailing punctuation not covered by the spec. Recommended: strip trailing punctuation and emoji before matching" },
+    { "id": "OO-13", "type": "text", "body": "Stop.", "suppress": true, "note": "Same gap as OO-12" },
+    { "id": "OO-14", "type": "button", "payload": "View offer", "text": "View offer", "suppress": false },
+    { "id": "OO-15", "type": "image", "caption": "STOP", "suppress": false, "note": "SPEC GAP G-09: captions on media are not mentioned. Assumed ignored" }
+  ],
+  "side_effects_when_suppressed": [
+    "suppression_list row with reason stop_keyword (text) or button (quick reply)",
+    "audit_log row with user_id = system:webhook",
+    "no Parquet rewrite in the webhook request (copied by apply-suppressions cron within 5 min)",
+    "UI shows the contact as opted-out immediately (overlay)",
+    "pending campaign_messages for that number become skipped at send time"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "$spec": "SPEC.md §5.2 (send window), §8.2 (loadControlState.waitUntil), FR-CMP-08",
+  "description": "Send window 09:00–20:00 Asia/Kolkata (UTC+05:30, no DST). Given `now` (UTC) and optional scheduled_at, the engine either sends now (wait_until = null) or sleeps until `wait_until` (UTC).",
+  "window": { "start": "09:00", "end": "20:00", "tz": "Asia/Kolkata" },
+  "cases": [
+    { "id": "SW-01", "now": "2026-11-02T05:00:00Z", "wait_until": null, "note": "10:30 IST, inside window" },
+    { "id": "SW-02", "now": "2026-11-02T15:30:00Z", "wait_until": "2026-11-03T03:30:00Z", "note": "21:00 IST → next day 09:00 IST (FR-CMP-08 acceptance)" },
+    { "id": "SW-03", "now": "2026-11-02T03:29:00Z", "wait_until": "2026-11-02T03:30:00Z", "note": "08:59 IST → 09:00 same day" },
+    { "id": "SW-04", "now": "2026-11-02T03:30:00Z", "wait_until": null, "note": "Exactly 09:00 IST: start is inclusive" },
+    { "id": "SW-05", "now": "2026-11-02T14:29:00Z", "wait_until": null, "note": "19:59 IST" },
+    { "id": "SW-06", "now": "2026-11-02T14:30:00Z", "wait_until": "2026-11-03T03:30:00Z", "note": "Exactly 20:00 IST: end assumed exclusive. SPEC GAP G-11" },
+    { "id": "SW-07", "now": "2026-11-02T19:00:00Z", "wait_until": "2026-11-03T03:30:00Z", "note": "00:30 IST (after UTC midnight boundary trap): wait until 09:00 the same IST day" },
+    { "id": "SW-08", "now": "2026-11-02T05:00:00Z", "scheduled_at": "2026-11-02T08:30:00Z", "wait_until": "2026-11-02T08:30:00Z", "note": "Scheduled inside the window" },
+    { "id": "SW-09", "now": "2026-11-02T05:00:00Z", "scheduled_at": "2026-11-02T15:30:00Z", "wait_until": "2026-11-03T03:30:00Z", "note": "Scheduled at 21:00 IST → also respects window" },
+    { "id": "SW-10", "now": "2026-12-31T18:45:00Z", "wait_until": "2027-01-01T03:30:00Z", "note": "Year rollover (00:15 IST on 1 Jan)" }
+  ]
+}
