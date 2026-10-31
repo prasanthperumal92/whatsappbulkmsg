@@ -1,6 +1,6 @@
 # Evaluations — WhatsApp Bulk Messenger
 
-An acceptance suite derived from [`SPEC.md`](../SPEC.md) v2.0, written before the implementation exists. It defines what "correct" means in terms you can check, so tests in each delivery phase (§14) can be wired straight to it.
+An acceptance suite derived from [`SPEC.md`](../SPEC.md) v2.1, written before the implementation exists. It defines what "correct" means in terms you can check, so tests in each delivery phase (§14) can be wired straight to it.
 
 | Path | What it is |
 |---|---|
@@ -30,6 +30,11 @@ node evals/check.mjs
 | `send-window.json` | §5.2, §8.2 | SW-01…10 | `waitUntil` computation (UTC in, UTC out) |
 | `csv-export-escaping.json` | §12 | CE-01…12 | Export cell escaper |
 | `import-summaries.json` | §5.3, §6.1 | IS-01…15 | Import service against a test Neon branch + Blob |
+| `email-normalisation.json` | §4.6 | EN-01…18 | `normaliseEmail(raw)`, browser and server |
+| `email-send-payload.json` | §7A.4, §7A.5 | EP-01…10 | Email renderer + `/emails/batch` element builder |
+| `email-status-transitions.json` | §8.1, §7A.8 | ES-01…25 | Email webhook status reducer + suppression |
+| `email-webhook-signature.json` | §7A.8 | RS-01…13 | Resend (Svix) signature check; real HMACs, cross-checked against `svix@1.40.0` |
+| `unsubscribe-token.json` | §7A.5 | UT-01…08 | Unsubscribe token sign/verify (real HMACs) |
 
 Phone goldens were checked against `libphonenumber-js/max` 1.x with a reference implementation of §4.5. Several obvious-looking cases behave differently from what you'd guess (`+91 12345 67890` is **valid**; `919876543210` without `+` is accepted as Indian), so keep the library version pinned and re-run PN-* when you upgrade it.
 
@@ -55,6 +60,8 @@ Each phase in §14 is done when its evals pass:
 | P5 Campaigns (mock) | SP-*, ST-*, EC-*, OO-*, WS-*, WH-*, SW-*, CM-01…26, WB-01…09, CR-01…04, TP-03, E2E-01, E2E-05, SEC-04…08 |
 | P6 Meta integration | TP-04…09, CM-23, LIVE-01…03, LIVE-05 |
 | P7 Hardening | LIVE-04, NFR-04, WB-03, E2E-06, full re-run |
+| P8 Email (mock) | EN-*, EP-*, ES-*, RS-*, UT-*, EM-01…36 (except live), SEC-12…18 |
+| P9 Email live | LIVE-EM-01…04, EM-34, EM-35 re-run |
 
 ## Spec gaps found while writing the evals
 
@@ -82,3 +89,5 @@ Each golden that depends on one of these is tagged `SPEC GAP G-nn` and encodes t
 | G-18 | Does a header `Name` map to `first_name` or `display_name`? | `first_name` | IS-01 |
 | G-19 | Invalid email: drop the value, keep with a warning, or reject the row? | Drop value, keep row | IS-04 |
 | G-20 | If Meta re-categorises a MARKETING template to UTILITY, can it still be sent? | Not offered in the wizard | TP-07 |
+| G-21 | Several addresses in one email cell: invalid, or take the first? | Invalid (value dropped) | EN-11 |
+| G-22 | Hard bounce arriving after `opened`: status and suppression? | Status stays `opened`; address suppressed | ES-12 |

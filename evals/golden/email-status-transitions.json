@@ -1,0 +1,31 @@
+{
+  "$spec": "SPEC.md §8.1 (email), §7A.8, FR-EML-08, FR-EML-09",
+  "description": "Email webhook precedence. Given a campaign_messages row (channel=email) in `current` and an incoming Resend event, the row must end in `expect`; `suppress` says whether the address is added to email_suppression_list (with `reason`). Rank: accepted < sent < delayed < delivered < opened < clicked. bounced/failed replace accepted/sent/delayed; bounced also replaces delivered; complained replaces everything post-accepted; nothing replaces complained. Timestamps (opened_at, clicked_at…) are recorded even when the status does not move.",
+  "cases": [
+    { "id": "ES-01", "current": "accepted",  "incoming": "email.sent",             "expect": "sent",       "suppress": false },
+    { "id": "ES-02", "current": "sent",      "incoming": "email.delivered",        "expect": "delivered",  "suppress": false },
+    { "id": "ES-03", "current": "delivered", "incoming": "email.opened",           "expect": "opened",     "suppress": false },
+    { "id": "ES-04", "current": "opened",    "incoming": "email.clicked",          "expect": "clicked",    "suppress": false },
+    { "id": "ES-05", "current": "accepted",  "incoming": "email.clicked",          "expect": "clicked",    "suppress": false, "note": "Out of order: jump forward" },
+    { "id": "ES-06", "current": "clicked",   "incoming": "email.opened",           "expect": "clicked",    "suppress": false, "also": "opened_at is set if null" },
+    { "id": "ES-07", "current": "sent",      "incoming": "email.delivery_delayed", "expect": "delayed",    "suppress": false },
+    { "id": "ES-08", "current": "delayed",   "incoming": "email.delivered",        "expect": "delivered",  "suppress": false },
+    { "id": "ES-09", "current": "delivered", "incoming": "email.delivery_delayed", "expect": "delivered",  "suppress": false },
+    { "id": "ES-10", "current": "sent",      "incoming": "email.bounced", "bounce_type": "Permanent", "expect": "bounced", "suppress": true, "reason": "hard_bounce" },
+    { "id": "ES-11", "current": "delivered", "incoming": "email.bounced", "bounce_type": "Permanent", "expect": "bounced", "suppress": true, "reason": "hard_bounce", "note": "Async bounce after the receiving server accepted" },
+    { "id": "ES-12", "current": "opened",    "incoming": "email.bounced", "bounce_type": "Permanent", "expect": "opened",  "suppress": true, "reason": "hard_bounce", "note": "SPEC GAP G-22: status keeps the higher rank, but a hard bounce still suppresses the address. Assumed." },
+    { "id": "ES-13", "current": "sent",      "incoming": "email.bounced", "bounce_type": "Transient", "expect": "failed",  "suppress": false, "note": "Transient bounces never suppress" },
+    { "id": "ES-14", "current": "clicked",   "incoming": "email.complained",       "expect": "complained", "suppress": true, "reason": "complaint" },
+    { "id": "ES-15", "current": "bounced",   "incoming": "email.complained",       "expect": "complained", "suppress": true, "reason": "complaint" },
+    { "id": "ES-16", "current": "complained","incoming": "email.delivered",        "expect": "complained", "suppress": false, "also": "delivered_at is set if null" },
+    { "id": "ES-17", "current": "accepted",  "incoming": "email.failed",           "expect": "failed",     "suppress": false },
+    { "id": "ES-18", "current": "delivered", "incoming": "email.failed",           "expect": "delivered",  "suppress": false },
+    { "id": "ES-19", "current": "unknown",   "incoming": "email.delivered",        "expect": "delivered",  "suppress": false, "note": "Matched through the message_id tag; resend_id is filled from data.email_id" },
+    { "id": "ES-20", "current": "unknown",   "incoming": "email.bounced", "bounce_type": "Permanent", "expect": "bounced", "suppress": true, "reason": "hard_bounce" },
+    { "id": "ES-21", "current": "sent",      "incoming": "email.suppressed",       "expect": "failed",     "suppress": true, "reason": "resend_suppressed" },
+    { "id": "ES-22", "current": "failed",    "incoming": "email.delivered",        "expect": "failed",     "suppress": false, "note": "Same assumption as G-05 for WhatsApp" },
+    { "id": "ES-23", "current": "delivered", "incoming": "email.scheduled",        "expect": "delivered",  "suppress": false, "note": "Stored, ignored" },
+    { "id": "ES-24", "current": "accepted",  "incoming": "email.received",         "expect": "accepted",   "suppress": false, "note": "Inbound email event: stored, ignored" },
+    { "id": "ES-25", "current": "skipped",   "incoming": "email.delivered",        "expect": "skipped",    "suppress": false, "note": "Never sent; logged as unmatched" }
+  ]
+}

@@ -1,0 +1,172 @@
+{
+  "$spec": "SPEC.md §4.6, FR-EML-02",
+  "description": "normaliseEmail(raw) → { email, valid, warning?, role? }. Invalid email never rejects the row: the value is dropped and the row carries warning INVALID_EMAIL. Same function in browser and server.",
+  "cases": [
+    {
+      "id": "EN-01",
+      "raw": "asha@example.com",
+      "expect": {
+        "email": "asha@example.com",
+        "valid": true
+      }
+    },
+    {
+      "id": "EN-02",
+      "raw": " Asha@Example.COM ",
+      "expect": {
+        "email": "asha@example.com",
+        "valid": true
+      },
+      "note": "FR-EML-02 acceptance example"
+    },
+    {
+      "id": "EN-03",
+      "raw": "mailto:ravi@example.in",
+      "expect": {
+        "email": "ravi@example.in",
+        "valid": true
+      }
+    },
+    {
+      "id": "EN-04",
+      "raw": "<ravi@example.in>",
+      "expect": {
+        "email": "ravi@example.in",
+        "valid": true
+      }
+    },
+    {
+      "id": "EN-05",
+      "raw": "Asha.K+Offers@gmail.com",
+      "expect": {
+        "email": "asha.k+offers@gmail.com",
+        "valid": true
+      },
+      "note": "Dots and +tags kept"
+    },
+    {
+      "id": "EN-06",
+      "raw": " asha@example.com ",
+      "expect": {
+        "email": "asha@example.com",
+        "valid": true
+      },
+      "note": "Unicode spaces trimmed"
+    },
+    {
+      "id": "EN-07",
+      "raw": "",
+      "expect": {
+        "email": null,
+        "valid": true,
+        "warning": null
+      },
+      "note": "Empty is not a warning"
+    },
+    {
+      "id": "EN-08",
+      "raw": "a@b",
+      "expect": {
+        "email": null,
+        "valid": false,
+        "warning": "INVALID_EMAIL"
+      }
+    },
+    {
+      "id": "EN-09",
+      "raw": "asha@@example.com",
+      "expect": {
+        "email": null,
+        "valid": false,
+        "warning": "INVALID_EMAIL"
+      }
+    },
+    {
+      "id": "EN-10",
+      "raw": "asha k@example.com",
+      "expect": {
+        "email": null,
+        "valid": false,
+        "warning": "INVALID_EMAIL"
+      }
+    },
+    {
+      "id": "EN-11",
+      "raw": "a@x.com; b@y.com",
+      "expect": {
+        "email": null,
+        "valid": false,
+        "warning": "INVALID_EMAIL"
+      },
+      "note": "SPEC GAP G-21: several addresses in one cell — invalid, or take the first? Assumed invalid."
+    },
+    {
+      "id": "EN-12",
+      "raw": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com",
+      "expect": {
+        "email": null,
+        "valid": false,
+        "warning": "INVALID_EMAIL"
+      },
+      "note": "Local part > 64"
+    },
+    {
+      "id": "EN-13",
+      "raw": "asha@example.c",
+      "expect": {
+        "email": null,
+        "valid": false,
+        "warning": "INVALID_EMAIL"
+      },
+      "note": "One-letter TLD"
+    },
+    {
+      "id": "EN-14",
+      "raw": "asha@example.com.",
+      "expect": {
+        "email": null,
+        "valid": false,
+        "warning": "INVALID_EMAIL"
+      },
+      "note": "Trailing dot"
+    },
+    {
+      "id": "EN-15",
+      "raw": "asha@münchen.de",
+      "expect": {
+        "email": "asha@xn--mnchen-3ya.de",
+        "valid": true
+      },
+      "note": "IDN domain → punycode"
+    },
+    {
+      "id": "EN-16",
+      "raw": "Info@Example.com",
+      "expect": {
+        "email": "info@example.com",
+        "valid": true,
+        "role": true
+      },
+      "note": "Role address kept, flagged"
+    },
+    {
+      "id": "EN-17",
+      "raw": "noreply@example.com",
+      "expect": {
+        "email": "noreply@example.com",
+        "valid": true,
+        "role": true
+      }
+    },
+    {
+      "id": "EN-18",
+      "raw": "asha@example.com",
+      "row_has_phone": false,
+      "expect": {
+        "email": "asha@example.com",
+        "valid": true
+      },
+      "note": "Email alone does not make a row importable: the row is still rejected EMPTY_PHONE (§1.3, Q5)"
+    }
+  ]
+}

@@ -1,0 +1,506 @@
+{
+  "$spec": "SPEC.md §7A.4, §7A.5, §5.12, FR-EML-04, FR-EML-05",
+  "description": "Email template + mapping + contact → one /emails/batch element. `{token(message_id)}` stands for the unsubscribe token of the message (see unsubscribe-token.json). Check the listed fields; html is checked with contains / not-contains because exact React Email markup is not pinned.",
+  "settings": {
+    "from": "Example Exports <offers@mail.example.com>",
+    "reply_to": "sales@example.com",
+    "postal_address": "12 Harbour Road, Kochi 682001, India",
+    "app_url": "https://wa.example.com"
+  },
+  "cases": [
+    {
+      "id": "EP-01",
+      "note": "Spec example (§7A.4)",
+      "template": {
+        "name": "festive_offer_nov26_email",
+        "subject": "{{first_name}}, our festive offer is live",
+        "preheader": "{{discount}} off all orders this week",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Hi {{first_name}}, get {{discount}} off all orders placed this week."
+          },
+          {
+            "type": "button",
+            "label": "View offer",
+            "url": "https://example.com/offer/{{offer_code}}"
+          }
+        ]
+      },
+      "mapping": {
+        "first_name": {
+          "field": "first_name",
+          "fallback": "there"
+        },
+        "discount": {
+          "static": "15%"
+        },
+        "offer_code": {
+          "attribute": "offer_code"
+        }
+      },
+      "contact": {
+        "email": "asha@example.com",
+        "first_name": "Asha",
+        "attributes": {
+          "offer_code": "FEST15"
+        }
+      },
+      "message_id": "0192f4e0-0000-7000-8000-000000000042",
+      "campaign_id": "0192f4d1-0000-7000-8000-000000000001",
+      "expect": {
+        "from": "Example Exports <offers@mail.example.com>",
+        "to": [
+          "asha@example.com"
+        ],
+        "reply_to": "sales@example.com",
+        "subject": "Asha, our festive offer is live",
+        "headers": {
+          "List-Unsubscribe": "<https://wa.example.com/u/{token(message_id)}>",
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"
+        },
+        "tags": [
+          {
+            "name": "campaign_id",
+            "value": "0192f4d1-0000-7000-8000-000000000001"
+          },
+          {
+            "name": "message_id",
+            "value": "0192f4e0-0000-7000-8000-000000000042"
+          }
+        ],
+        "html_contains": [
+          "Hi Asha, get 15% off",
+          "href=\"https://example.com/offer/FEST15\"",
+          "12 Harbour Road, Kochi 682001, India",
+          "href=\"https://wa.example.com/u/{token(message_id)}\"",
+          "15% off all orders this week"
+        ],
+        "text_contains": [
+          "Hi Asha, get 15% off all orders placed this week.",
+          "https://example.com/offer/FEST15",
+          "Unsubscribe: https://wa.example.com/u/{token(message_id)}"
+        ],
+        "no_keys": [
+          "cc",
+          "bcc",
+          "attachments"
+        ]
+      }
+    },
+    {
+      "id": "EP-02",
+      "note": "HTML-escaping in the HTML part only",
+      "template": {
+        "name": "festive_offer_nov26_email",
+        "subject": "{{first_name}}, our festive offer is live",
+        "preheader": "{{discount}} off all orders this week",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Hi {{first_name}}, get {{discount}} off all orders placed this week."
+          },
+          {
+            "type": "button",
+            "label": "View offer",
+            "url": "https://example.com/offer/{{offer_code}}"
+          }
+        ]
+      },
+      "mapping": {
+        "first_name": {
+          "field": "first_name",
+          "fallback": "there"
+        },
+        "discount": {
+          "static": "15%"
+        },
+        "offer_code": {
+          "attribute": "offer_code"
+        }
+      },
+      "contact": {
+        "email": "asha@example.com",
+        "first_name": "<b>Asha & Co</b>",
+        "attributes": {
+          "offer_code": "FEST15"
+        }
+      },
+      "message_id": "0192f4e0-0000-7000-8000-000000000042",
+      "expect": {
+        "subject": "<b>Asha & Co</b>, our festive offer is live",
+        "html_contains": [
+          "&lt;b&gt;Asha &amp; Co&lt;/b&gt;"
+        ],
+        "html_not_contains": [
+          "<b>Asha"
+        ],
+        "text_contains": [
+          "Hi <b>Asha & Co</b>, get"
+        ]
+      }
+    },
+    {
+      "id": "EP-03",
+      "note": "Fallback for an empty field",
+      "template": {
+        "name": "festive_offer_nov26_email",
+        "subject": "{{first_name}}, our festive offer is live",
+        "preheader": "{{discount}} off all orders this week",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Hi {{first_name}}, get {{discount}} off all orders placed this week."
+          },
+          {
+            "type": "button",
+            "label": "View offer",
+            "url": "https://example.com/offer/{{offer_code}}"
+          }
+        ]
+      },
+      "mapping": {
+        "first_name": {
+          "field": "first_name",
+          "fallback": "there"
+        },
+        "discount": {
+          "static": "15%"
+        },
+        "offer_code": {
+          "attribute": "offer_code"
+        }
+      },
+      "contact": {
+        "email": "ravi@example.in",
+        "first_name": "",
+        "attributes": {
+          "offer_code": "FEST15"
+        }
+      },
+      "message_id": "0192f4e0-0000-7000-8000-000000000042",
+      "expect": {
+        "subject": "there, our festive offer is live",
+        "text_contains": [
+          "Hi there, get 15% off"
+        ]
+      }
+    },
+    {
+      "id": "EP-04",
+      "note": "Empty variable without fallback → skipped at freeze",
+      "template": {
+        "name": "festive_offer_nov26_email",
+        "subject": "{{first_name}}, our festive offer is live",
+        "preheader": "{{discount}} off all orders this week",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Hi {{first_name}}, get {{discount}} off all orders placed this week."
+          },
+          {
+            "type": "button",
+            "label": "View offer",
+            "url": "https://example.com/offer/{{offer_code}}"
+          }
+        ]
+      },
+      "mapping": {
+        "first_name": {
+          "field": "first_name",
+          "fallback": "there"
+        },
+        "discount": {
+          "static": "15%"
+        },
+        "offer_code": {
+          "attribute": "offer_code"
+        }
+      },
+      "contact": {
+        "email": "ravi@example.in",
+        "first_name": "Ravi",
+        "attributes": {}
+      },
+      "message_id": "0192f4e0-0000-7000-8000-000000000042",
+      "expect": {
+        "skip_reason": "EMPTY_VARIABLE"
+      }
+    },
+    {
+      "id": "EP-05",
+      "note": "Variables in URLs are URL-encoded",
+      "template": {
+        "name": "festive_offer_nov26_email",
+        "subject": "{{first_name}}, our festive offer is live",
+        "preheader": "{{discount}} off all orders this week",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Hi {{first_name}}, get {{discount}} off all orders placed this week."
+          },
+          {
+            "type": "button",
+            "label": "View offer",
+            "url": "https://example.com/offer/{{offer_code}}"
+          }
+        ]
+      },
+      "mapping": {
+        "first_name": {
+          "field": "first_name",
+          "fallback": "there"
+        },
+        "discount": {
+          "static": "15%"
+        },
+        "offer_code": {
+          "attribute": "offer_code"
+        }
+      },
+      "contact": {
+        "email": "asha@example.com",
+        "first_name": "Asha",
+        "attributes": {
+          "offer_code": "FEST 15/A"
+        }
+      },
+      "message_id": "0192f4e0-0000-7000-8000-000000000042",
+      "expect": {
+        "html_contains": [
+          "href=\"https://example.com/offer/FEST%2015%2FA\""
+        ],
+        "text_contains": [
+          "https://example.com/offer/FEST%2015%2FA"
+        ]
+      }
+    },
+    {
+      "id": "EP-06",
+      "note": "Header injection: CR/LF in a subject variable become a space (same rule as G-14)",
+      "template": {
+        "name": "festive_offer_nov26_email",
+        "subject": "{{first_name}}, our festive offer is live",
+        "preheader": "{{discount}} off all orders this week",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Hi {{first_name}}, get {{discount}} off all orders placed this week."
+          },
+          {
+            "type": "button",
+            "label": "View offer",
+            "url": "https://example.com/offer/{{offer_code}}"
+          }
+        ]
+      },
+      "mapping": {
+        "first_name": {
+          "field": "first_name",
+          "fallback": "there"
+        },
+        "discount": {
+          "static": "15%"
+        },
+        "offer_code": {
+          "attribute": "offer_code"
+        }
+      },
+      "contact": {
+        "email": "asha@example.com",
+        "first_name": "Asha\r\nBcc: victim@example.org",
+        "attributes": {
+          "offer_code": "FEST15"
+        }
+      },
+      "message_id": "0192f4e0-0000-7000-8000-000000000042",
+      "expect": {
+        "subject": "Asha Bcc: victim@example.org, our festive offer is live",
+        "no_keys": [
+          "bcc"
+        ]
+      }
+    },
+    {
+      "id": "EP-07",
+      "note": "Deterministic rendering (§7A.4, needed for idempotency keys)",
+      "template": {
+        "name": "festive_offer_nov26_email",
+        "subject": "{{first_name}}, our festive offer is live",
+        "preheader": "{{discount}} off all orders this week",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Hi {{first_name}}, get {{discount}} off all orders placed this week."
+          },
+          {
+            "type": "button",
+            "label": "View offer",
+            "url": "https://example.com/offer/{{offer_code}}"
+          }
+        ]
+      },
+      "mapping": {
+        "first_name": {
+          "field": "first_name",
+          "fallback": "there"
+        },
+        "discount": {
+          "static": "15%"
+        },
+        "offer_code": {
+          "attribute": "offer_code"
+        }
+      },
+      "contact": {
+        "email": "asha@example.com",
+        "first_name": "Asha",
+        "attributes": {
+          "offer_code": "FEST15"
+        }
+      },
+      "message_id": "0192f4e0-0000-7000-8000-000000000042",
+      "expect": {
+        "render_twice_identical": true
+      }
+    },
+    {
+      "id": "EP-08",
+      "note": "Address normalised from the contact field",
+      "template": {
+        "name": "festive_offer_nov26_email",
+        "subject": "{{first_name}}, our festive offer is live",
+        "preheader": "{{discount}} off all orders this week",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Hi {{first_name}}, get {{discount}} off all orders placed this week."
+          },
+          {
+            "type": "button",
+            "label": "View offer",
+            "url": "https://example.com/offer/{{offer_code}}"
+          }
+        ]
+      },
+      "mapping": {
+        "first_name": {
+          "field": "first_name",
+          "fallback": "there"
+        },
+        "discount": {
+          "static": "15%"
+        },
+        "offer_code": {
+          "attribute": "offer_code"
+        }
+      },
+      "contact": {
+        "email": " Asha@Example.COM ",
+        "first_name": "Asha",
+        "attributes": {
+          "offer_code": "FEST15"
+        }
+      },
+      "message_id": "0192f4e0-0000-7000-8000-000000000042",
+      "expect": {
+        "to": [
+          "asha@example.com"
+        ]
+      }
+    },
+    {
+      "id": "EP-09",
+      "note": "No email → skipped (normally excluded at freeze)",
+      "template": {
+        "name": "festive_offer_nov26_email",
+        "subject": "{{first_name}}, our festive offer is live",
+        "preheader": "{{discount}} off all orders this week",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Hi {{first_name}}, get {{discount}} off all orders placed this week."
+          },
+          {
+            "type": "button",
+            "label": "View offer",
+            "url": "https://example.com/offer/{{offer_code}}"
+          }
+        ]
+      },
+      "mapping": {
+        "first_name": {
+          "field": "first_name",
+          "fallback": "there"
+        },
+        "discount": {
+          "static": "15%"
+        },
+        "offer_code": {
+          "attribute": "offer_code"
+        }
+      },
+      "contact": {
+        "email": null,
+        "first_name": "Asha",
+        "attributes": {
+          "offer_code": "FEST15"
+        }
+      },
+      "message_id": "0192f4e0-0000-7000-8000-000000000042",
+      "expect": {
+        "skip_reason": "NO_EMAIL"
+      }
+    },
+    {
+      "id": "EP-10",
+      "note": "Test send: [TEST] prefix, unsubscribe headers still present, no message tags",
+      "test_send": true,
+      "template": {
+        "name": "festive_offer_nov26_email",
+        "subject": "{{first_name}}, our festive offer is live",
+        "preheader": "{{discount}} off all orders this week",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Hi {{first_name}}, get {{discount}} off all orders placed this week."
+          },
+          {
+            "type": "button",
+            "label": "View offer",
+            "url": "https://example.com/offer/{{offer_code}}"
+          }
+        ]
+      },
+      "mapping": {
+        "first_name": {
+          "field": "first_name",
+          "fallback": "there"
+        },
+        "discount": {
+          "static": "15%"
+        },
+        "offer_code": {
+          "attribute": "offer_code"
+        }
+      },
+      "contact": {
+        "email": "qa@example.com",
+        "first_name": "Asha",
+        "attributes": {
+          "offer_code": "FEST15"
+        }
+      },
+      "expect": {
+        "subject": "[TEST] Asha, our festive offer is live",
+        "headers_present": [
+          "List-Unsubscribe",
+          "List-Unsubscribe-Post"
+        ],
+        "tags_absent": [
+          "message_id"
+        ]
+      }
+    }
+  ]
+}

@@ -160,3 +160,67 @@ Unless stated otherwise: provider = Mock, store starts empty, send window disabl
 | LIVE-03 | L | FR-CMP-03 | Send to the test number. | Message arrives; `delivered` webhook updates the row. |
 | LIVE-04 | L | FR-CMP-07 | Reply STOP from the test phone. | Number suppressed within 5 s. |
 | LIVE-05 | C | R2 | Replay recorded responses for every §7.7 code (EC-* goldens). | Engine action matches. Re-record on each `GRAPH_API_VERSION` bump. |
+
+## 12. Email via Resend (§7A, FR-EML)
+
+Unless stated otherwise: email provider = MockEmailProvider, domain verified, postal address set, email frequency cap 7 days, 2 batch requests/s.
+
+| ID | Level | Covers | Scenario | Pass if |
+|---|---|---|---|---|
+| EM-01 | I | FR-EML-01 | Contact is opted_in on both channels; STOP arrives on WhatsApp; then an unsubscribe POST arrives for the email. | After the STOP: `suppression_list` has the phone, email opt-in unchanged. After the unsubscribe: `email_suppression_list` has the address; S-04 shows both. |
+| EM-02 | I | FR-EML-01, §4.2 migrations | Load a schema v1 store, then commit an import. | Reads show `email_opt_in_status = unknown`; the new version has `app.schema_version = 2` and the three email consent columns. |
+| EM-03 | I | FR-EML-01 | Import `email-opt-in.csv` mapping an email opt-in column, consent box ticked. | `email_opt_in_status/source/at` set; the confirming user is stored; WhatsApp opt-in untouched. Without the box: commit refused. |
+| EM-04 | I | FR-EML-02 | Import a file whose email column has every EN-* raw value (phones valid). | Every row imported; email values match EN-* goldens; Step 3 shows the INVALID_EMAIL count and role count. |
+| EM-05 | E | FR-EML-03 | Type in subject and a text block on S-11. | Preview (desktop, mobile, plain text) updates on each keystroke with samples substituted. |
+| EM-06 | E | FR-EML-03 | Add an image block without alt text; then a button with an `http://` URL. | *Mark ready* disabled with both errors listed; fixed → enabled; status `READY`. |
+| EM-07 | E | FR-EML-04 | Try to delete or edit the footer block. | Not possible; footer always shows the postal address and the unsubscribe link. |
+| EM-08 | U | FR-EML-04, FR-EML-05 | Every EP-* golden. | Matches. |
+| EM-09 | I | FR-EML-05 | Audience of 100: 10 no email, 4 email-suppressed, 6 email opted_out, 15 email unknown, 5 emailed 2 days ago, 2 deleted, and 3 pairs of contacts sharing an address. | Exclusion counts 10/4/6/15/5/2 and 3 duplicates; final 55; frozen rows have unique `email_to`. |
+| EM-10 | E | FR-EML-05 | Email campaign wizard with no postal address set / domain pending / no key. | *Send* disabled with the specific reason for each; *Send test email* also disabled without a key. |
+| EM-11 | W | FR-EML-05, §7A.6 | Daily cap 1,000, 900 emails sent today (IST), campaign of 300. | Wizard warns and offers a split; if sent, the engine holds after 100 and resumes after 00:00 IST. |
+| EM-12 | W | FR-EML-06 | 1,050-recipient campaign. | Exactly 11 `/emails/batch` calls (10 × 100 + 1 × 50); every row `accepted` with the id at its index; no request > 100 emails or > 1 recipient per email. |
+| EM-13 | W | FR-EML-06, FR-EML-07, §8.3 | Kill `sendBatch` after the batch request was sent but before ids are persisted (rows `sending`). Workflow retries the step within minutes. | Same payload bytes and same `Idempotency-Key` are re-sent; Mock reports 0 new emails; rows get the original ids; campaign completes. Provider "delivered" log has no duplicate address. |
+| EM-14 | W | FR-EML-07, §8.3 | Same as EM-13 but the clock is moved 24 h forward before the retry. | Rows become `unknown`, are **not** resent; a later webhook with the `message_id` tag resolves them (ES-19). |
+| EM-15 | W | §7A.7 | Mock returns 422 for a batch of 100 (one invalid address). | Batch split into 100 `POST /emails` with `msg_{message_id}` keys; 99 accepted, 1 failed with the error message; no row sent twice. |
+| EM-16 | W | §7A.7 | Mock returns 401. | Campaign `paused`; banner tells the user to update the key in `.local.bin` / env / Settings; no further calls. |
+| EM-17 | W | §7A.6 | Mock returns 429 for 3 calls. | Backoff with jitter; request rate halves for 5 min; all rows eventually accepted. |
+| EM-18 | W | §7A.7 | Mock returns 409 (idempotency key reused with a different payload). | Campaign `paused` with a bug-level reason; no automatic send under a new key. |
+| EM-19 | W | FR-EML-06, §5.8 | A WhatsApp campaign is running; start an email campaign; then start a second email campaign. | Email campaign 1 runs in parallel with WhatsApp; email campaign 2 is `queued` and starts after email 1 finalises. |
+| EM-20 | W | §5.8, §7A.5 | Address unsubscribes after freeze, before its batch. | Row `skipped` (suppressed); not in the batch request. |
+| EM-21 | I | FR-EML-08 | Every ES-* golden applied through `POST /api/webhooks/resend` with valid signatures. | Rows and suppression list match the goldens. |
+| EM-22 | U | FR-EML-08 | Every RS-* golden. | Matches (`svix` behaviour). |
+| EM-23 | I | FR-EML-08 | Same event delivered 3 times with the same `svix-id`. | One `webhook_events` row processed; counters change once. |
+| EM-24 | I | FR-EML-08 | Delivered webhook during a running email campaign. | S-08 counters update within 10 s. |
+| EM-25 | I | FR-EML-09 | `email.bounced` (Permanent) and `email.complained` for two addresses in campaign A; campaign B targets both. | Both suppressed within 5 s (reasons `hard_bounce`, `complaint`); campaign B excludes them at freeze and at send. |
+| EM-26 | W | FR-EML-11 | Mock bounces 6% over 500 accepted emails. | Auto-pause with a bounce-rate `pause_reason`; at 4% it does not pause. |
+| EM-27 | W | FR-EML-11 | Mock complaint rate 0.4% over 500. | Auto-pause; new email campaigns blocked until a user acknowledges. |
+| EM-28 | U | FR-EML-10 | Every UT-* golden. | Matches. |
+| EM-29 | I | FR-EML-10 | GET `/u/{valid}`; then POST; then POST again; then POST `/u/{tampered}`. | GET writes nothing and shows the masked address; first POST suppresses (`unsubscribe_link`), sets `unsubscribed_at`, audits `system:unsubscribe`; second POST no-op; tampered writes nothing. |
+| EM-30 | I | FR-EML-10, RFC 8058 | POST `/u/{token}` with body `List-Unsubscribe=One-Click`, no cookies, no session. | 200; suppressed with reason `one_click`. |
+| EM-31 | C | FR-EML-12 | Send test email from S-11 and from S-07. | One email per configured test address, `[TEST]` subject; no `campaign_messages` rows; audit entry. |
+| EM-32 | I | §10 | Row `accepted` 3 h ago, no webhook; run `reconcile-emails`. | `GET /emails/{id}` called; `last_event = delivered` applied. |
+| EM-33 | I | §10 | Mock domain status flips to `failed`; run `check-email-domain`. | Running email campaigns paused; banner shown; WhatsApp campaigns unaffected. |
+| EM-34 | P | NFR send throughput | 20,000 mock emails at 2 req/s. | Measured 1.8–2.2 batch requests/s over any 30 s window; ~200 emails/s. |
+| EM-35 | P | NFR-04 | 50k mock emails with simulated webhooks. | Completes; no duplicates; stats consistent; no step exceeds its time limit. |
+| EM-36 | E | E2E | Sign in → import `email-opt-in.csv` (email opt-in column mapped, consent box ticked) → filter has-email + email opted_in → select all → Send campaign ▾ Email → READY template → send now → monitor. | Filter matches 3 (Asha, Ravi, Priya; Kiran's email was dropped, Meena's `no` is `unknown` per G-15, Tom has none). Wizard removes 1 duplicate address (Priya = Asha) → **2 recipients**. Monitor reaches 100% with simulated delivered/opened/clicked; activity log shows each step. |
+
+## 13. Email key, environments & security (FR-SET-06, FR-SET-07)
+
+| ID | Level | Covers | Scenario | Pass if |
+|---|---|---|---|---|
+| SEC-12 | I | FR-SET-06 | Start `next dev` with no `.local.bin`; stop; add `RESEND_API_KEY=re_test…` to `.local.bin`; start again. | First run: email provider Mock, S-01 "Not set". Second: S-01 "Loaded from `.local.bin`", Test connection calls `GET /domains` with that key. |
+| SEC-13 | I | FR-SET-06 | `.env.local` and `.local.bin` both define `RESEND_API_KEY` with different values. | The `.local.bin` value is used. |
+| SEC-14 | I | FR-SET-06 | Key in env and in the Settings row. | Env value is used; S-01 says so; the Settings value is never returned by `GET /settings`. |
+| SEC-15 | U | FR-SET-06, R12 | `git check-ignore .local.bin`; grep the build output and logs after a send. | File is ignored; the key (`re_…`) never appears in logs, responses or the client bundle. |
+| SEC-16 | E | FR-SET-07, R6 | On a preview deployment, set the email provider to Resend and send a campaign. | Provider stays Mock; zero requests to `api.resend.com`. |
+| SEC-17 | I | §9 | Unauthenticated calls to `/u/{token}` and `/api/webhooks/resend`; authenticated-only check for every other new route. | Those two are reachable without a session (and verify their own signatures); every other new `/api/*` route returns 401 without one. |
+| SEC-18 | U | NFR observability | Log a bounce for `asha@example.com`. | Log shows `a••••@example.com`. |
+
+## 14. Live email smoke (once the Resend key exists)
+
+| ID | Level | Covers | Scenario | Pass if |
+|---|---|---|---|---|
+| LIVE-EM-01 | L | FR-SET-06 | Test connection with the real key. | Domain name and `verified` status shown (or the DNS records to add). |
+| LIVE-EM-02 | L | FR-EML-06, FR-EML-08 | Campaign to `delivered@resend.dev`, `bounced@resend.dev`, `complained@resend.dev`. | Rows end `delivered`, `bounced`, `complained`; the last two are suppressed. |
+| LIVE-EM-03 | L | FR-EML-04 | Send to a real Gmail inbox; click Gmail's "Unsubscribe". | One-click POST arrives; address suppressed. |
+| LIVE-EM-04 | L | FR-EML-07 | Send the same batch twice with the same `Idempotency-Key`. | Second response returns the same ids; one email in the inbox. |

@@ -1,0 +1,137 @@
+{
+  "$spec": "SPEC.md §7A.8, §12, FR-EML-08",
+  "description": "Svix signature as used by Resend. signed = `${svix-id}.${svix-timestamp}.${raw body}`; key = base64-decode(secret without the `whsec_` prefix); signature = base64(HMAC-SHA256(key, signed)); header = space-separated `v1,<sig>` list, any one may match; |now − timestamp| must be ≤ 300 s. Valid → processed. Invalid → stored with signature_ok=false, not processed, 401. `now` is Unix seconds. Bodies are exact; do not re-serialise.",
+  "webhook_secret": "whsec_dGVzdF9yZXNlbmRfd2ViaG9va19zZWNyZXRfMzJieXQ=",
+  "cases": [
+    {
+      "id": "RS-01",
+      "note": "Valid signature",
+      "svix_id": "msg_2paGqTnHc8iDXoFrqKbG1jhCPZf",
+      "svix_timestamp": "1761890400",
+      "svix_signature": "v1,6lYd+QxqIiF7MwT2W3+q6qH4Htx/Y9sIOqVper+4Wig=",
+      "body": "{\"type\":\"email.delivered\",\"created_at\":\"2026-10-31T06:00:00.000Z\",\"data\":{\"created_at\":\"2026-10-31T05:59:58.000Z\",\"email_id\":\"56761188-7520-42d8-8898-ff6fc54ce618\",\"from\":\"Example Exports <offers@mail.example.com>\",\"to\":[\"asha@example.com\"],\"subject\":\"Asha, our festive offer is live\",\"tags\":{\"campaign_id\":\"0192f4d1-0000-7000-8000-000000000001\",\"message_id\":\"0192f4e0-0000-7000-8000-000000000042\"}}}",
+      "now": 1761890400,
+      "valid": true
+    },
+    {
+      "id": "RS-02",
+      "note": "Body tampered (delivered→opened) with original signature",
+      "svix_id": "msg_2paGqTnHc8iDXoFrqKbG1jhCPZf",
+      "svix_timestamp": "1761890400",
+      "svix_signature": "v1,6lYd+QxqIiF7MwT2W3+q6qH4Htx/Y9sIOqVper+4Wig=",
+      "body": "{\"type\":\"email.opened\",\"created_at\":\"2026-10-31T06:00:00.000Z\",\"data\":{\"created_at\":\"2026-10-31T05:59:58.000Z\",\"email_id\":\"56761188-7520-42d8-8898-ff6fc54ce618\",\"from\":\"Example Exports <offers@mail.example.com>\",\"to\":[\"asha@example.com\"],\"subject\":\"Asha, our festive offer is live\",\"tags\":{\"campaign_id\":\"0192f4d1-0000-7000-8000-000000000001\",\"message_id\":\"0192f4e0-0000-7000-8000-000000000042\"}}}",
+      "now": 1761890400,
+      "valid": false
+    },
+    {
+      "id": "RS-03",
+      "note": "Re-serialised body must not verify (raw body is signed)",
+      "svix_id": "msg_2paGqTnHc8iDXoFrqKbG1jhCPZf",
+      "svix_timestamp": "1761890400",
+      "svix_signature": "v1,6lYd+QxqIiF7MwT2W3+q6qH4Htx/Y9sIOqVper+4Wig=",
+      "body": "{\n  \"type\": \"email.delivered\",\n  \"created_at\": \"2026-10-31T06:00:00.000Z\",\n  \"data\": {\n    \"created_at\": \"2026-10-31T05:59:58.000Z\",\n    \"email_id\": \"56761188-7520-42d8-8898-ff6fc54ce618\",\n    \"from\": \"Example Exports <offers@mail.example.com>\",\n    \"to\": [\n      \"asha@example.com\"\n    ],\n    \"subject\": \"Asha, our festive offer is live\",\n    \"tags\": {\n      \"campaign_id\": \"0192f4d1-0000-7000-8000-000000000001\",\n      \"message_id\": \"0192f4e0-0000-7000-8000-000000000042\"\n    }\n  }\n}",
+      "now": 1761890400,
+      "valid": false
+    },
+    {
+      "id": "RS-04",
+      "note": "Pretty body with its own correct signature",
+      "svix_id": "msg_2paGqTnHc8iDXoFrqKbG1jhCPZf",
+      "svix_timestamp": "1761890400",
+      "svix_signature": "v1,hwcaXhl6GBzz3Kh2lahC3F+WavLJk7gLJw3X1fevOmE=",
+      "body": "{\n  \"type\": \"email.delivered\",\n  \"created_at\": \"2026-10-31T06:00:00.000Z\",\n  \"data\": {\n    \"created_at\": \"2026-10-31T05:59:58.000Z\",\n    \"email_id\": \"56761188-7520-42d8-8898-ff6fc54ce618\",\n    \"from\": \"Example Exports <offers@mail.example.com>\",\n    \"to\": [\n      \"asha@example.com\"\n    ],\n    \"subject\": \"Asha, our festive offer is live\",\n    \"tags\": {\n      \"campaign_id\": \"0192f4d1-0000-7000-8000-000000000001\",\n      \"message_id\": \"0192f4e0-0000-7000-8000-000000000042\"\n    }\n  }\n}",
+      "now": 1761890400,
+      "valid": true
+    },
+    {
+      "id": "RS-05",
+      "note": "Signed with a different secret",
+      "svix_id": "msg_2paGqTnHc8iDXoFrqKbG1jhCPZf",
+      "svix_timestamp": "1761890400",
+      "svix_signature": "v1,SWfHU0DKj8+cRZOHPDXk/LPHWOasDPNhnOXh+QWQhIQ=",
+      "body": "{\"type\":\"email.delivered\",\"created_at\":\"2026-10-31T06:00:00.000Z\",\"data\":{\"created_at\":\"2026-10-31T05:59:58.000Z\",\"email_id\":\"56761188-7520-42d8-8898-ff6fc54ce618\",\"from\":\"Example Exports <offers@mail.example.com>\",\"to\":[\"asha@example.com\"],\"subject\":\"Asha, our festive offer is live\",\"tags\":{\"campaign_id\":\"0192f4d1-0000-7000-8000-000000000001\",\"message_id\":\"0192f4e0-0000-7000-8000-000000000042\"}}}",
+      "now": 1761890400,
+      "valid": false
+    },
+    {
+      "id": "RS-06",
+      "note": "svix-id changed: id is part of the signed content",
+      "svix_id": "msg_2paGqTnHc8iDXoFrqKbG1jhCPZg",
+      "svix_timestamp": "1761890400",
+      "svix_signature": "v1,6lYd+QxqIiF7MwT2W3+q6qH4Htx/Y9sIOqVper+4Wig=",
+      "body": "{\"type\":\"email.delivered\",\"created_at\":\"2026-10-31T06:00:00.000Z\",\"data\":{\"created_at\":\"2026-10-31T05:59:58.000Z\",\"email_id\":\"56761188-7520-42d8-8898-ff6fc54ce618\",\"from\":\"Example Exports <offers@mail.example.com>\",\"to\":[\"asha@example.com\"],\"subject\":\"Asha, our festive offer is live\",\"tags\":{\"campaign_id\":\"0192f4d1-0000-7000-8000-000000000001\",\"message_id\":\"0192f4e0-0000-7000-8000-000000000042\"}}}",
+      "now": 1761890400,
+      "valid": false
+    },
+    {
+      "id": "RS-07",
+      "note": "Multiple signatures (secret rotation): any one valid one is enough",
+      "svix_id": "msg_2paGqTnHc8iDXoFrqKbG1jhCPZf",
+      "svix_timestamp": "1761890400",
+      "svix_signature": "v1,SWfHU0DKj8+cRZOHPDXk/LPHWOasDPNhnOXh+QWQhIQ= v1,6lYd+QxqIiF7MwT2W3+q6qH4Htx/Y9sIOqVper+4Wig=",
+      "body": "{\"type\":\"email.delivered\",\"created_at\":\"2026-10-31T06:00:00.000Z\",\"data\":{\"created_at\":\"2026-10-31T05:59:58.000Z\",\"email_id\":\"56761188-7520-42d8-8898-ff6fc54ce618\",\"from\":\"Example Exports <offers@mail.example.com>\",\"to\":[\"asha@example.com\"],\"subject\":\"Asha, our festive offer is live\",\"tags\":{\"campaign_id\":\"0192f4d1-0000-7000-8000-000000000001\",\"message_id\":\"0192f4e0-0000-7000-8000-000000000042\"}}}",
+      "now": 1761890400,
+      "valid": true
+    },
+    {
+      "id": "RS-08",
+      "note": "Timestamp 6 minutes old (replay), signature otherwise valid",
+      "svix_id": "msg_2paGqTnHc8iDXoFrqKbG1jhCPZf",
+      "svix_timestamp": "1761890040",
+      "svix_signature": "v1,9F8lvqgxai9RHoNnkjPq+2AeKj3NzgtQ0HY+h/IFGcU=",
+      "body": "{\"type\":\"email.delivered\",\"created_at\":\"2026-10-31T06:00:00.000Z\",\"data\":{\"created_at\":\"2026-10-31T05:59:58.000Z\",\"email_id\":\"56761188-7520-42d8-8898-ff6fc54ce618\",\"from\":\"Example Exports <offers@mail.example.com>\",\"to\":[\"asha@example.com\"],\"subject\":\"Asha, our festive offer is live\",\"tags\":{\"campaign_id\":\"0192f4d1-0000-7000-8000-000000000001\",\"message_id\":\"0192f4e0-0000-7000-8000-000000000042\"}}}",
+      "now": 1761890400,
+      "valid": false
+    },
+    {
+      "id": "RS-09",
+      "note": "Timestamp 4 minutes old: inside the 5-minute tolerance",
+      "svix_id": "msg_2paGqTnHc8iDXoFrqKbG1jhCPZf",
+      "svix_timestamp": "1761890160",
+      "svix_signature": "v1,EtWGlEEsX7i3VkpqukMxu40ErJA8uir2hKMH/D9kK4s=",
+      "body": "{\"type\":\"email.delivered\",\"created_at\":\"2026-10-31T06:00:00.000Z\",\"data\":{\"created_at\":\"2026-10-31T05:59:58.000Z\",\"email_id\":\"56761188-7520-42d8-8898-ff6fc54ce618\",\"from\":\"Example Exports <offers@mail.example.com>\",\"to\":[\"asha@example.com\"],\"subject\":\"Asha, our festive offer is live\",\"tags\":{\"campaign_id\":\"0192f4d1-0000-7000-8000-000000000001\",\"message_id\":\"0192f4e0-0000-7000-8000-000000000042\"}}}",
+      "now": 1761890400,
+      "valid": true
+    },
+    {
+      "id": "RS-10",
+      "note": "Timestamp 6 minutes in the future",
+      "svix_id": "msg_2paGqTnHc8iDXoFrqKbG1jhCPZf",
+      "svix_timestamp": "1761890760",
+      "svix_signature": "v1,gA+wvNdw4Oh0yfatO00Dp1zkI961q3a9MgsvmBJT7M8=",
+      "body": "{\"type\":\"email.delivered\",\"created_at\":\"2026-10-31T06:00:00.000Z\",\"data\":{\"created_at\":\"2026-10-31T05:59:58.000Z\",\"email_id\":\"56761188-7520-42d8-8898-ff6fc54ce618\",\"from\":\"Example Exports <offers@mail.example.com>\",\"to\":[\"asha@example.com\"],\"subject\":\"Asha, our festive offer is live\",\"tags\":{\"campaign_id\":\"0192f4d1-0000-7000-8000-000000000001\",\"message_id\":\"0192f4e0-0000-7000-8000-000000000042\"}}}",
+      "now": 1761890400,
+      "valid": false
+    },
+    {
+      "id": "RS-11",
+      "note": "svix-signature header missing",
+      "svix_id": "msg_2paGqTnHc8iDXoFrqKbG1jhCPZf",
+      "svix_timestamp": "1761890400",
+      "svix_signature": null,
+      "body": "{\"type\":\"email.delivered\",\"created_at\":\"2026-10-31T06:00:00.000Z\",\"data\":{\"created_at\":\"2026-10-31T05:59:58.000Z\",\"email_id\":\"56761188-7520-42d8-8898-ff6fc54ce618\",\"from\":\"Example Exports <offers@mail.example.com>\",\"to\":[\"asha@example.com\"],\"subject\":\"Asha, our festive offer is live\",\"tags\":{\"campaign_id\":\"0192f4d1-0000-7000-8000-000000000001\",\"message_id\":\"0192f4e0-0000-7000-8000-000000000042\"}}}",
+      "now": 1761890400,
+      "valid": false
+    },
+    {
+      "id": "RS-12",
+      "note": "Unknown version prefix (v2) with a correct digest",
+      "svix_id": "msg_2paGqTnHc8iDXoFrqKbG1jhCPZf",
+      "svix_timestamp": "1761890400",
+      "svix_signature": "v2,6lYd+QxqIiF7MwT2W3+q6qH4Htx/Y9sIOqVper+4Wig=",
+      "body": "{\"type\":\"email.delivered\",\"created_at\":\"2026-10-31T06:00:00.000Z\",\"data\":{\"created_at\":\"2026-10-31T05:59:58.000Z\",\"email_id\":\"56761188-7520-42d8-8898-ff6fc54ce618\",\"from\":\"Example Exports <offers@mail.example.com>\",\"to\":[\"asha@example.com\"],\"subject\":\"Asha, our festive offer is live\",\"tags\":{\"campaign_id\":\"0192f4d1-0000-7000-8000-000000000001\",\"message_id\":\"0192f4e0-0000-7000-8000-000000000042\"}}}",
+      "now": 1761890400,
+      "valid": false
+    },
+    {
+      "id": "RS-13",
+      "note": "Truncated digest (must not throw on length mismatch)",
+      "svix_id": "msg_2paGqTnHc8iDXoFrqKbG1jhCPZf",
+      "svix_timestamp": "1761890400",
+      "svix_signature": "v1,6lYd+QxqIiF7MwT2W",
+      "body": "{\"type\":\"email.delivered\",\"created_at\":\"2026-10-31T06:00:00.000Z\",\"data\":{\"created_at\":\"2026-10-31T05:59:58.000Z\",\"email_id\":\"56761188-7520-42d8-8898-ff6fc54ce618\",\"from\":\"Example Exports <offers@mail.example.com>\",\"to\":[\"asha@example.com\"],\"subject\":\"Asha, our festive offer is live\",\"tags\":{\"campaign_id\":\"0192f4d1-0000-7000-8000-000000000001\",\"message_id\":\"0192f4e0-0000-7000-8000-000000000042\"}}}",
+      "now": 1761890400,
+      "valid": false
+    }
+  ]
+}

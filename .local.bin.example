@@ -1,0 +1,5 @@
+# Copy to .local.bin (git-ignored) and fill in. Dotenv format. See SPEC.md §7A.1.
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxx
+# Optional until the Resend webhook is registered
+RESEND_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxxxxxx
+EMAIL_UNSUBSCRIBE_SECRET=change-me

@@ -1,0 +1,76 @@
+{
+  "$spec": "SPEC.md §7A.5, §5.13, FR-EML-10",
+  "description": "token = base64url(message_id) + \".\" + base64url(HMAC-SHA256(EMAIL_UNSUBSCRIBE_SECRET, message_id)), no padding. Constant-time compare. Tokens never expire. An invalid token writes nothing.",
+  "secret": "test_unsubscribe_secret_do_not_use",
+  "previous_secret": "previous_unsubscribe_secret_rotated",
+  "cases": [
+    {
+      "id": "UT-01",
+      "note": "Valid token",
+      "token": "MDE5MmY0ZTAtMDAwMC03MDAwLTgwMDAtMDAwMDAwMDAwMDQy.yCMY2A5iJAuUvyNIzweC3vDO0KGpMhxaTSdSPUgvWBA",
+      "expect": {
+        "valid": true,
+        "message_id": "0192f4e0-0000-7000-8000-000000000042"
+      }
+    },
+    {
+      "id": "UT-02",
+      "note": "Token for another message, signature reused",
+      "token": "MDE5MmY0ZTAtMDAwMC03MDAwLTgwMDAtMDAwMDAwMDAwMDQz.yCMY2A5iJAuUvyNIzweC3vDO0KGpMhxaTSdSPUgvWBA",
+      "expect": {
+        "valid": false
+      }
+    },
+    {
+      "id": "UT-03",
+      "note": "One character of the signature changed",
+      "token": "MDE5MmY0ZTAtMDAwMC03MDAwLTgwMDAtMDAwMDAwMDAwMDQy.yCMY2B5iJAuUvyNIzweC3vDO0KGpMhxaTSdSPUgvWBA",
+      "expect": {
+        "valid": false
+      }
+    },
+    {
+      "id": "UT-04",
+      "note": "Signature missing",
+      "token": "MDE5MmY0ZTAtMDAwMC03MDAwLTgwMDAtMDAwMDAwMDAwMDQy",
+      "expect": {
+        "valid": false
+      }
+    },
+    {
+      "id": "UT-05",
+      "note": "Truncated signature (must not throw)",
+      "token": "MDE5MmY0ZTAtMDAwMC03MDAwLTgwMDAtMDAwMDAwMDAwMDQy.yCMY2A5iJA",
+      "expect": {
+        "valid": false
+      }
+    },
+    {
+      "id": "UT-06",
+      "note": "Signed with the previous secret, within the 90-day rotation window",
+      "token": "MDE5MmY0ZTAtMDAwMC03MDAwLTgwMDAtMDAwMDAwMDAwMDQy.mo0EBMIZtFkLwLYqV3u-iyGyuEJ2Aauo2rm0FV5G6nk",
+      "previous_secret_active": true,
+      "expect": {
+        "valid": true,
+        "message_id": "0192f4e0-0000-7000-8000-000000000042"
+      }
+    },
+    {
+      "id": "UT-07",
+      "note": "Signed with the previous secret after the rotation window",
+      "token": "MDE5MmY0ZTAtMDAwMC03MDAwLTgwMDAtMDAwMDAwMDAwMDQy.mo0EBMIZtFkLwLYqV3u-iyGyuEJ2Aauo2rm0FV5G6nk",
+      "previous_secret_active": false,
+      "expect": {
+        "valid": false
+      }
+    },
+    {
+      "id": "UT-08",
+      "note": "Garbage",
+      "token": "../../etc/passwd",
+      "expect": {
+        "valid": false
+      }
+    }
+  ]
+}

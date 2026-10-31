@@ -79,6 +79,17 @@ write('opt-in-column.csv', lines([
   '6000000000,H,',
 ]));
 
+// EM-03/EM-36: email column + separate email opt-in column (SPEC §4.6, D12).
+write('email-opt-in.csv', lines([
+  'Mobile No,Name,Email,Email Consent,Segment',
+  '9876543210,Asha, Asha@Example.COM ,yes,steel',
+  '9812345678,Ravi,ravi@example.in,yes,steel',
+  '9900112233,Kiran,not-an-email,yes,export',
+  '9123456780,Meena,info@example.com,no,steel',
+  '9845012345,Priya,asha@example.com,yes,export',
+  '7012345678,Tom,,,steel',
+]));
+
 // IMP-F08: formula-injection payloads in text fields (export round-trip).
 write('injection.csv', lines([
   'phone,name,company',
