@@ -122,13 +122,13 @@ Phases keep their numbers from SPEC §14. P8 comes before P6 because it needs no
 
 Email consent columns are built here, not in P8, because the IS-* goldens need them.
 
-- [ ] **T2.1 Phone normalisation**
+- [x] **T2.1 Phone normalisation**
   - **Depends:** T1.1
   - **Spec:** §4.5
   - **Build:** `normalisePhone` in `lib/contacts/phone.ts`, usable in browser and server, with `libphonenumber-js` pinned.
   - **Done when:** PN-* pass and FR-IMP-05 holds.
 
-- [ ] **T2.2 Email normalisation**
+- [x] **T2.2 Email normalisation**
   - **Depends:** T1.1
   - **Spec:** §4.6
   - **Build:** `normaliseEmail` in `lib/contacts/email.ts`, usable in browser and server, with role-address flagging.
@@ -188,7 +188,7 @@ Email consent columns are built here, not in P8, because the IS-* goldens need t
   - **Build:** all four steps, including the virtualised mapping grid, default country for the file, red and amber cell highlights, consent checkboxes, result card and the "import in progress" state. Add the S-01 Import section.
   - **Done when:** E2E-02, E2E-03 and E2E-04 pass.
 
-- [ ] **T2.12 Country and time zone**
+- [x] **T2.12 Country and time zone**
   - **Depends:** T2.1
   - **Spec:** §4.8
   - **Build:** `lib/geo` country-to-zone table, and a pure function resolving a contact's country and zone.
