@@ -4,7 +4,7 @@ Date: 2026-11-02. Branch: `p2/import`, based on `p1/foundation`, not pushed.
 
 ## Verdict
 
-**The code for P2 is written and passes locally, but P2's gate (T2.13) can't pass yet.** Only T2.1, T2.2 and T2.12 are ticked. Every other P2 task depends on a P1 task that is still open, and T1.2, T1.3 and T1.4 need real infrastructure. TASKS.md says to tick a task only when its dependencies are ticked, so the rest stay open.
+**The code for P2 is written and passes locally and on Neon, but P2's gate (T2.13) can't pass yet.** Only T2.1, T2.2 and T2.12 are ticked. Every other P2 task depends on a P1 task that is still open, and T1.2, T1.3 and T1.4 need real infrastructure. TASKS.md says to tick a task only when its dependencies are ticked, so the rest stay open.
 
 ## Status
 
@@ -75,9 +75,35 @@ TASKS.md says to report mismatches rather than resolve them quietly. No golden o
 5. **Departures from the spec's mechanism, same behaviour.** §4.2's temporary table is replaced by in-memory matching under the lock plus JSON bulk writes. §5.3's `upload()` is replaced by `put()` with a token from our route, because the path must be known first.
 6. **Additions beyond the spec's lists:** `GET /api/imports/active`, a dev-only `PUT /api/imports/local-upload` that refuses to run with a real store, three `import_batches` columns, and an extra audit action for upload authorisation. Campaign links on the result card go to the plain Campaigns page until P5, and the contacts filter arrives in P3.
 
+## Update: first run on real infrastructure (2026-11-02)
+
+Nothing here has been pushed, and no task was ticked, because T1.2 is still open and everything depends on it.
+
+| Check | Result |
+|---|---|
+| All 358 tests on a Neon branch, direct connection | Pass |
+| 203 integration tests through Neon's pooler, which is how the app connects | Pass |
+| NFR-01 on Neon, direct connection, 0.25 CU | **9.5 s**, against 60 s. From a local machine, not a function |
+| Functions in `sin1` | Confirmed on a preview |
+| SEC-02, SEC-03 on a preview with real Clerk | Pass: signed-out API calls and wrong cron secrets get 401; pages redirect to Clerk |
+| SEC-01 with real Clerk | Partial, run against local dev: an unknown address is refused. Sign-up is still open, see below |
+| Local browser tests, with a real token in `.env.local` | 11 of 11, and nothing reached the real store |
+
+Spike results are in `docs/spikes/platform.md`. E2E-02's "no 4.5 MB error" is still unproven, because no browser has uploaded to Blob.
+
+### Blocking T1.2 and the gates
+
+1. **Clerk is misconfigured.** The development instance reports sign-up mode `public` and passwords required, against §3.5. Only the app's allowlist keeps outsiders out. Follow `docs/clerk-setup.md`.
+2. **The Vercel project has no Git connection,** so a pushed branch gets no preview.
+3. **Previews share one Neon database,** the `main` branch, with Development. There's no branch per preview yet.
+4. **Production has almost no variables:** no database, Clerk or app secrets.
+5. **The Blob token is shared** by Production and Preview, and is marked Non-sensitive.
+6. **The public Blob store isn't connected,** which holds up SPK-05.
+7. **HN-01…03 aren't built** (T1.10). They depend on the items above.
+
 ## Next steps
 
-1. **You:** decide on the plan (H-1) and create the two Blob stores (H-2), in Singapore to match the database and functions (§3.1). T1.2 remains open.
-2. Run the P1 spikes on a preview deployment, especially SPK-05, then tick T1.4, T1.8 and the others.
-3. Run IS-*, WP-* and NFR-01 against a Neon test branch with `TEST_DATABASE_URL`. **Never point it at a shared branch: the test setup drops the schema.**
-4. Tick T2.3–T2.11, then run the T2.13 gate.
+1. **You:** the seven items above, and decide on the plan (H-1). P5 can't run its 5-minute crons on Hobby.
+2. Connect Git, push, and confirm a preview gets its own Neon branch. That closes T1.2.
+3. Rerun the gates on that preview, including a real browser upload, then tick T1.3–T1.9 and T2.3–T2.11.
+4. Build T1.10, then run T1.11 and T2.13.
