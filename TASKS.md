@@ -321,7 +321,7 @@ Email consent columns are built here, not in P8, because the IS-* goldens need t
   - **Build:** template payload builder with variable mapping, fallbacks and `biz_opaque_callback_data`; open-zone and `waitUntil` calculation.
   - **Done when:** SP-* and SW-* pass.
 
-- [ ] **T5.4 Status, error and opt-out logic**
+- [x] **T5.4 Status, error and opt-out logic**
   - **Depends:** T1.1
   - **Spec:** §7.7, §7.8, §8.1
   - **Build:** webhook status reducer; `lib/whatsapp/errors.ts` classifier, kept as data; inbound opt-out detector.
