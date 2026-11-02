@@ -1,6 +1,7 @@
 // §7.4 and §5.8 step 3: template + variable mapping + contact → the /messages request body.
 
-export type ValueSource = ({ field: string } | { attribute: string } | { static: string }) & { fallback?: string };
+import { resolveValue, type ValueSource, type VariableContact } from '@/lib/campaigns/variables';
+
 export type HeaderMapping = { media_id: string } | ValueSource;
 /** Keys are body variable names, `header`, and `button_{index}` for a URL suffix. */
 export type VariableMapping = Record<string, ValueSource | HeaderMapping>;
@@ -16,7 +17,7 @@ export type PayloadTemplate = {
   url_button_index?: number;
 };
 
-export type PayloadContact = { wa_to: string; attributes?: Record<string, unknown> | null } & Record<string, unknown>;
+export type PayloadContact = { wa_to: string } & VariableContact;
 
 type TextParameter = { type: 'text'; parameter_name?: string; text: string };
 type MediaParameter = { type: string } & Record<string, unknown>;
@@ -36,13 +37,8 @@ export type SendPayload = {
 
 export type PayloadResult = { body: SendPayload } | { skip_reason: 'EMPTY_VARIABLE' };
 
-/** G-14: Meta rejects newlines, tabs and long runs of spaces in parameters. */
-const clean = (value: unknown) => (value === null || value === undefined ? '' : String(value).replace(/[\r\n\t ]+/g, ' ').trim());
-
 function resolve(source: ValueSource | HeaderMapping | undefined, contact: PayloadContact): string | null {
-  if (!source || 'media_id' in source) return null;
-  const raw = 'static' in source ? source.static : 'field' in source ? contact[source.field] : contact.attributes?.[source.attribute];
-  return clean(raw) || clean(source.fallback) || null;
+  return !source || 'media_id' in source ? null : resolveValue(source, contact);
 }
 
 /** Returns the request body, or a skip reason: a recipient is never sent an empty variable. */

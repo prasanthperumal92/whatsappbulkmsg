@@ -394,7 +394,7 @@ Email consent columns are built here, not in P8, because the IS-* goldens need t
   - **Build:** `EmailProvider`, `MockEmailProvider` (idempotency keys, Svix-signed webhooks with a mock-only secret, `@bounce.test` and `@complain.test`), provider selection that refuses Mock in production, the `.local.bin` loader using `util.parseEnv`, `GET /settings/email-domain` and the full S-01 Email section.
   - **Done when:** FR-SET-06, FR-SET-07, SEC-12…16 and SEC-19 (email half) pass.
 
-- [ ] **T8.2 Email renderer and unsubscribe tokens**
+- [x] **T8.2 Email renderer and unsubscribe tokens**
   - **Depends:** T1.1
   - **Spec:** §5.12, §7A.4, §7A.5
   - **Build:** block-to-React-Email renderer with deterministic output and correct escaping; `/emails/batch` element builder; token sign and verify with old secrets kept indefinitely, and test tokens.
