@@ -1,5 +1,6 @@
 import { eq, sql } from 'drizzle-orm';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it } from 'vitest';
 import golden from '../../evals/golden/import-summaries.json';
@@ -240,6 +241,17 @@ describe('IS-01…18 import summaries', () => {
     const { summary } = await runImport(fixture(c.fixture), { options: apiOptions(c).options, commit: apiOptions(c).commit });
     expectSummary(summary, c.validate);
     for (const [email, status] of Object.entries(c.commit.email_opt_in_status_by_email)) expect((await byEmail(email))?.emailOptInStatus).toBe(status);
+  });
+
+  it('§5.3 email opt-in needs its own confirmation: the WhatsApp one does not cover it', async () => {
+    const { import_id } = await prepare('phone,email\n9876543210,a@example.com\n', { options: { opt_in_value: 'opted_in', email_opt_in_value: 'opted_in' } });
+    const refused = await commit(import_id, { consent_confirmed: true });
+    expect(refused.status).toBe(422);
+    expect((await refused.json()).error.code).toBe('email_consent_required');
+    expect(await liveCount()).toBe(0);
+    expect((await commit(import_id, { consent_confirmed: true, email_consent_confirmed: true })).status).toBe(200);
+    const [batch] = await db.select().from(importBatches).where(eq(importBatches.id, import_id));
+    expect(batch!.consentJson).toMatchObject({ whatsapp: { confirmed_by: ME }, email: { confirmed_by: ME } });
   });
 
   it('IS-14 NFR-01 50k rows: validate + commit under 60 s (local Postgres, not a deployment)', async () => {
@@ -533,11 +545,18 @@ describe('T2.5 upload', () => {
     const { POST } = await import('@/app/api/imports/route');
     const reg = (body: object) => POST(new Request('http://localhost/api/imports', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }), none);
     const sha256 = 'a'.repeat(64);
-    expect((await reg({ blob_path: 'prod/imports/00000000-0000-0000-0000-000000000000/source.csv', file_name: 'a.csv', sha256 })).status).toBe(400);
-    expect((await reg({ blob_path: 'dev/snapshots/s000001.parquet', file_name: 'a.csv', sha256 })).status).toBe(400);
-    const path = 'dev/imports/00000000-0000-0000-0000-000000000000/source.csv';
     const { getBlobStore } = await import('@/lib/storage/blob');
-    await getBlobStore().put(path, 'phone\n', 'text/csv');
+    // The files exist, and their hashes match, so only the path check can refuse them.
+    const content = 'phone\n';
+    const hash = createHash('sha256').update(content).digest('hex');
+    for (const blob_path of ['prod/imports/00000000-0000-0000-0000-000000000000/source.csv', 'dev/snapshots/s000001.parquet']) {
+      await getBlobStore().put(blob_path, content, 'text/csv');
+      const res = await reg({ blob_path, file_name: 'a.csv', sha256: hash });
+      expect(res.status, blob_path).toBe(400);
+      expect((await res.json()).error.code).toBe('invalid_blob_path');
+    }
+    const path = 'dev/imports/00000000-0000-0000-0000-000000000000/source.csv';
+    await getBlobStore().put(path, content, 'text/csv');
     expect((await reg({ blob_path: path, file_name: 'a.csv', sha256 })).status).toBe(400);
   });
 });

@@ -54,7 +54,7 @@ export function snapshotMetadata(bytes: Uint8Array) {
   };
 }
 
-/** Reads any snapshot this app has written. Columns an older schema didn't have get their defaults (WP-10). */
+/** Reads any snapshot this app has written. A column an older schema didn't have stays absent, and `insertMany` gives it its default (WP-10, EM-02). */
 export async function readSnapshotFile(bytes: Uint8Array): Promise<Partial<ContactRow>[]> {
   const file = toArrayBuffer(bytes);
   const metadata = parquetMetadata(file);
@@ -73,7 +73,6 @@ export async function readSnapshotFile(bytes: Uint8Array): Promise<Partial<Conta
     }
     out.tags = typeof row.tags === 'string' ? JSON.parse(row.tags) : (row.tags ?? []);
     out.attributes = typeof row.attributes === 'string' ? JSON.parse(row.attributes) : (row.attributes ?? {});
-    if (!columns.has('email_opt_in_status')) out.email_opt_in_status = 'unknown';
     return out as Partial<ContactRow>;
   });
 }

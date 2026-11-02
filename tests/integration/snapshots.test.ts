@@ -9,7 +9,7 @@ import * as snapshotsRoute from '@/app/api/snapshots/route';
 import * as statusRoute from '@/app/api/status/route';
 import { ContactStore } from '@/lib/contacts/store';
 import { getDb, schema } from '@/lib/db';
-import { createSnapshot, readSnapshotFile, runCleanup, snapshotMetadata } from '@/lib/snapshots/service';
+import { createSnapshot, readSnapshotFile, runCleanup, snapshotDue, snapshotMetadata } from '@/lib/snapshots/service';
 import { getBlobStore } from '@/lib/storage/blob';
 import { addSuppression } from '@/lib/suppression/service';
 import { resetClerk, signInAs } from '../support/clerk-mock';
@@ -28,6 +28,7 @@ const restore = (version: number, body: object = { confirm: true }) =>
 const snapshotNow = async () => createSnapshot(db, { reason: 'test', createdBy: ME });
 const byPhone = async (phone: string) => (await db.select().from(contacts).where(eq(contacts.phoneE164, phone)))[0];
 const bump = () => db.transaction((tx) => new ContactStore(tx).bumpRevision());
+const realBump = (tx: Parameters<Parameters<typeof db.transaction>[0]>[0]) => new ContactStore(tx).bumpRevision();
 
 beforeEach(async () => {
   await resetDb();
@@ -74,6 +75,30 @@ describe('WP-09 consistency', () => {
     expect(rows.map((r) => r.first_name)).toEqual(['Before']);
     expect(info.row_count).toBe(1);
     expect((await byPhone('+919876543210'))?.firstName).toBe('During');
+  });
+});
+
+describe('WP-09 one point in time', () => {
+  it('an edit landing between reading the revision and reading the contacts is not in the file', async () => {
+    await runImport('phone,name\n9876543210,Before\n');
+    const realRevision = ContactStore.prototype.revision;
+    const startRevision = await new ContactStore(db).revision();
+    const spy = vi.spyOn(ContactStore.prototype, 'revision').mockImplementationOnce(async function (this: ContactStore) {
+      const value = await realRevision.call(this);
+      await db.transaction(async (tx) => {
+        await tx.update(contacts).set({ firstName: 'During' });
+        await tx.insert(contacts).values({ phoneE164: '+919812345678' });
+        await realBump(tx);
+      });
+      return value;
+    });
+    const info = await snapshotNow();
+    spy.mockRestore();
+    const rows = await readSnapshotFile((await getBlobStore().read(info.blob_path))!);
+    expect(rows.map((r) => r.first_name)).toEqual(['Before']);
+    expect(info).toMatchObject({ row_count: 1, revision: startRevision });
+    // The edit moved the revision past the snapshot's, so the next hourly run still picks it up.
+    expect(await snapshotDue(db)).toBe(true);
   });
 });
 
