@@ -64,6 +64,6 @@ export async function getAppStatus(db: Tx, env: Record<string, string | undefine
   const modes = channelModes({ environment, sources, localProvider: { whatsapp: whatsapp.provider, email: email.provider } });
   const banners = computeBanners(modes);
   // §4.2 and WP-14: live contacts are unaffected, but the team should know backups have stopped.
-  if (failedSnapshot) banners.push({ id: 'snapshot-failed', tone: 'warning', text: 'The latest contact snapshot failed. Contacts are unaffected. It will be retried on the next hourly run.' });
+  if (failedSnapshot) banners.push({ id: 'snapshot-failed', tone: 'warning', text: 'The latest contact snapshot failed. Contacts are unaffected. It will be retried on the next scheduled run.' });
   return { environment, ...modes, banners };
 }
