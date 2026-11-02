@@ -19,7 +19,8 @@ async function main() {
 
   const next = spawn('npx', ['next', 'dev', '--port', String(port)], {
     stdio: 'inherit',
-    env: { ...process.env, DATABASE_URL: url, E2E_FAKE_CLERK: '1', LOCAL_BLOB_DIR: path.join(dir, 'blob') },
+    // BLOB_READ_WRITE_TOKEN is blanked because Next would otherwise load it from .env.local and use the real store.
+    env: { ...process.env, DATABASE_URL: url, E2E_FAKE_CLERK: '1', LOCAL_BLOB_DIR: path.join(dir, 'blob'), BLOB_READ_WRITE_TOKEN: '' },
   });
 
   const stop = async () => {
