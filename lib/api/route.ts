@@ -54,6 +54,8 @@ export type AuditedContext = {
   params: Record<string, string | string[]>;
   /** Sets what the audit row records. Details are scrubbed; secrets are never stored. */
   audit: (entry: AuditEntry) => void;
+  /** Runs if the transaction rolls back, on its own connection: for records that must survive the failure. */
+  afterRollback: (fn: (db: Db) => Promise<void>) => void;
 };
 
 class RollbackWith extends Error {
@@ -90,13 +92,27 @@ export function withAudit(meta: { action: string; entity: string }, handler: (re
       const db = getDb();
       const user = await requireMember(db);
       const params = args?.params ? await args.params : {};
-      return await db.transaction(async (tx) => {
-        let entry: AuditEntry = {};
-        const response = await handler(req, { user, tx, params, audit: (e) => void (entry = e) });
-        if (!response.ok) throw new RollbackWith(response);
-        await writeAudit(tx, user, meta.action, meta.entity, entry);
-        return response;
-      });
+      const rollbackHooks: ((db: Db) => Promise<void>)[] = [];
+      try {
+        return await db.transaction(async (tx) => {
+          let entry: AuditEntry = {};
+          const response = await handler(req, {
+            user,
+            tx,
+            params,
+            audit: (e) => void (entry = e),
+            afterRollback: (fn) => void rollbackHooks.push(fn),
+          });
+          if (!response.ok) throw new RollbackWith(response);
+          await writeAudit(tx, user, meta.action, meta.entity, entry);
+          return response;
+        });
+      } catch (err) {
+        for (const hook of rollbackHooks) {
+          await hook(db).catch((hookErr) => log.error('A rollback hook failed', { err: hookErr }));
+        }
+        throw err;
+      }
     } catch (err) {
       if (err instanceof RollbackWith) return err.response;
       return handleError(err, req);

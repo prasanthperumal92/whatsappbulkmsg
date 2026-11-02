@@ -12,6 +12,8 @@ export default function config(phase: string): NextConfig {
     reactStrictMode: true,
     poweredByHeader: false,
     serverExternalPackages: ['pg'],
+    // Local dev only: uploads go through the app because there is no Blob store. Deployments upload straight to Blob.
+    ...(phase === PHASE_DEVELOPMENT_SERVER && { experimental: { proxyClientMaxBodySize: '60mb' } }),
     ...(fakeClerk && {
       turbopack: {
         resolveAlias: {

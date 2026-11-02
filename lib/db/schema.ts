@@ -112,6 +112,10 @@ export const importBatches = pgTable(
     preRevision: bigint('pre_revision', { mode: 'number' }),
     postRevision: bigint('post_revision', { mode: 'number' }),
     createdBy: varchar('created_by'),
+    // Shown in "already imported by …" and "An import by … is in progress" (§5.3).
+    createdByEmail: varchar('created_by_email'),
+    commitStartedAt: tstz('commit_started_at'),
+    commitStartedBy: varchar('commit_started_by'),
     createdAt: tstz('created_at').notNull().defaultNow(),
   },
   (t) => [

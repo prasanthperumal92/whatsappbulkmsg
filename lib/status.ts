@@ -2,6 +2,7 @@ import { getEnvironment, type AppEnvironment } from '@/lib/env';
 import { credentialSources, type CredentialSource, type SecretName } from '@/lib/settings/secrets';
 import { getSettingsSection } from '@/lib/settings/store';
 import type { Tx } from '@/lib/db';
+import { snapshotFailure } from '@/lib/snapshots/service';
 
 export type Banner = {
   id: string;
@@ -54,11 +55,15 @@ export function computeBanners(modes: { whatsapp: ChannelMode; email: ChannelMod
 
 export async function getAppStatus(db: Tx, env: Record<string, string | undefined> = process.env): Promise<AppStatus> {
   const environment = getEnvironment(env);
-  const [sources, whatsapp, email] = await Promise.all([
+  const [sources, whatsapp, email, failedSnapshot] = await Promise.all([
     credentialSources(db, env),
     getSettingsSection(db, 'whatsapp'),
     getSettingsSection(db, 'email'),
+    snapshotFailure(db),
   ]);
   const modes = channelModes({ environment, sources, localProvider: { whatsapp: whatsapp.provider, email: email.provider } });
-  return { environment, ...modes, banners: computeBanners(modes) };
+  const banners = computeBanners(modes);
+  // §4.2 and WP-14: live contacts are unaffected, but the team should know backups have stopped.
+  if (failedSnapshot) banners.push({ id: 'snapshot-failed', tone: 'warning', text: 'The latest contact snapshot failed. Contacts are unaffected. It will be retried on the next hourly run.' });
+  return { environment, ...modes, banners };
 }

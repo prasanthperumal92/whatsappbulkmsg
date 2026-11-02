@@ -7,4 +7,8 @@ export const config: VercelConfig = {
   regions: ['bom1'],
   // §3.1: migrations are a deploy step. See docs/migrations.md.
   buildCommand: 'npm run db:migrate && npm run build',
+  crons: [
+    { path: '/api/cron/snapshot-contacts', schedule: '0 * * * *' },
+    { path: '/api/cron/cleanup', schedule: '30 20 * * *' }, // 02:00 IST
+  ],
 };
