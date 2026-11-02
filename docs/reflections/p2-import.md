@@ -77,7 +77,7 @@ TASKS.md says to report mismatches rather than resolve them quietly. No golden o
 
 ## Next steps
 
-1. **You:** decide on the plan (H-1) and create the two Blob stores (H-2). T1.2 remains open.
+1. **You:** decide on the plan (H-1) and create the two Blob stores (H-2), in Singapore to match the database and functions (§3.1). T1.2 remains open.
 2. Run the P1 spikes on a preview deployment, especially SPK-05, then tick T1.4, T1.8 and the others.
 3. Run IS-*, WP-* and NFR-01 against a Neon test branch with `TEST_DATABASE_URL`. **Never point it at a shared branch: the test setup drops the schema.**
 4. Tick T2.3–T2.11, then run the T2.13 gate.

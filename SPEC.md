@@ -176,7 +176,7 @@ These answer the gaps listed in `evals/README.md`. They are now requirements.
 
 ### 3.1 Deployment model
 - A single **Next.js** project on Vercel, Node.js runtime on Fluid Compute. The app detects its own production URL: the custom domain once one is attached, otherwise `VERCEL_PROJECT_PRODUCTION_URL`. S-01 shows it, with every URL to configure elsewhere (FR-SET-08). Clerk production sign-in needs a custom domain (§15 Q1).
-- Region: `bom1` (Mumbai) for functions, with the database and Blob in a nearby region. The team is in India; recipients are mostly overseas (D14), and data transfers are covered in §12A.
+- Region: `sin1` (Singapore) for functions, the database (Neon `aws-ap-southeast-1`) and Blob, so they sit together. Neon has no region in India, and Singapore is its closest. The team is in India; recipients are mostly overseas (D14), and data transfers are covered in §12A.
 - Git-connected: changes reach `master` only through pull requests that pass CI (type check, unit and integration tests, `evals:check`). Merging deploys to production; pull requests get preview deployments (§3.5).
 - Migrations run as a deploy step and must be backward compatible (expand, then contract), because pinned Workflow runs on an older deployment keep using the same database.
 
@@ -1345,7 +1345,7 @@ Answered on 2026-11-02:
 - **Q8.** Resend **Free** plan to start: 100 emails per day, 3,000 per month and 1 webhook endpoint, checked on resend.com/pricing on 2026-11-02. The one endpoint goes to production, so local dev relies on the `reconcile-emails` cron. Larger campaigns need a paid plan; raise both caps in Settings after upgrading.
 - **Q10.** Main regions are listed in D14. Add their countries to the price table from Meta's rate card, and include them in the legal review.
 - **Q11.** English only for v1 (D5).
-- **Q12.** The team is in India, so `bom1` and `Asia/Kolkata` stay.
+- **Q12.** The team is in India, so `Asia/Kolkata` stays. Functions moved from `bom1` to `sin1` on 2026-11-02, to sit next to the database (§3.1).
 
 No questions remain open. Numbers are kept stable because `TASKS.md` refers to them.
 

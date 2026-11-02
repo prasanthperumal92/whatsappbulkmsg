@@ -56,7 +56,7 @@ Phases keep their numbers from SPEC §14. P8 comes before P6 because it needs no
 
 - [x] **T1.1 Scaffold the project**
   - **Spec:** §3.1, §3.2
-  - **Build:** Next.js App Router with TypeScript, Tailwind and shadcn/ui, TanStack Query, Vitest and Playwright. Region `bom1` in `vercel.ts`. Scripts: `test`, `test:e2e`, `evals:check` (runs `node evals/check.mjs`).
+  - **Build:** Next.js App Router with TypeScript, Tailwind and shadcn/ui, TanStack Query, Vitest and Playwright. Region `sin1` in `vercel.ts`. Scripts: `test`, `test:e2e`, `evals:check` (runs `node evals/check.mjs`).
   - **Done when:** `build`, `test` and `evals:check` pass, and one Vitest case loads a golden file through the import shown in `evals/README.md`.
 
 - [ ] **T1.2 `[HUMAN]` Link Vercel and provision services**
