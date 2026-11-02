@@ -1,2 +1,13 @@
 evals/fixtures/large-50k.csv
 .local.bin
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+.env*
+!.env.example
+.vercel/
+.DS_Store
+test-results/
+playwright-report/
+coverage/
