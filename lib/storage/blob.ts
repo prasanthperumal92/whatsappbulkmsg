@@ -77,8 +77,8 @@ class LocalBlobStore implements BlobStore {
   constructor(private readonly root: string) {}
 
   private resolve(pathname: string) {
-    const full = path.resolve(this.root, pathname);
-    if (!full.startsWith(path.resolve(this.root) + path.sep)) throw new Error('Path escapes the local blob directory');
+    const full = path.resolve(/*turbopackIgnore: true*/ this.root, pathname);
+    if (!full.startsWith(path.resolve(/*turbopackIgnore: true*/ this.root) + path.sep)) throw new Error('Path escapes the local blob directory');
     return full;
   }
 
@@ -129,5 +129,5 @@ export function getBlobStore(env: Record<string, string | undefined> = process.e
   const token = env.BLOB_READ_WRITE_TOKEN;
   if (token) return (cache.__appBlob = new VercelBlobStore(token));
   if (getEnvironment(env) !== 'local') throw new Error('BLOB_READ_WRITE_TOKEN is not set');
-  return (cache.__appBlob = new LocalBlobStore(path.resolve(env.LOCAL_BLOB_DIR ?? '.local-blob')));
+  return (cache.__appBlob = new LocalBlobStore(path.resolve(/*turbopackIgnore: true*/ env.LOCAL_BLOB_DIR ?? '.local-blob')));
 }
