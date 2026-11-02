@@ -77,7 +77,7 @@ Unless stated otherwise: provider = Mock, store starts empty, send window disabl
 | CM-17 | W | FR-CMP-07 | Mock returns 131050. | Row `failed`; number in suppression list with reason `error_131050` within 5 s. |
 | CM-18 | W | FR-CMP-08 | Two campaigns started 1 s apart. | Second is `queued`; starts automatically after the first finalises; never two `running`. |
 | CM-19 | W | FR-CMP-08 | Schedule at 21:00 IST (clock faked). | No sends until 09:00 IST next day (see SW-* goldens). Same for a campaign that runs past 20:00. |
-| CM-20 | W | FR-CMP-09 | Tier 1k, 900 unique users messaged in last 24 h, campaign of 300. | Wizard warns and offers a split; if sent, engine holds after 100 and continues when the window rolls. |
+| CM-20 | W | FR-CMP-09 | Tier 2k, 1,900 unique users messaged in last 24 h, campaign of 300. | Wizard warns and offers a split; if sent, engine holds after 100 and continues when the window rolls. |
 | CM-21 | W | §7.5 | Image header campaign of 500. | Exactly one `/media` upload; same media id in all 500 payloads. Resuming after > 30 days re-uploads. |
 | CM-22 | W | §8.6 | 1,000-row campaign; poll stats. | Counts by status sum to total at every poll; final state all terminal. |
 | CM-23 | C | FR-CMP-03 | Test send with mapping. | One send per configured test number using the first sample contact's params; not recorded as campaign messages. |

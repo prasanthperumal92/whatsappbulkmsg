@@ -3,8 +3,8 @@
 | Field | Value |
 |---|---|
 | Document | SPEC.md |
-| Version | 2.1 (adds bulk email through Resend — see §17 Revision log) |
-| Date | 2026-10-31 |
+| Version | 2.2 (adds the Meta Graph API setup guide — see §17 Revision log) |
+| Date | 2026-11-02 |
 | Status | Ready for build |
 | Scope | Shared team web app on Vercel: import contacts from CSV → store in Parquet → design marketing templates → send WhatsApp marketing messages via the Meta Graph API (WhatsApp Cloud API) **and bulk marketing emails via the Resend API** → track delivery |
 
@@ -28,6 +28,8 @@
    7.1 Credentials · 7.2 Endpoints · 7.3 Template creation payload · 7.4 Send payload · 7.5 Media · 7.6 Limits & pricing · 7.7 Error handling · 7.8 Webhooks
 7A. [Resend Email Integration](#7a-resend-email-integration)
    7A.1 Credentials & the `.local.bin` file · 7A.2 Provider interface · 7A.3 Endpoints · 7A.4 Send payload · 7A.5 Deliverability & compliance · 7A.6 Limits & pricing · 7A.7 Error handling · 7A.8 Webhooks
+7B. [Meta Graph API Setup Guide](#7b-meta-graph-api-setup-guide)
+   7B.1 Before you start · 7B.2 Part A: on Meta's side · 7B.3 Part B: in the app · 7B.4 Part C: confirm it works · 7B.5 Test number to real number · 7B.6 Troubleshooting · 7B.7 After go-live · 7B.8 Meta documentation
 8. [Sending Engine](#8-sending-engine)
    8.1 Message state machine · 8.2 Campaign workflow · 8.3 Crash & retry safety · 8.4 Idempotency · 8.5 Circuit breaker · 8.6 Progress reporting
 9. [Backend API](#9-backend-api)
@@ -138,7 +140,7 @@ A web app, hosted on Vercel and shared by a small team, that lets any team membe
 ### 3.1 Deployment model
 - A single **Next.js** project on Vercel, Node.js runtime on Fluid Compute. Production is on a custom domain, e.g. `wa.<company-domain>`.
 - Region: `bom1` (Mumbai) for functions, with the database and Blob in a nearby region. Most recipients and the team are in India.
-- Git-connected: pushes to `main` deploy to production; pull requests get preview deployments (§3.5).
+- Git-connected: pushes to `master` deploy to production; pull requests get preview deployments (§3.5).
 
 ### 3.2 Tech stack
 | Layer | Choice | Reason |
@@ -312,8 +314,8 @@ Used by import, contact edits and the send path (one function, `normaliseEmail`,
 - Banners: *"WhatsApp not connected — sending and template submission are disabled. [Open Settings]"* · *"Email not connected — add `RESEND_API_KEY` to `.local.bin` (local) or Settings → Email. [Open Settings]"* · *"Email domain `mail.example.com` is not verified — email sending is disabled"* · *"Mock mode — messages are simulated"* / *"Email mock mode — emails are simulated"* (always shown on previews) · *"Campaign 'Festive offer' is sending — 4,210 / 9,800"* with a channel icon (shown on all screens while a campaign runs; one line per running channel).
 
 ### 5.2 S-01 Settings
-1. **WhatsApp connection:** Access token (write-only, masked; shows "set by env var" when an env var supplies it), WABA ID, Phone Number ID, App ID, App Secret, Graph API version (default: latest stable at build time, e.g. `v23.0`), provider `Graph API | Mock` (Mock is forced on previews).
-   - **Test connection:** `GET /{phone-number-id}?fields=display_phone_number,verified_name,quality_rating,throughput` plus `GET /{waba-id}/message_templates?limit=1`. Shows the display name, number, quality rating and any error.
+1. **WhatsApp connection:** Access token (write-only, masked; shows "set by env var" when an env var supplies it), WABA ID, Phone Number ID, App ID, App Secret, Graph API version (default: latest stable at build time, e.g. `v26.0`), provider `Graph API | Mock` (Mock is forced on previews).
+   - **Test connection:** `GET /{phone-number-id}?fields=display_phone_number,verified_name,quality_rating,throughput,whatsapp_business_manager_messaging_limit` plus `GET /{waba-id}/message_templates?limit=1`. Shows the display name, number, quality rating, messaging limit and any error.
    - **Webhook setup card:** callback URL (`https://<prod-domain>/api/webhooks/whatsapp`, with a copy button), verify token (generated, with a copy button), fields to subscribe, and the time of the last received event.
 2. **Email (Resend):** provider `Resend | Mock` (Mock is forced on previews, and is the default until a key exists).
    - **API key:** write-only, masked. The status line says where the key comes from: *"Loaded from `.local.bin`"* (local dev only), *"Set by env var"*, *"Saved in Settings"* or *"Not set — add `RESEND_API_KEY=re_…` to `.local.bin`"*. Precedence in §7A.1.
@@ -323,7 +325,7 @@ Used by import, contact edits and the send path (one function, `normaliseEmail`,
    - **Webhook setup card:** callback URL (`https://<prod-domain>/api/webhooks/resend`, copy button), events to subscribe (`email.sent`, `email.delivered`, `email.delivery_delayed`, `email.opened`, `email.clicked`, `email.bounced`, `email.complained`, `email.failed`, `email.suppressed`), signing secret (write-only; or `RESEND_WEBHOOK_SECRET` env var), time of the last received event.
    - **Email sending:** batch requests per second (default 2, max 10 or the account's limit; each request carries up to 100 emails), daily send cap (the plan's quota; the wizard and engine respect it), frequency cap (default: skip contacts emailed in the last 7 days), send window (default 09:00–20:00 `Asia/Kolkata`, separate from WhatsApp), test email address(es), circuit-breaker thresholds (bounce rate 5%, complaint rate 0.3%), price per 1,000 emails (cost estimate), open and click tracking (informational: configured on the Resend domain; Apple Mail Privacy Protection inflates opens).
    - **Test connection:** `GET /domains`; shows the domain status, and sends nothing. **Send test email** sends a sample to the test address(es).
-3. **WhatsApp sending:** messages per second (default 20, max 80), frequency cap (default: skip contacts who received a marketing message in the last 7 days), send window (default 09:00–20:00 `Asia/Kolkata`), test phone number(s), messaging limit tier (read from the API if available, otherwise entered manually), send endpoint (`/messages` default | `/marketing_messages`), circuit-breaker threshold, price per marketing message for India (used for cost estimates).
+3. **WhatsApp sending:** messages per second (default 20, max 80), frequency cap (default: skip contacts who received a marketing message in the last 7 days), send window (default 09:00–20:00 `Asia/Kolkata`), test phone number(s), messaging limit tier (read from the `whatsapp_business_manager_messaging_limit` phone number field, e.g. `TIER_250`, otherwise entered manually; the older `messaging_limit_tier` field is deprecated), send endpoint (`/messages` default | `/marketing_messages`), circuit-breaker threshold, price per marketing message for India (used for cost estimates).
 4. **Import:** default country (IN), default WhatsApp and email opt-in status, existing-contact policy, max file size (default 50 MB).
 5. **Team:** allowlist of emails (add / remove). Changes are audit-logged.
 6. **Data:** current store version and row count, version history (restore with confirmation), export all contacts to CSV, opt-out keywords (default `STOP`, `UNSUBSCRIBE`, `STOP PROMOTIONS`), email suppression list (view, export, add, remove with reason).
@@ -604,7 +606,7 @@ Rendering: blocks → React Email components → HTML (inlined CSS, max width 60
 #### 7.1.1 Required values (to be supplied later)
 | Setting | Where to get it | Used for |
 |---|---|---|
-| `WHATSAPP_ACCESS_TOKEN` | Meta Business Manager → System User → token with `whatsapp_business_messaging` and `whatsapp_business_management` | All calls |
+| `WHATSAPP_ACCESS_TOKEN` | Meta Business Manager → System User → token with `business_management`, `whatsapp_business_messaging` and `whatsapp_business_management` | All calls |
 | `WHATSAPP_WABA_ID` | WhatsApp Manager | Templates |
 | `WHATSAPP_PHONE_NUMBER_ID` | WhatsApp Manager → API setup | Sending, media |
 | `META_APP_ID` | developers.facebook.com | Resumable upload (template samples) |
@@ -638,7 +640,7 @@ Base: `https://graph.facebook.com/{GRAPH_API_VERSION}`. Header: `Authorization: 
 
 | Purpose | Method & path |
 |---|---|
-| Phone info | `GET /{PHONE_NUMBER_ID}?fields=display_phone_number,verified_name,quality_rating,throughput` |
+| Phone info | `GET /{PHONE_NUMBER_ID}?fields=display_phone_number,verified_name,quality_rating,throughput,whatsapp_business_manager_messaging_limit` |
 | List templates | `GET /{WABA_ID}/message_templates?fields=id,name,status,category,language,components,quality_score,rejected_reason&limit=100` (follow `paging.next`) |
 | Create template | `POST /{WABA_ID}/message_templates` |
 | Edit template | `POST /{TEMPLATE_ID}` |
@@ -708,7 +710,7 @@ Success: `{ "contacts": [{ "input": "919876543210", "wa_id": "919876543210" }], 
 | Limit | Behaviour |
 |---|---|
 | Throughput (~80 msg/s per number by default) | Token bucket at the configured rate (default 20/s) inside the send step |
-| Messaging limit tier (unique users per rolling 24 h: 250 / 1k / 10k / 100k / unlimited; applied per business portfolio) | Wizard guard (§5.8); the engine holds the campaign when the 24 h unique count reaches the tier and continues when the window rolls |
+| Messaging limit tier (unique users per rolling 24 h: 250 / 2k / 10k / 100k / unlimited; applied per business portfolio) | Wizard guard (§5.8); the engine holds the campaign when the 24 h unique count reaches the tier and continues when the window rolls |
 | Per-user marketing cap | Error 131049 → failed; manual retry allowed only after 24 h |
 | Pair rate limit | Error 131056 → retry that recipient after 60 s |
 | Pricing | Marketing templates are charged per delivered message at the recipient-country rate. The estimate uses the price in Settings; actual categories come from the webhook `pricing` object |
@@ -856,6 +858,123 @@ Every failure stores the HTTP status, Resend error `name` and `message` in `erro
 - Insert into `webhook_events` (`source = resend`, `external_id = svix-id`; a repeated `svix-id` is a no-op), process within the request, return 200. Processing errors → still 200, retried by `reconcile-campaigns`. Invalid signature → stored with `signature_ok = false`, not processed, **401** (Svix retries; that is fine for a misconfigured secret).
 - **Matching:** `data.email_id` = `resend_id`; if not found, the `message_id` tag. Unmatched events (e.g. test emails) are stored and ignored.
 - **Status handling** (forward only, §8.1): `email.sent` → sent · `email.delivery_delayed` → delayed · `email.delivered` → delivered · `email.opened` → opened (sets `opened_at`) · `email.clicked` → clicked (sets `clicked_at`, counts the link) · `email.bounced` → bounced (`Permanent` → suppress, `Transient` → failed, not suppressed) · `email.complained` → complained + suppress · `email.failed` → failed · `email.suppressed` → failed (`resend_suppressed`) + suppress · `email.scheduled`, `email.received` and unknown types → stored, ignored. Update `contact_activity` (`last_email_at`).
+
+---
+
+## 7B. Meta Graph API Setup Guide
+
+A step-by-step runbook for connecting the app to the WhatsApp Cloud API, written for the person holding admin access to the Meta business portfolio. §7 is the technical reference; this page is the order to do things in. Allow an hour for the setup itself. Display name approval and template review happen on Meta's side and can take longer.
+
+**The live connection only works on Production.** Local dev and previews use the Mock provider (§3.5), so do Part B and Part C on the production deployment.
+
+Meta renames dashboard labels often (a WABA may appear as a "WhatsApp account" linked to a "Messaging account"). If a label below doesn't match, go by the links in §7B.8.
+
+### 7B.1 Before you start
+| Need | Notes |
+|---|---|
+| Admin access to a Meta business portfolio | Can be created during Step 1. Business verification is optional to begin with, but it is the quickest way to raise the messaging limit (§7B.7) |
+| A phone number for sending (D4) | Must be able to receive an SMS or voice call for verification. A number in use on the WhatsApp or WhatsApp Business app must be deleted from it or migrated first. Optional at first: Meta's test number is enough for a first send (§7.1.1) |
+| The production deployment | Deployed with `APP_ENCRYPTION_KEY` set and P6 shipped. Its domain is the webhook URL, so settle §15 Q1 first; changing the domain later means repeating Step 7 |
+| Somewhere to keep the secrets | The token and the registration PIN are needed again later; use the team's password manager |
+
+### 7B.2 Part A: on Meta's side
+**Step 1. Create the Meta app.**
+1. Go to [developers.facebook.com/apps](https://developers.facebook.com/apps), then **Create app**.
+2. Enter a name and contact email, and choose the use case **Connect with customers through WhatsApp**.
+3. Select the business portfolio (or create one), then **Create app**.
+4. In **App settings → Basic**, copy the **App ID** (`META_APP_ID`) and **App Secret** (`META_APP_SECRET`).
+
+**Step 2. Connect the WhatsApp Business Account.**
+1. Click **Start using the API**, and in **API Setup** select an existing account or create one.
+2. Copy the account ID (`WHATSAPP_WABA_ID`).
+
+**Step 3. Add the sending number.**
+- *First test only:* in **API Setup**, use the test number and add up to 5 recipient numbers. Copy its **Phone number ID**, then skip Step 5.
+- *Real number:* in **WhatsApp Manager → Phone numbers**, add the number, set the display name and verify it with the code. Copy its **Phone number ID** (`WHATSAPP_PHONE_NUMBER_ID`). This is not the phone number itself.
+
+**Step 4. Create the permanent token.** The token on the API Setup page expires quickly, so don't use it in the app.
+1. In **Business settings → Users → System users**, click **Add** and create a user with the **Admin** role.
+2. Click **Assign assets**, select the app and grant **Manage app** (Full control). Reload to confirm it took effect; this can take a few minutes.
+3. Assign the WhatsApp account too, with Full control. In Business Suite, assign both the WhatsApp account and the Messaging account if both are listed. Missing access shows up later as error 200.
+4. Click **Generate token**, select the app, set expiry to **Never**, and tick `business_management`, `whatsapp_business_management` and `whatsapp_business_messaging`.
+5. Copy the token straight away (`WHATSAPP_ACCESS_TOKEN`).
+
+**Step 5. Register the number for Cloud API** (real number only). This call isn't made by the app, so run it once by hand. `pin` is a new 6-digit two-step verification PIN, or the existing PIN if two-step verification is already on:
+```bash
+curl -X POST "https://graph.facebook.com/$GRAPH_API_VERSION/$WHATSAPP_PHONE_NUMBER_ID/register" \
+  -H "Authorization: Bearer $WHATSAPP_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"messaging_product":"whatsapp","pin":"<6-digit-pin>"}'
+```
+Expect `{"success":true}`. Registration is limited to 10 requests per number in 72 hours; going over returns error 133016 and blocks the number for 72 hours. Register again after any display name change, once Meta has approved the new name.
+
+### 7B.3 Part B: in the app
+**Step 6. Enter the credentials.** Open **S-01 Settings → WhatsApp connection** on Production and use one of these (§7.1.2 has the precedence):
+
+| Option | How | Applies |
+|---|---|---|
+| Settings screen (no developer needed) | Paste the values and save. The token and App Secret are encrypted and can't be read back | Immediately |
+| Vercel env vars | `vercel env add WHATSAPP_ACCESS_TOKEN production`, marked sensitive, and the same for each value in §7.1.1 | After a redeploy |
+
+Then:
+1. Set the **Graph API version** to the current one (`v26.0` at the time of writing).
+2. Set the provider to **Graph API**.
+3. Click **Test connection**. It should show the display number, verified name, quality rating and messaging limit. If it doesn't, see §7B.6.
+
+**Step 7. Connect the webhook.** Sending works without this, but status updates, template approvals and STOP opt-outs all arrive through it. Save the App Secret first, or signature checks will fail.
+1. From the **Webhook setup card** on S-01, copy the callback URL (`https://<prod-domain>/api/webhooks/whatsapp`) and the verify token.
+2. In the Meta app, open **Use cases → Customize → Configuration** (older apps: **WhatsApp → Configuration**), paste both and click **Verify and save**. Meta calls the app's `GET` handshake at this point (§7.8).
+3. Under **Webhook fields**, subscribe to `messages`, `message_template_status_update` and `phone_number_quality_update`.
+4. Link the WhatsApp account to the app. The dashboard doesn't always do this, and without it real events never arrive even though the dashboard's **Test** button works:
+   ```bash
+   curl -X POST "https://graph.facebook.com/$GRAPH_API_VERSION/$WHATSAPP_WABA_ID/subscribed_apps" \
+     -H "Authorization: Bearer $WHATSAPP_ACCESS_TOKEN"
+   ```
+   Expect `{"success":true}`. A `GET` on the same path lists the subscribed apps.
+5. Switch the app to **Live** mode at the top of the dashboard, filling in anything it asks for, such as a privacy policy URL. Some webhooks are not sent while the app is in Dev mode.
+
+An app that only uses the portfolio's own WhatsApp account doesn't need Advanced access, which is for acting on other businesses' accounts. If the dashboard asks for App Review, follow what it lists.
+
+### 7B.4 Part C: confirm it works
+Do these in order, using a phone the team controls. They match evals LIVE-01…04.
+
+| # | Do this | Expect |
+|---|---|---|
+| 1 | S-01 → **Test connection** | Display number, verified name, quality rating and messaging limit |
+| 2 | S-06 → submit a small test template to Meta | `PENDING`, then `APPROVED` or `REJECTED` with no manual refresh. This proves the webhook works; the card on S-01 shows the time of the last event |
+| 3 | S-07 → **Send test** with the approved template, to a test phone number from S-01 | The message arrives on the phone, and the `delivered` webhook updates its row |
+| 4 | Reply `STOP` from that phone | The number is on the suppression list within 5 s, with an S-10 entry from `system:webhook` |
+| 5 | Remove that number from the suppression list if it will be used again, then send a small real campaign | Passes the messaging-limit check in S-07, and S-08 moves through accepted → sent → delivered → read |
+
+### 7B.5 Going from the test number to the real number
+1. Do Step 3 (real number) and Step 5.
+2. Replace `WHATSAPP_PHONE_NUMBER_ID` on S-01 and click **Test connection**.
+3. Repeat checks 3 and 4 of §7B.4. The token, webhook and WhatsApp account link stay the same if the number is on the same account.
+
+### 7B.6 Troubleshooting
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| Error 190 | Token expired, revoked, or the temporary one from API Setup | Repeat Step 4 and update the token |
+| Error 200 or 10 | System user lacks access to the app or account, or a permission is missing | Repeat Step 4 parts 2–4, then generate a new token |
+| Error 133010 (account not registered) | Step 5 was skipped | Run Step 5 |
+| Error 133016 | Too many registration attempts | Wait 72 hours |
+| Error 131030 (recipient not allowed) | Test number sending to a number not on its recipient list | Add the recipient in API Setup, or move to the real number |
+| "Verify and save" fails | Verify token mismatch, route blocked by Vercel Deployment Protection or Clerk, or the URL is a preview deployment | Copy the token again; check §7.8; use the production domain |
+| Dashboard **Test** works but real events never arrive | The WhatsApp account isn't linked to the app, or the app is in Dev mode | Step 7 parts 4 and 5 |
+| Events are stored with `signature_ok = false` and not processed | App Secret is wrong or from a different app | Copy it again from **App settings → Basic** |
+| Template stays `PENDING` | Review is still running, or the webhook isn't connected | Click **Sync from Meta** on S-05; if the status changes, fix the webhook |
+| Campaign pauses with a token banner | Token was revoked or rotated | Update the token on S-01, then resume |
+
+Quote `fbtrace_id` (stored with every failure, §7.7) when contacting Meta support.
+
+### 7B.7 After go-live
+- **Messaging limit:** new portfolios start at 250 unique recipients per 24 hours. To reach 2,000, verify the business, or deliver 2,000 template messages outside customer service windows to unique numbers within 30 days using high-quality templates; Meta then reviews message quality. Later increases are automatic while quality stays high and at least half the limit has been used in the past 7 days.
+- **API version:** `GRAPH_API_VERSION` is the only place to change it. Re-run the contract tests (LIVE-05) and §7B.4 after each change.
+- **Token rotation:** generate the new token, update S-01 or the env var, and click **Test connection**. Revoke the old one afterwards. Rotate immediately if a leak is suspected.
+- **Quality:** watch the rating on S-01. A drop to RED pauses all campaigns (§7.8).
+
+### 7B.8 Meta documentation
+[Get started](https://developers.facebook.com/documentation/business-messaging/whatsapp/get-started) · [Access tokens](https://developers.facebook.com/documentation/business-messaging/whatsapp/access-tokens) · [Phone number registration](https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/registration) · [Webhooks](https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/overview) · [Messaging limits](https://developers.facebook.com/documentation/business-messaging/whatsapp/messaging-limits) · [Graph API changelog](https://developers.facebook.com/docs/graph-api/changelog)
 
 ---
 
@@ -1091,3 +1210,4 @@ Still open:
 | 1.0 | Review pass: suppression list, upload lifecycle, DuckDB⇄SQLite join, `unknown` state, re-check before each send, Marketing Messages API option, CSV injection, designer wireframe, risks. |
 | 2.0 | **Re-architected for a shared Vercel deployment** after the open questions were answered. Local disk → private Vercel Blob with versioned Parquet and a Postgres pointer; SQLite → Neon Postgres; asyncio worker → Vercel Workflow + Cron; browser→Blob client upload (4.5 MB body limit); Clerk sign-in with allowlist; audit log with user attribution; S-10 Activity screen; per-environment isolation (Mock forced on previews); webhooks at the production URL (tunnel removed); credentials via env vars or encrypted Postgres row; campaign queue (one sending number); scope fixed to IN default / English / <50k contacts / `/messages`. |
 | 2.1 | **Bulk email via Resend.** Email channel next to WhatsApp: per-channel consent (Parquet schema v2) and suppression lists; §4.6 email normalisation; S-11 email template designer; S-12 public unsubscribe page; channel step and email exclusions in S-07; email counters in S-08; channel column/filter on S-09 and S-03; Email section on S-01; §7A Resend integration (`/emails/batch`, idempotency keys, Svix webhooks, one-click unsubscribe); per-channel campaign queues; email circuit breaker; Resend key read from `.local.bin` locally (§7A.1); P8/P9 phases; FR-EML-01…12, FR-SET-06/07. |
+| 2.2 | **Meta Graph API setup guide.** §7B: step-by-step runbook for the Meta app, system user token, number registration, S-01 credentials, webhook connection, end-to-end checks and troubleshooting. Aligned with Meta's current docs: `business_management` added to the token permissions (§7.1.1), the 1k messaging tier corrected to 2k (§7.6), example API version `v26.0`, and the limit read from `whatsapp_business_manager_messaging_limit` (§5.2, §7.2). |

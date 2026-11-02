@@ -1,0 +1,1175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bulk Messenger Wireframes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0}
+.wf{display:flex;gap:28px;padding:28px;background:#ECECE8;color:#1F1F1C;font:14px/1.45 'IBM Plex Sans',system-ui,sans-serif}
+.frame{flex:1 1 0;min-width:0;display:flex;align-self:flex-start;background:#fff;border:2px solid #1F1F1C;border-radius:6px;overflow:hidden}
+.side{flex:0 0 150px;padding:14px 10px;border-right:1px solid #8A8A85;display:flex;flex-direction:column;gap:2px;background:#F7F7F4}
+.side b{padding:4px 8px 12px;font-size:13px}
+.side a{display:block;padding:7px 8px;border-radius:4px;color:#1F1F1C;text-decoration:none}
+.side a:hover{background:#E4E4DF}
+.side a.on{background:#1F1F1C;color:#fff}
+.main{flex:1 1 0;min-width:0;padding:18px;display:flex;flex-direction:column;gap:14px}
+.notes{flex:0 0 370px;display:flex;flex-direction:column;gap:12px}
+.notes h1{margin:0;font-size:26px;line-height:1.15}
+.notes p{margin:0}
+.notes ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:11px}
+.notes li{display:flex;gap:10px;align-items:flex-start}
+.notes li b{display:block}
+.pin{display:inline-flex;align-items:center;justify-content:center;flex:0 0 22px;width:22px;height:22px;border-radius:50%;background:#B4380B;color:#fff;font:600 12px/1 'IBM Plex Sans',system-ui,sans-serif;vertical-align:middle}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.grow{flex:1 1 0;min-width:0}
+.stack{display:flex;flex-direction:column;gap:10px}
+.cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{border:1px solid #8A8A85;border-radius:4px;padding:12px;display:flex;flex-direction:column;gap:10px}
+h2{margin:0;font-size:18px;line-height:1.2}
+h3{margin:0;font-size:14px}
+.muted{color:#55554F}
+.small{font-size:12px}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px}
+button{font:inherit;font-size:13px;min-height:32px;padding:4px 12px;border:1px solid #1F1F1C;border-radius:4px;background:#fff;color:#1F1F1C}
+button.pri{background:#1F1F1C;color:#fff}
+input,select,textarea{font:inherit;font-size:13px;min-height:32px;padding:4px 8px;border:1px solid #8A8A85;border-radius:4px;background:#fff;color:#1F1F1C;min-width:0}
+input[type=checkbox]{min-height:0;width:16px;height:16px;padding:0}
+::placeholder{color:#4A4A45;opacity:1}
+label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:#55554F}
+label.inline{flex-direction:row;align-items:flex-start;gap:8px;font-size:13px;color:#1F1F1C}
+.chip{display:inline-block;padding:1px 8px;border:1px solid #8A8A85;border-radius:10px;font-size:12px;white-space:nowrap}
+.chip.dark{background:#1F1F1C;border-color:#1F1F1C;color:#fff}
+.banner{padding:8px 12px;border:1px dashed #1F1F1C;border-radius:4px;background:#F2F2EE;font-size:13px}
+.ph{display:flex;align-items:center;justify-content:center;min-height:90px;border:1px solid #8A8A85;background:repeating-linear-gradient(45deg,#F2F2EE 0 8px,#E4E4DF 8px 16px);font-size:12px;color:#3D3D39}
+.tblbox{overflow-x:auto;border:1px solid #8A8A85;border-radius:4px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:6px 9px;border-bottom:1px solid #D0D0CA;text-align:left;vertical-align:middle}
+th{background:#F2F2EE;font-weight:600;font-size:12px}
+tr:last-child td{border-bottom:0}
+.num{text-align:right}
+.steps{display:flex;gap:6px;flex-wrap:wrap}
+.steps span{padding:4px 10px;border:1px solid #8A8A85;border-radius:12px;font-size:12px}
+.steps span.on{background:#1F1F1C;border-color:#1F1F1C;color:#fff}
+.bad{background:#E9E9E4;font-weight:600;text-decoration:underline wavy #1F1F1C}
+.warn{background:#F2F2EE;text-decoration:underline dotted #1F1F1C}
+.bar{display:flex;height:16px;border:1px solid #1F1F1C;border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%}
+.phone{border:2px solid #1F1F1C;border-radius:14px;padding:10px;background:#F2F2EE;display:flex;flex-direction:column;gap:8px}
+.bubble{background:#fff;border:1px solid #8A8A85;border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.stat{border:1px solid #8A8A85;border-radius:4px;padding:6px 8px;display:flex;flex-direction:column}
+.stat b{font-size:18px;line-height:1.2}
+.map{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.map a{display:flex;flex-direction:column;gap:3px;padding:12px;background:#fff;border:1px solid #1F1F1C;border-radius:4px;color:#1F1F1C;text-decoration:none}
+.map a:hover{background:#F2F2EE}
+.flow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.flow span{padding:6px 10px;background:#fff;border:1px solid #1F1F1C;border-radius:4px;font-size:13px}
+.flow i{font-style:normal;font-weight:600}
+
+body{background:#ECECE8}
+.top{position:sticky;top:0;z-index:10;display:flex;gap:4px 12px;flex-wrap:wrap;padding:8px 28px;background:#1F1F1C;font:12px/1.5 'IBM Plex Sans',system-ui,sans-serif}
+.top a{color:#fff;white-space:nowrap}
+body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
+.group{margin:0;padding:36px 28px 0;font:600 32px/1.15 'IBM Plex Sans',system-ui,sans-serif;color:#1F1F1C}
+@media (max-width:1100px){
+  .wf{flex-direction:column}
+  .frame{align-self:stretch;flex:none}
+  .notes{flex:none}
+}
+@media (max-width:700px){
+  .wf{padding:16px}
+  .frame{flex-direction:column}
+  .side{flex:none;flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid #8A8A85}
+  .map{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cols2{grid-template-columns:minmax(0,1fr)}
+}
+</style>
+</head>
+<body>
+<nav class="top" aria-label="Screens">
+    <a href="#Main">Screen map</a>
+    <a href="#S01-Settings">S-01 Settings</a>
+    <a href="#S10-Activity">S-10 Activity log</a>
+    <a href="#S02a-Import-Map">S-02 Import: choose and map</a>
+    <a href="#S02b-Import-Validate">S-02 Import: validate and result</a>
+    <a href="#S03-Contacts">S-03 Contacts list</a>
+    <a href="#S04-Contact-Drawer">S-04 Contact drawer</a>
+    <a href="#S05-Templates">S-05 Template library</a>
+    <a href="#S06-WhatsApp-Designer">S-06 WhatsApp template designer</a>
+    <a href="#S11-Email-Designer">S-11 Email template designer</a>
+    <a href="#S12-Unsubscribe">S-12 Unsubscribe page</a>
+    <a href="#S07-Campaign-Wizard">S-07 Campaign wizard</a>
+    <a href="#S08-Campaign-Monitor">S-08 Campaign monitor</a>
+    <a href="#S09-Campaigns">S-09 Campaign list</a>
+</nav>
+<h2 class="group">Start here and admin</h2>
+<section id="Main" aria-label="Start here: screen map">
+<div class="wf" style="flex-direction: column; gap: 22px">
+  <div class="stack" style="gap: 6px">
+    <h1 style="margin: 0; font-size: 34px; line-height: 1.1">WhatsApp Bulk Messenger: screen wireframes</h1>
+    <p style="margin: 0; max-width: 900px">Low-fidelity layouts for all 12 screens in SPEC.md §5. They show where things go and what they do, not the final colours or styling.</p>
+  </div>
+
+  <div class="stack">
+    <h2>How to read these</h2>
+    <div class="row" style="gap: 24px">
+      <div class="row"><span class="pin">1</span><span>A numbered pointer on the screen matches the same number in the notes on its right.</span></div>
+      <div class="row"><button class="pri" type="button">Primary</button><button type="button">Secondary</button><span>Dark marks the main action.</span></div>
+      <div class="row"><div class="ph" style="min-height: 32px; width: 80px">media</div><span>Hatching marks an image or preview.</span></div>
+    </div>
+    <p style="margin: 0">The bar at the top and the sidebar links jump between screens. Links and buttons are otherwise not functional.</p>
+  </div>
+
+  <div class="stack">
+    <h2>The main journey</h2>
+    <div class="flow">
+      <span>Import CSV<br><b class="small">S-02</b></span><i>→</i>
+      <span>Filter and select<br><b class="small">S-03</b></span><i>→</i>
+      <span>Choose an approved template<br><b class="small">S-05, S-06 or S-11</b></span><i>→</i>
+      <span>Create and send<br><b class="small">S-07</b></span><i>→</i>
+      <span>Watch delivery<br><b class="small">S-08</b></span><i>→</i>
+      <span>Review results<br><b class="small">S-09, S-10</b></span>
+    </div>
+  </div>
+
+  <div class="stack">
+    <h2>All screens</h2>
+    <div class="map">
+      <a href="#S01-Settings"><b>S-01 Settings</b><span class="small">Connections, sending rules, team and data</span></a>
+      <a href="#S02a-Import-Map"><b>S-02 Import: choose and map</b><span class="small">Upload a CSV and match its columns</span></a>
+      <a href="#S02b-Import-Validate"><b>S-02 Import: validate and result</b><span class="small">Check the rows, confirm consent, commit</span></a>
+      <a href="#S03-Contacts"><b>S-03 Contacts list</b><span class="small">Search, filter, select and bulk actions</span></a>
+      <a href="#S04-Contact-Drawer"><b>S-04 Contact drawer</b><span class="small">One contact: details, consent, history</span></a>
+      <a href="#S05-Templates"><b>S-05 Template library</b><span class="small">WhatsApp and email templates</span></a>
+      <a href="#S06-WhatsApp-Designer"><b>S-06 WhatsApp designer</b><span class="small">Build a template and submit it to Meta</span></a>
+      <a href="#S11-Email-Designer"><b>S-11 Email designer</b><span class="small">Build an email from blocks</span></a>
+      <a href="#S07-Campaign-Wizard"><b>S-07 Campaign wizard</b><span class="small">Audience, template, variables, review</span></a>
+      <a href="#S08-Campaign-Monitor"><b>S-08 Campaign monitor</b><span class="small">Live counters and controls</span></a>
+      <a href="#S09-Campaigns"><b>S-09 Campaign list</b><span class="small">Every campaign and the send queue</span></a>
+      <a href="#S10-Activity"><b>S-10 Activity log</b><span class="small">Who did what, and when</span></a>
+    </div>
+    <p style="margin: 0" class="small muted">S-12 Unsubscribe is public and has no sidebar. People reach it from the link in a marketing email. <a href="#S12-Unsubscribe">See S-12</a>.</p>
+  </div>
+</div>
+</section>
+<section id="S01-Settings" aria-label="S-01 Settings">
+<div class="wf">
+  <div class="frame">
+    <nav class="side" aria-label="Main">
+      <b>Bulk Messenger</b>
+      <a href="#S03-Contacts">Contacts</a>
+      <a href="#S02a-Import-Map">Import</a>
+      <a href="#S05-Templates">Templates</a>
+      <a href="#S09-Campaigns">Campaigns</a>
+      <a href="#S10-Activity">Activity</a>
+      <a class="on" href="#S01-Settings">Settings</a>
+    </nav>
+    <div class="main">
+      <div class="banner row"><span class="pin">1</span><span>WhatsApp not connected. Sending and template submission are disabled.</span></div>
+      <h2>Settings</h2>
+
+      <section class="card">
+        <div class="row between"><h3>WhatsApp connection</h3><span class="chip">Disconnected</span></div>
+        <div class="cols2">
+          <label><span class="row"><span class="pin">2</span> Access token</span><input type="password" placeholder="Write-only, never shown again"></label>
+          <label>Provider<select><option>Graph API</option><option>Mock</option></select></label>
+          <label>WABA ID<input placeholder="1098…"></label>
+          <label>Phone Number ID<input placeholder="1065…"></label>
+          <label>App ID<input placeholder="8841…"></label>
+          <label>App Secret<input type="password" placeholder="Write-only"></label>
+          <label>Graph API version<input placeholder="v26.0"></label>
+        </div>
+        <div class="row">
+          <span class="pin">3</span>
+          <button type="button" class="pri">Test connection</button>
+          <span class="small muted">+91 98450 12345 · Example Exports · Quality GREEN · Limit 250/24 h</span>
+        </div>
+        <div class="card">
+          <div class="row"><span class="pin">4</span><h3>Webhook setup</h3></div>
+          <div class="row"><span class="mono grow">https://&lt;prod-domain&gt;/api/webhooks/whatsapp</span><button type="button">Copy</button></div>
+          <div class="row"><span class="mono grow">Verify token: 8f2c…</span><button type="button">Copy</button></div>
+          <span class="small muted">Subscribe: messages, message_template_status_update, phone_number_quality_update. Last event: never.</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="row between"><h3>Email (Resend)</h3><span class="chip">Mock</span></div>
+        <div class="cols2">
+          <label><span class="row"><span class="pin">5</span> API key</span><input type="password" placeholder="Not set: add RESEND_API_KEY=re_… to .local.bin"></label>
+          <label>Provider<select><option>Mock</option><option>Resend</option></select></label>
+        </div>
+        <div class="card">
+          <div class="row between"><div class="row"><span class="pin">6</span><h3>Sending domain: mail.example.com</h3></div><span class="chip">pending</span></div>
+          <div class="tblbox"><table>
+            <thead><tr><th>Record</th><th>Name</th><th>Value</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>SPF</td><td class="mono">send.mail</td><td class="mono">v=spf1 include:…</td><td>pending</td></tr>
+              <tr><td>DKIM</td><td class="mono">resend._domainkey.mail</td><td class="mono">p=MIGf…</td><td>pending</td></tr>
+              <tr><td>DMARC</td><td class="mono">_dmarc</td><td class="muted">No record found</td><td>warning</td></tr>
+            </tbody>
+          </table></div>
+          <div class="row"><button type="button">Re-check</button><button type="button">Copy records</button></div>
+        </div>
+        <div class="cols2">
+          <label>From name<input placeholder="Example Exports"></label>
+          <label>From address<input placeholder="offers@mail.example.com"></label>
+          <label>Reply-to<input placeholder="sales@example.com"></label>
+          <label><span class="row"><span class="pin">7</span> Postal address (required to send)</span><input placeholder="[YOUR BUSINESS ADDRESS]"></label>
+        </div>
+        <div class="row"><button type="button">Test connection</button><button type="button">Send test email</button></div>
+      </section>
+
+      <section class="card">
+        <div class="row"><span class="pin">8</span><h3>Sending rules</h3></div>
+        <div class="tblbox"><table>
+          <thead><tr><th>Rule</th><th>WhatsApp</th><th>Email</th></tr></thead>
+          <tbody>
+            <tr><td>Rate</td><td>20 messages/s (max 80)</td><td>2 batch requests/s (max 10)</td></tr>
+            <tr><td>Frequency cap</td><td>Skip if messaged in last 7 days</td><td>Skip if emailed in last 7 days</td></tr>
+            <tr><td>Send window</td><td>09:00–20:00 Asia/Kolkata</td><td>09:00–20:00 Asia/Kolkata</td></tr>
+            <tr><td>Volume limit</td><td>Messaging limit tier from Meta</td><td>Daily send cap from Resend plan</td></tr>
+            <tr><td>Circuit breaker</td><td>Failure rate above 25%</td><td>Bounces above 5%, complaints above 0.3%</td></tr>
+            <tr><td>Test recipients</td><td>Test phone numbers</td><td>Test email addresses</td></tr>
+            <tr><td>Cost estimate</td><td>Price per message (India)</td><td>Price per 1,000 emails</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <div class="cols2">
+        <section class="card">
+          <h3>Import defaults</h3>
+          <span class="small">Default country: IN · Opt-in defaults per channel · Existing-contact policy · Max file size: 50 MB</span>
+        </section>
+        <section class="card">
+          <div class="row"><span class="pin">9</span><h3>Team</h3></div>
+          <div class="row"><input class="grow" aria-label="Email to add" placeholder="name@company.com"><button type="button">Add</button></div>
+          <span class="small">asha@example.com · ravi@example.com</span>
+        </section>
+      </div>
+
+      <section class="card">
+        <div class="row"><span class="pin">10</span><h3>Data</h3></div>
+        <div class="row"><span class="grow">Store version v000123 · 8,412 contacts</span><button type="button">Version history</button><button type="button">Export all contacts</button></div>
+        <div class="row"><span class="grow">Opt-out keywords: STOP, UNSUBSCRIBE, STOP PROMOTIONS</span><button type="button">Edit</button></div>
+        <div class="row"><span class="grow">Email suppression list: 46 addresses</span><button type="button">Manage</button></div>
+      </section>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <h1>S-01 Settings</h1>
+    <p>Where the app connects to Meta and Resend, and where the sending rules live. Spec §5.2.</p>
+    <ol>
+      <li><span class="pin">1</span><div><b>Connection banners</b>These show on every screen until a channel is connected. Previews always show Mock mode.</div></li>
+      <li><span class="pin">2</span><div><b>Write-only secrets</b>Saved values are encrypted and never shown again. A value supplied by an env var reads "set by env var" and takes priority.</div></li>
+      <li><span class="pin">3</span><div><b>Test connection</b>Calls Meta and shows the number, verified name, quality rating and messaging limit, or the error.</div></li>
+      <li><span class="pin">4</span><div><b>Webhook card</b>Everything to paste into Meta's dashboard (§7B Step 7). The last-event time confirms the webhook is working.</div></li>
+      <li><span class="pin">5</span><div><b>Resend key source</b>The status says where the key came from: .local.bin, env var, Settings, or not set.</div></li>
+      <li><span class="pin">6</span><div><b>Domain verification</b>Lists the DNS records to add. Email campaigns stay blocked until the domain is verified.</div></li>
+      <li><span class="pin">7</span><div><b>Postal address</b>Required before the first email, because it goes into every email footer.</div></li>
+      <li><span class="pin">8</span><div><b>Sending rules</b>Each channel has its own limits. The wireframe groups them side by side for easy comparison; the spec lists them per channel.</div></li>
+      <li><span class="pin">9</span><div><b>Team allowlist</b>Only these emails can sign in. All team members have equal access, and changes are audit-logged.</div></li>
+      <li><span class="pin">10</span><div><b>Data</b>Restore an earlier contact version, export contacts, and manage opt-out keywords and suppressions. A restore can never re-enable an opted-out contact.</div></li>
+    </ol>
+  </aside>
+</div>
+</section>
+<section id="S10-Activity" aria-label="S-10 Activity log">
+<div class="wf">
+  <div class="frame">
+    <nav class="side" aria-label="Main">
+      <b>Bulk Messenger</b>
+      <a href="#S03-Contacts">Contacts</a>
+      <a href="#S02a-Import-Map">Import</a>
+      <a href="#S05-Templates">Templates</a>
+      <a href="#S09-Campaigns">Campaigns</a>
+      <a class="on" href="#S10-Activity">Activity</a>
+      <a href="#S01-Settings">Settings</a>
+    </nav>
+    <div class="main">
+      <h2>Activity</h2>
+      <div class="row">
+        <span class="pin">1</span>
+        <label>Person<select><option>Everyone</option></select></label>
+        <label>Channel<select><option>All</option><option>WhatsApp</option><option>Email</option></select></label>
+        <label>Action<select><option>All actions</option></select></label>
+        <label>Date range<input placeholder="Last 7 days"></label>
+      </div>
+      <div class="tblbox"><table>
+        <thead><tr><th>When</th><th>Who <span class="pin">2</span></th><th>Channel</th><th>Action</th><th>Details <span class="pin">3</span></th></tr></thead>
+        <tbody>
+          <tr><td>2 Nov, 14:32</td><td>Asha</td><td>WhatsApp</td><td>Campaign started</td><td>Festive offer · 9,800 recipients</td></tr>
+          <tr><td>2 Nov, 14:30</td><td>Asha</td><td>WhatsApp</td><td>Campaign created</td><td>Festive offer</td></tr>
+          <tr><td>2 Nov, 12:05</td><td class="mono">system:webhook</td><td>WhatsApp</td><td>Opt-out added</td><td>+91******3210 · STOP keyword</td></tr>
+          <tr><td>2 Nov, 11:47</td><td class="mono">system:unsubscribe</td><td>Email</td><td>Unsubscribed</td><td>a••••@example.com</td></tr>
+          <tr><td>1 Nov, 18:20</td><td>Ravi</td><td>Both</td><td>Import committed</td><td>expo_leads.csv · 10,902 new · v000123</td></tr>
+          <tr><td>1 Nov, 16:02</td><td>Ravi</td><td>WhatsApp</td><td>Template submitted</td><td>festive_offer_nov26</td></tr>
+          <tr><td>1 Nov, 10:14</td><td>Asha</td><td>Email</td><td>Resend key changed</td><td>Value not recorded</td></tr>
+          <tr><td>31 Oct, 09:30</td><td>Asha</td><td>—</td><td>Team member added</td><td>ravi@example.com</td></tr>
+        </tbody>
+      </table></div>
+      <div class="row between"><span class="small muted">Page 1 of 42</span><div class="row"><button type="button">Previous</button><button type="button">Next</button></div></div>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <h1>S-10 Activity log</h1>
+    <p>A read-only record of every important action. Spec §5.11.</p>
+    <ol>
+      <li><span class="pin">1</span><div><b>Filters</b>Narrow by person, channel, action or date to answer "who did this?"</div></li>
+      <li><span class="pin">2</span><div><b>Who</b>Each entry names a team member, or a system source for automatic actions such as a STOP reply.</div></li>
+      <li><span class="pin">3</span><div><b>Masked details</b>Phone numbers and emails are masked, and secrets are never recorded. A key change logs that it changed, not its value.</div></li>
+    </ol>
+  </aside>
+</div>
+</section>
+
+<h2 class="group">Import and contacts</h2>
+<section id="S02a-Import-Map" aria-label="S-02 Import: choose and map">
+<div class="wf">
+  <div class="frame">
+    <nav class="side" aria-label="Main">
+      <b>Bulk Messenger</b>
+      <a href="#S03-Contacts">Contacts</a>
+      <a class="on" href="#S02a-Import-Map">Import</a>
+      <a href="#S05-Templates">Templates</a>
+      <a href="#S09-Campaigns">Campaigns</a>
+      <a href="#S10-Activity">Activity</a>
+      <a href="#S01-Settings">Settings</a>
+    </nav>
+    <div class="main">
+      <h2>Import contacts</h2>
+      <div class="steps"><span class="on">1 Choose file</span><span class="on">2 Map columns</span><span>3 Validate</span><span>4 Import</span></div>
+
+      <section class="card">
+        <div class="row"><span class="pin">1</span><h3>Step 1: Choose file</h3></div>
+        <div class="row">
+          <button type="button">Choose .csv or .txt</button>
+          <span class="grow">expo_leads.csv · 12,480 rows · uploading 64%</span>
+        </div>
+        <div class="bar" aria-hidden="true"><i style="width: 64%; background: #1F1F1C"></i></div>
+        <div class="row">
+          <span class="pin">2</span>
+          <label>Encoding<select><option>UTF-8 (detected)</option><option>Windows-1252</option><option>UTF-16</option></select></label>
+          <label>Delimiter<select><option>Comma (detected)</option><option>Semicolon</option><option>Tab</option><option>Pipe</option></select></label>
+          <label>Rows to skip<input placeholder="0" style="width: 70px"></label>
+          <label class="inline" style="align-self: flex-end"><input type="checkbox"> First row is a header</label>
+        </div>
+        <span class="banner"><span class="pin">3</span> This file was already imported on 12 Oct by Asha.</span>
+      </section>
+
+      <section class="card">
+        <div class="row between">
+          <div class="row"><h3>Step 2: Map columns</h3></div>
+          <div class="row"><span class="pin">4</span><label>Preset<select><option>Expo leads</option></select></label><button type="button" style="align-self: flex-end">Save preset</button></div>
+        </div>
+        <div class="tblbox"><table>
+          <thead>
+            <tr><th></th><th>Col A</th><th>Col B</th><th>Col C</th><th>Col D</th><th>Col E</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Map to <span class="pin">5</span></th>
+              <td><select aria-label="Col A maps to"><option>Phone *</option></select></td>
+              <td><select aria-label="Col B maps to"><option>First name</option></select></td>
+              <td><select aria-label="Col C maps to"><option>Email</option></select></td>
+              <td><select aria-label="Col D maps to"><option>Tags</option></select></td>
+              <td><select aria-label="Col E maps to"><option>Ignore</option></select></td>
+            </tr>
+            <tr><th>Header</th><td>Mobile No</td><td>Name</td><td>E-mail</td><td>Segment</td><td>Notes</td></tr>
+            <tr><th>Fill / unique <span class="pin">6</span></th><td>99% / 98%</td><td>97% / 61%</td><td>82% / 80%</td><td>100% / 4</td><td>12% / 11%</td></tr>
+            <tr><th>Row 1</th><td>98765 43210</td><td>Asha</td><td>asha@example.com</td><td>steel;export</td><td>called twice</td></tr>
+            <tr><th>Row 2</th><td>+91 98450 12345</td><td>Ravi</td><td><span class="warn">ravi@example</span> <span class="pin">7</span></td><td>steel</td><td></td></tr>
+            <tr><th>Row 3</th><td><span class="bad">9.19876E+11</span> <span class="pin">8</span></td><td>Priya</td><td>priya@example.com</td><td>export</td><td></td></tr>
+            <tr><th>…</th><td colspan="5" class="muted">Virtualised, first 200 rows</td></tr>
+          </tbody>
+        </table></div>
+        <div class="row">
+          <span class="pin">9</span>
+          <label>Tag separator<input placeholder=";" style="width: 60px"></label>
+          <label>Apply tags to every row<input placeholder="expo-2026"></label>
+          <label>WhatsApp opt-in<select><option>Whole file: unknown</option><option>Whole file: opted in</option><option>Use a column</option></select></label>
+          <label>Email opt-in<select><option>Whole file: unknown</option><option>Whole file: opted in</option><option>Use a column</option></select></label>
+        </div>
+        <div class="row between"><button type="button">Back</button><div class="row"><span class="pin">10</span><button type="button" class="pri">Next: Validate</button></div></div>
+      </section>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <h1>S-02 Import: choose and map</h1>
+    <p>Steps 1 and 2. Both are shown together here; in the app they are separate steps. Spec §5.3.</p>
+    <ol>
+      <li><span class="pin">1</span><div><b>Instant preview</b>The browser previews the first 200 rows while the file uploads directly to Blob, so large files avoid the 4.5 MB limit.</div></li>
+      <li><span class="pin">2</span><div><b>Detected settings</b>Encoding, delimiter and header are detected automatically, and each can be overridden.</div></li>
+      <li><span class="pin">3</span><div><b>Duplicate file warning</b>Shown when the file's SHA-256 matches a committed import.</div></li>
+      <li><span class="pin">4</span><div><b>Presets</b>Shared across the team and applied automatically when the headers match.</div></li>
+      <li><span class="pin">5</span><div><b>Column mapping</b>Each column maps to a standard field, a custom field or Ignore. Headers are auto-suggested, so "Mobile No" becomes Phone.</div></li>
+      <li><span class="pin">6</span><div><b>Column stats</b>How full and how unique each column is, to help spot the right one.</div></li>
+      <li><span class="pin">7</span><div><b>Amber: invalid email</b>A warning only. The row is still imported, without the email.</div></li>
+      <li><span class="pin">8</span><div><b>Red: invalid phone</b>This row will be rejected. Here, Excel has damaged the number.</div></li>
+      <li><span class="pin">9</span><div><b>Separate consent</b>WhatsApp and email opt-in are set independently, from a column or for the whole file.</div></li>
+      <li><span class="pin">10</span><div><b>Phone is required</b>Next stays disabled until a column is mapped to Phone.</div></li>
+    </ol>
+  </aside>
+</div>
+</section>
+<section id="S02b-Import-Validate" aria-label="S-02 Import: validate and result">
+<div class="wf">
+  <div class="frame">
+    <nav class="side" aria-label="Main">
+      <b>Bulk Messenger</b>
+      <a href="#S03-Contacts">Contacts</a>
+      <a class="on" href="#S02a-Import-Map">Import</a>
+      <a href="#S05-Templates">Templates</a>
+      <a href="#S09-Campaigns">Campaigns</a>
+      <a href="#S10-Activity">Activity</a>
+      <a href="#S01-Settings">Settings</a>
+    </nav>
+    <div class="main">
+      <h2>Import contacts</h2>
+      <div class="steps"><span class="on">1 Choose file</span><span class="on">2 Map columns</span><span class="on">3 Validate</span><span class="on">4 Import</span></div>
+
+      <section class="card">
+        <div class="row"><h3>Step 3: Validate and resolve</h3><span class="pin">1</span></div>
+        <div class="tblbox"><table>
+          <tbody>
+            <tr><td>Total rows</td><td class="num">12,480</td><td class="muted"></td></tr>
+            <tr><td>Valid new</td><td class="num">10,902</td><td class="muted"></td></tr>
+            <tr><td>Valid, already in store</td><td class="num">1,201</td><td class="muted">Handled by the policy below</td></tr>
+            <tr><td>Duplicates within file</td><td class="num">212</td><td class="muted">First occurrence kept</td></tr>
+            <tr><td>Suppressed numbers <span class="pin">2</span></td><td class="num">34</td><td class="muted">Imported but kept opted out</td></tr>
+            <tr><td>Invalid</td><td class="num">165</td><td class="muted">INVALID_PHONE 140, SCIENTIFIC_NOTATION 20, EMPTY_PHONE 5</td></tr>
+            <tr><td>Email warnings</td><td class="num">96</td><td class="muted">INVALID_EMAIL 90 (value dropped), role address 6</td></tr>
+            <tr><td>Suppressed emails</td><td class="num">12</td><td class="muted">Imported but kept email opted out</td></tr>
+          </tbody>
+        </table></div>
+        <div class="row">
+          <span class="pin">3</span>
+          <label>Existing contacts<select><option>Fill empty fields only (default)</option><option>Skip</option><option>Overwrite mapped fields</option></select></label>
+          <span class="grow"></span>
+          <span class="pin">4</span>
+          <button type="button" style="align-self: flex-end">Download rejected rows</button>
+        </div>
+        <div class="card">
+          <div class="row"><span class="pin">5</span><h3>Consent confirmation</h3></div>
+          <label class="inline"><input type="checkbox"><span>I confirm these contacts agreed to receive WhatsApp marketing messages from us, and the proof is kept on file.</span></label>
+          <label class="inline"><input type="checkbox"><span>I confirm these contacts agreed to receive marketing emails from us, and the proof is kept on file.</span></label>
+        </div>
+        <div class="row between"><button type="button">Back</button><button type="button" class="pri">Import 12,103 contacts</button></div>
+      </section>
+
+      <section class="card">
+        <div class="row"><h3>Step 4: Import complete</h3><span class="pin">6</span></div>
+        <div class="row"><span>10,902 added · 1,201 updated · 165 rejected · store version v000124</span></div>
+        <div class="row">
+          <button type="button">View imported contacts</button>
+          <button type="button" class="pri">Start campaign for these</button>
+          <span class="pin">7</span>
+          <button type="button">Undo this import</button>
+        </div>
+        <span class="small muted">Undo is available only while this import is the latest write. If it isn't, the button explains why it's disabled.</span>
+      </section>
+
+      <div class="banner row"><span class="pin">8</span><span>An import by Ravi is in progress. You can commit yours when it finishes.</span></div>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <h1>S-02 Import: validate and result</h1>
+    <p>Steps 3 and 4: see what will happen, then commit. Spec §5.3.</p>
+    <ol>
+      <li><span class="pin">1</span><div><b>Whole-file summary</b>The server checks every row and compares it with the current contacts. Nothing has been saved yet.</div></li>
+      <li><span class="pin">2</span><div><b>Opt-outs are permanent</b>An import can never switch an opted-out or suppressed contact back to opted in, on either channel.</div></li>
+      <li><span class="pin">3</span><div><b>Existing-contact policy</b>Decides what happens to rows already in the store. Tags are always merged.</div></li>
+      <li><span class="pin">4</span><div><b>Rejected rows</b>Downloads rejects.csv with a reject_reason column, so the list can be fixed and re-imported.</div></li>
+      <li><span class="pin">5</span><div><b>Consent checkboxes</b>Required when importing as opted in on that channel. The person and time are recorded. The proof itself stays outside the app.</div></li>
+      <li><span class="pin">6</span><div><b>Result card</b>Shows the final counts and the new store version, and links to the imported contacts or a campaign.</div></li>
+      <li><span class="pin">7</span><div><b>Undo</b>Returns to the previous version. Suppressions are re-applied afterwards, so opt-outs survive.</div></li>
+      <li><span class="pin">8</span><div><b>One import at a time</b>Only one commit runs at once. Anyone else sees who holds it.</div></li>
+    </ol>
+  </aside>
+</div>
+</section>
+<section id="S03-Contacts" aria-label="S-03 Contacts list">
+<div class="wf">
+  <div class="frame">
+    <nav class="side" aria-label="Main">
+      <b>Bulk Messenger</b>
+      <a class="on" href="#S03-Contacts">Contacts</a>
+      <a href="#S02a-Import-Map">Import</a>
+      <a href="#S05-Templates">Templates</a>
+      <a href="#S09-Campaigns">Campaigns</a>
+      <a href="#S10-Activity">Activity</a>
+      <a href="#S01-Settings">Settings</a>
+    </nav>
+    <div class="main">
+      <div class="banner row"><span class="pin">1</span><span>Campaign "Festive offer" is sending: 4,210 / 9,800</span></div>
+      <div class="row between"><h2>Contacts</h2><a href="#S02a-Import-Map" class="small">Import CSV</a></div>
+
+      <div class="row">
+        <span class="pin">2</span>
+        <input class="grow" aria-label="Search" placeholder="Search name, phone or email">
+        <button type="button">Columns</button>
+      </div>
+      <div class="row">
+        <span class="pin">3</span>
+        <label>Tags<select><option>steel (any)</option></select></label>
+        <label>WhatsApp opt-in<select><option>Opted in</option></select></label>
+        <label>Email opt-in<select><option>Any</option></select></label>
+        <label>Has email<select><option>Any</option></select></label>
+        <label>Last messaged<select><option>Older than 30 days</option></select></label>
+        <label>Last emailed<select><option>Any</option></select></label>
+        <button type="button" style="align-self: flex-end">More filters</button>
+      </div>
+
+      <div class="banner row"><span class="pin">4</span><span>100 selected on this page.</span><a href="#S03-Contacts">Select all 8,412 matching contacts</a></div>
+
+      <div class="row card" style="flex-direction: row; padding: 8px">
+        <b>100 selected</b>
+        <span class="pin">5</span>
+        <a href="#S07-Campaign-Wizard" class="small" style="padding: 6px 12px; background: #1F1F1C; color: #fff; border-radius: 4px; text-decoration: none">Send campaign ▾ WhatsApp · Email</a>
+        <button type="button">Add tags</button>
+        <button type="button">Remove tags</button>
+        <button type="button">Mark opted out ▾</button>
+        <button type="button">Set email opt-in</button>
+        <button type="button">Delete</button>
+        <button type="button">Export CSV</button>
+      </div>
+
+      <div class="tblbox"><table>
+        <thead><tr><th>☑</th><th>Name</th><th>Phone</th><th>Email</th><th>Tags</th><th>WhatsApp <span class="pin">6</span></th><th>Email opt-in</th><th>Company</th><th>City</th><th>Last messaged</th><th>Last emailed</th></tr></thead>
+        <tbody>
+          <tr><td>☑</td><td><a href="#S04-Contact-Drawer">Asha Rao</a> <span class="pin">7</span></td><td class="mono">+919876543210</td><td>asha@example.com</td><td><span class="chip">steel</span></td><td><span class="chip dark">Opted in</span></td><td><span class="chip dark">Opted in</span></td><td>Rao Steel</td><td>Pune</td><td>42 days ago</td><td>Never</td></tr>
+          <tr><td>☑</td><td>Ravi Shah</td><td class="mono">+919845012345</td><td>ravi@example.com</td><td><span class="chip">steel</span></td><td><span class="chip dark">Opted in</span></td><td><span class="chip">Unknown</span></td><td>Shah Metals</td><td>Surat</td><td>Never</td><td>Never</td></tr>
+          <tr><td>☑</td><td>Priya Nair</td><td class="mono">+919900112233</td><td class="muted">—</td><td><span class="chip">steel</span></td><td><span class="chip dark">Opted in</span></td><td><span class="chip">Unknown</span></td><td>Nair Traders</td><td>Kochi</td><td>35 days ago</td><td>Never</td></tr>
+          <tr><td>☑</td><td>Kiran Das</td><td class="mono">+919812345678</td><td>kiran@example.com</td><td><span class="chip">steel</span></td><td><span class="chip">Opted out</span></td><td><span class="chip">Suppressed</span></td><td>Das &amp; Co</td><td>Kolkata</td><td>60 days ago</td><td>31 days ago</td></tr>
+          <tr><td>☐</td><td>Meena Iyer</td><td class="mono">+919833344455</td><td>meena@example.com</td><td><span class="chip">steel</span></td><td><span class="chip dark">Opted in</span></td><td><span class="chip">Opted out</span></td><td>Iyer Exports</td><td>Chennai</td><td>Never</td><td>45 days ago</td></tr>
+        </tbody>
+      </table></div>
+      <div class="row between"><span class="small muted">Page 1 of 85 · 100 per page</span><div class="row"><span class="pin">8</span><button type="button">Previous</button><button type="button">Next</button></div></div>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <h1>S-03 Contacts list</h1>
+    <p>Find an audience and act on it. Empty state: "No contacts yet", with a link to import. Spec §5.4.</p>
+    <ol>
+      <li><span class="pin">1</span><div><b>Sending banner</b>Shows on all screens while a campaign runs, with one line per running channel.</div></li>
+      <li><span class="pin">2</span><div><b>Search and columns</b>Search matches any part of a name, phone or email. The column chooser adds custom attributes.</div></li>
+      <li><span class="pin">3</span><div><b>Filters</b>Also covers import batch, date created, email suppressed and attribute equals. Every column can be sorted.</div></li>
+      <li><span class="pin">4</span><div><b>Select all matching</b>Switches from a page of rows to "this filter, minus these exclusions", so selection doesn't depend on paging. The selection stays in the URL, ready to share.</div></li>
+      <li><span class="pin">5</span><div><b>Bulk action bar</b>Send campaign is the main action and opens S-07 with the channel preset. Each bulk change creates one new store version.</div></li>
+      <li><span class="pin">6</span><div><b>Consent per channel</b>Two separate badges, each overlaid with its suppression list, so an opt-out shows before the Parquet file catches up.</div></li>
+      <li><span class="pin">7</span><div><b>Open a contact</b>Clicking a row opens the S-04 drawer.</div></li>
+      <li><span class="pin">8</span><div><b>Server paging</b>100 rows per page, with shift-click for ranges. Selection and phone columns stay visible when scrolling sideways.</div></li>
+    </ol>
+  </aside>
+</div>
+</section>
+<section id="S04-Contact-Drawer" aria-label="S-04 Contact drawer">
+<div class="wf">
+  <div class="frame">
+    <nav class="side" aria-label="Main">
+      <b>Bulk Messenger</b>
+      <a class="on" href="#S03-Contacts">Contacts</a>
+      <a href="#S02a-Import-Map">Import</a>
+      <a href="#S05-Templates">Templates</a>
+      <a href="#S09-Campaigns">Campaigns</a>
+      <a href="#S10-Activity">Activity</a>
+      <a href="#S01-Settings">Settings</a>
+    </nav>
+    <div class="main" style="background: #E4E4DF; flex: 0 0 170px; overflow: hidden">
+      <span class="small muted">Contacts list, behind the drawer</span>
+    </div>
+    <div class="main" style="border-left: 2px solid #1F1F1C">
+      <div class="row between"><h2>Asha Rao</h2><div class="row"><span class="pin">1</span><a href="#S03-Contacts" class="small">Close</a></div></div>
+
+      <section class="cols2">
+        <label>First name<input placeholder="Asha"></label>
+        <label>Last name<input placeholder="Rao"></label>
+        <label><span class="row"><span class="pin">2</span> Phone</span><input placeholder="+919876543210"></label>
+        <label>Email<input placeholder="asha@example.com"></label>
+        <label>Company<input placeholder="Rao Steel"></label>
+        <label>City<input placeholder="Pune"></label>
+      </section>
+
+      <section class="card">
+        <div class="row"><span class="pin">3</span><h3>Consent</h3></div>
+        <div class="tblbox"><table>
+          <thead><tr><th>Channel</th><th>Status</th><th>Source</th><th>Suppression</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>WhatsApp</td><td><span class="chip">Opted out</span></td><td>csv:expo_leads.csv</td><td>STOP keyword, 2 Nov</td><td><button type="button">Remove…</button> <span class="pin">4</span></td></tr>
+            <tr><td>Email</td><td><span class="chip dark">Opted in</span></td><td>csv:expo_leads.csv</td><td class="muted">None</td><td><button type="button">Mark opted out</button></td></tr>
+          </tbody>
+        </table></div>
+        <div class="row"><span class="pin">5</span><button type="button">Opt out of all channels</button></div>
+      </section>
+
+      <div class="row">
+        <h3>Tags</h3><span class="chip">steel</span><span class="chip">export</span><button type="button">Add</button>
+        <span class="grow"></span>
+        <span class="small muted">Attributes: gst_no, region</span>
+      </div>
+
+      <section class="card">
+        <div class="row"><span class="pin">6</span><h3>Message history</h3></div>
+        <div class="tblbox"><table>
+          <thead><tr><th>Channel</th><th>Campaign</th><th>Status</th><th>When</th><th>Reason</th></tr></thead>
+          <tbody>
+            <tr><td>WhatsApp</td><td>Festive offer</td><td>Read</td><td>2 Nov, 14:40</td><td class="muted">—</td></tr>
+            <tr><td>Email</td><td>Festive offer (email)</td><td>Clicked</td><td>1 Nov, 11:15</td><td class="muted">—</td></tr>
+            <tr><td>WhatsApp</td><td>Diwali list</td><td>Failed</td><td>20 Oct, 10:02</td><td>131049: not delivered to keep the ecosystem healthy</td></tr>
+            <tr><td>Email</td><td>Steel update</td><td>Bounced</td><td>12 Oct, 09:30</td><td>Transient, not suppressed</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <div class="row between"><button type="button">Delete contact</button><button type="button" class="pri">Save</button></div>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <h1>S-04 Contact drawer</h1>
+    <p>Everything about one person, opened from a row in the contacts list. Spec §5.5.</p>
+    <ol>
+      <li><span class="pin">1</span><div><b>Drawer, not a new page</b>Slides over the list, so the filters and selection stay in place behind it.</div></li>
+      <li><span class="pin">2</span><div><b>Same validation as import</b>Phones and emails are normalised the same way. A phone that belongs to another contact is rejected.</div></li>
+      <li><span class="pin">3</span><div><b>One row per channel</b>A WhatsApp STOP leaves email consent unchanged, and an email unsubscribe leaves WhatsApp unchanged.</div></li>
+      <li><span class="pin">4</span><div><b>Removing a suppression</b>Asks for a reason, which is audit-logged. A complaint entry needs an extra confirmation.</div></li>
+      <li><span class="pin">5</span><div><b>All channels</b>The one action that opts someone out of both channels at once.</div></li>
+      <li><span class="pin">6</span><div><b>Combined history</b>Messages from both channels, with status, timestamps and any error or bounce reason.</div></li>
+    </ol>
+  </aside>
+</div>
+</section>
+
+<h2 class="group">Templates</h2>
+<section id="S05-Templates" aria-label="S-05 Template library">
+<div class="wf">
+  <div class="frame">
+    <nav class="side" aria-label="Main">
+      <b>Bulk Messenger</b>
+      <a href="#S03-Contacts">Contacts</a>
+      <a href="#S02a-Import-Map">Import</a>
+      <a class="on" href="#S05-Templates">Templates</a>
+      <a href="#S09-Campaigns">Campaigns</a>
+      <a href="#S10-Activity">Activity</a>
+      <a href="#S01-Settings">Settings</a>
+    </nav>
+    <div class="main">
+      <h2>Templates</h2>
+      <div class="row between">
+        <div class="steps"><span class="on">WhatsApp</span><span>Email</span> <span class="pin">1</span></div>
+        <div class="row">
+          <span class="pin">2</span>
+          <button type="button">Sync from Meta</button>
+          <a href="#S06-WhatsApp-Designer" class="small" style="padding: 6px 12px; background: #1F1F1C; color: #fff; border-radius: 4px; text-decoration: none">New template</a>
+        </div>
+      </div>
+      <div class="tblbox"><table>
+        <thead><tr><th>Name</th><th>Language</th><th>Status <span class="pin">3</span></th><th>Quality</th><th>Created by</th><th>Updated</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">festive_offer_nov26</td><td>en</td><td><span class="chip dark">APPROVED</span></td><td>High</td><td>Asha</td><td>1 Nov</td><td>Duplicate · Edit · Delete</td></tr>
+          <tr><td class="mono">steel_price_update</td><td>en</td><td><span class="chip">PENDING</span></td><td class="muted">—</td><td>Ravi</td><td>2 Nov</td><td>Duplicate · Edit · Delete</td></tr>
+          <tr><td class="mono">new_year_sale</td><td>en</td><td><span class="chip">REJECTED</span></td><td class="muted">—</td><td>Asha</td><td>28 Oct</td><td>View reason <span class="pin">4</span> · Edit · Delete</td></tr>
+          <tr><td class="mono">old_catalogue</td><td>en</td><td><span class="chip">PAUSED</span></td><td>Low</td><td>Ravi</td><td>10 Oct</td><td>Duplicate · Edit · Delete</td></tr>
+          <tr><td class="mono">spring_launch</td><td>en</td><td><span class="chip">DRAFT</span></td><td class="muted">—</td><td>Asha</td><td>25 Oct</td><td>Duplicate · Edit · Delete</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Email tab</h3>
+      <div class="tblbox"><table>
+        <thead><tr><th>Name</th><th>Subject</th><th>Status <span class="pin">5</span></th><th>Created by</th><th>Updated</th><th>Last used</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">festive_offer_nov26_email</td><td>Our festive offer is live</td><td><span class="chip dark">READY</span></td><td>Asha</td><td>1 Nov</td><td>2 Nov</td><td><a href="#S11-Email-Designer">Edit</a> · Duplicate · Send test · Delete</td></tr>
+          <tr><td class="mono">steel_update_email</td><td>Steel prices this month</td><td><span class="chip">DRAFT</span></td><td>Ravi</td><td>2 Nov</td><td>Never</td><td><a href="#S11-Email-Designer">Edit</a> · Duplicate · Delete</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <h1>S-05 Template library</h1>
+    <p>Every template for both channels, in two tabs. Both are drawn here for reference. Spec §5.6.</p>
+    <ol>
+      <li><span class="pin">1</span><div><b>Channel tabs</b>WhatsApp and Email templates are managed separately, with different rules.</div></li>
+      <li><span class="pin">2</span><div><b>Sync and create</b>New template opens S-06. Sync pulls the latest from Meta. Status also updates by webhook, with a 15-minute sync as the fallback.</div></li>
+      <li><span class="pin">3</span><div><b>Meta status</b>DRAFT, PENDING, APPROVED, REJECTED, PAUSED or DISABLED. Only APPROVED templates can be sent.</div></li>
+      <li><span class="pin">4</span><div><b>Rejection reason</b>Shows Meta's reason, so the template can be fixed and resubmitted.</div></li>
+      <li><span class="pin">5</span><div><b>Email status</b>No outside approval. READY means the email passed validation in S-11 with no errors.</div></li>
+    </ol>
+  </aside>
+</div>
+</section>
+<section id="S06-WhatsApp-Designer" aria-label="S-06 WhatsApp template designer">
+<div class="wf">
+  <div class="frame">
+    <nav class="side" aria-label="Main">
+      <b>Bulk Messenger</b>
+      <a href="#S03-Contacts">Contacts</a>
+      <a href="#S02a-Import-Map">Import</a>
+      <a class="on" href="#S05-Templates">Templates</a>
+      <a href="#S09-Campaigns">Campaigns</a>
+      <a href="#S10-Activity">Activity</a>
+      <a href="#S01-Settings">Settings</a>
+    </nav>
+    <div class="main">
+      <h2>New template</h2>
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 16px; align-items: start">
+        <div class="stack">
+          <div class="row">
+            <label class="grow"><span class="row"><span class="pin">1</span> Name</span><input placeholder="festive_offer_nov26"></label>
+            <label>Language<select><option>en</option></select></label>
+            <label>Category<select><option>MARKETING</option></select></label>
+          </div>
+          <div class="row"><span class="pin">2</span><span>Variables:</span><span>(•) Named</span><span>( ) Positional</span></div>
+
+          <section class="card">
+            <div class="row"><span class="pin">3</span><h3>Header</h3><select aria-label="Header type"><option>Image</option><option>None</option><option>Text</option><option>Video</option><option>Document</option></select><button type="button">Choose file</button><span class="small muted">banner.jpg</span></div>
+          </section>
+
+          <section class="card">
+            <div class="row between">
+              <div class="row"><h3>Body</h3><span class="pin">4</span><button type="button" aria-label="Bold">B</button><button type="button" aria-label="Italic">I</button><button type="button" aria-label="Strikethrough">S</button><button type="button" aria-label="Monospace">&lt;/&gt;</button><button type="button">+ Variable ▾</button></div>
+              <span class="small muted">98/1024</span>
+            </div>
+            <div class="card" style="min-height: 80px">Hi {{first_name}}, our festive offer is live! Get {{discount}} off all orders placed this week.</div>
+            <div class="row"><span class="pin">5</span><span class="small">Samples:</span>
+              <label>first_name<input placeholder="Asha"></label>
+              <label>discount<input placeholder="15%"></label>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="row between"><h3>Footer</h3><span class="small muted">25/60</span></div>
+            <input aria-label="Footer" placeholder="Reply STOP to unsubscribe">
+          </section>
+
+          <section class="card">
+            <div class="row"><span class="pin">6</span><h3>Buttons</h3><button type="button">+ Add ▾</button></div>
+            <div class="row"><span class="chip">↗ View offer</span><span class="chip">↩ Stop promotions</span></div>
+          </section>
+
+          <div class="banner row"><span class="pin">7</span><span>0 errors · 1 warning: URL shorteners in buttons are often rejected.</span></div>
+          <div class="row between">
+            <button type="button">Discard</button>
+            <div class="row"><button type="button">Save draft</button><span class="pin">8</span><button type="button" class="pri">Submit to Meta</button></div>
+          </div>
+        </div>
+
+        <aside class="stack">
+          <div class="row"><span class="pin">9</span><h3>Preview</h3></div>
+          <div class="phone">
+            <div class="bubble">
+              <div class="ph">Header image</div>
+              <span>Hi Asha, our festive offer is live! Get 15% off all orders placed this week.</span>
+              <span class="small muted">Reply STOP to unsubscribe</span>
+              <span class="small">↗ View offer</span>
+              <span class="small">↩ Stop promotions</span>
+            </div>
+          </div>
+          <span class="small">( ) Light (•) Dark</span>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <h1>S-06 WhatsApp designer</h1>
+    <p>Build a marketing template and send it to Meta for approval. Spec §5.7.</p>
+    <ol>
+      <li><span class="pin">1</span><div><b>Name</b>Lowercase letters, digits and underscores, typed names are auto-slugified. Category is fixed to MARKETING and language to English for now.</div></li>
+      <li><span class="pin">2</span><div><b>Variable style</b>Named is the default. Positional variables must run in order from 1.</div></li>
+      <li><span class="pin">3</span><div><b>Header</b>Optional: text, image (5 MB), video (16 MB) or PDF (100 MB). Files upload directly to Blob.</div></li>
+      <li><span class="pin">4</span><div><b>Body</b>Up to 1,024 characters with WhatsApp formatting. The variable menu suggests contact fields. It can't start or end with a variable, because Meta rejects that.</div></li>
+      <li><span class="pin">5</span><div><b>Samples</b>Required for every variable, since Meta needs them to review the template.</div></li>
+      <li><span class="pin">6</span><div><b>Buttons</b>Up to 10, with quick replies grouped together. A "Stop promotions" button also opts people out automatically.</div></li>
+      <li><span class="pin">7</span><div><b>Live validation</b>Errors block submitting; warnings don't. For example, missing opt-out wording is a warning.</div></li>
+      <li><span class="pin">8</span><div><b>Submit to Meta</b>Disabled, with the reason, when no credentials are set. Drafts always work. In Mock mode, templates are approved for testing.</div></li>
+      <li><span class="pin">9</span><div><b>Live preview</b>Updates on every keystroke, using the sample values.</div></li>
+    </ol>
+  </aside>
+</div>
+</section>
+<section id="S11-Email-Designer" aria-label="S-11 Email template designer">
+<div class="wf">
+  <div class="frame">
+    <nav class="side" aria-label="Main">
+      <b>Bulk Messenger</b>
+      <a href="#S03-Contacts">Contacts</a>
+      <a href="#S02a-Import-Map">Import</a>
+      <a class="on" href="#S05-Templates">Templates</a>
+      <a href="#S09-Campaigns">Campaigns</a>
+      <a href="#S10-Activity">Activity</a>
+      <a href="#S01-Settings">Settings</a>
+    </nav>
+    <div class="main">
+      <h2>New email template</h2>
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 16px; align-items: start">
+        <div class="stack">
+          <label>Name<input placeholder="festive_offer_nov26_email"></label>
+          <label><span class="row"><span class="pin">1</span> Subject · 38/150, about 60 characters show in most inboxes</span><input placeholder="{{first_name}}, our festive offer is live"></label>
+          <label><span class="row"><span class="pin">2</span> Preheader · 29/150</span><input placeholder="15% off all orders this week"></label>
+
+          <section class="card">
+            <div class="row"><span class="pin">3</span><h3>Blocks</h3><button type="button">+ Add ▾</button><span class="small muted">5 of 30</span></div>
+            <div class="row card" style="flex-direction: row"><span>⋮⋮</span><b>Image</b><span class="grow">banner.jpg</span><span class="pin">4</span><input aria-label="Alt text" placeholder="Alt: Festive sale"><button type="button">Link</button></div>
+            <div class="row card" style="flex-direction: row"><span>⋮⋮</span><b>Heading</b><span class="grow">Festive offer</span></div>
+            <div class="card">
+              <div class="row"><span>⋮⋮</span><b>Text</b><button type="button" aria-label="Bold">B</button><button type="button" aria-label="Italic">I</button><button type="button">Link</button><button type="button">+ Variable ▾</button></div>
+              <span>Hi {{first_name}}, get {{discount}} off all orders placed this week.</span>
+            </div>
+            <div class="row card" style="flex-direction: row"><span>⋮⋮</span><b>Button</b><span class="grow">View offer → https://example.com/offer</span></div>
+            <div class="row card" style="flex-direction: row"><span>⋮⋮</span><b>Divider</b></div>
+          </section>
+
+          <div class="row"><span class="small">Samples:</span>
+            <label>first_name<input placeholder="Asha"></label>
+            <label>discount<input placeholder="15%"></label>
+          </div>
+
+          <section class="card" style="background: #F2F2EE">
+            <div class="row"><span class="pin">5</span><h3>Footer (fixed)</h3></div>
+            <span class="small">Example Exports · [YOUR BUSINESS ADDRESS] · Unsubscribe</span>
+          </section>
+
+          <div class="banner row"><span class="pin">6</span><span>0 errors · 1 warning: subject is in all caps.</span></div>
+          <div class="row between">
+            <button type="button">Discard</button>
+            <div class="row"><button type="button">Save draft</button><span class="pin">7</span><button type="button">Send test</button><button type="button" class="pri">Mark ready</button></div>
+          </div>
+        </div>
+
+        <aside class="stack">
+          <div class="row"><span class="pin">8</span><h3>Preview</h3></div>
+          <div class="steps"><span class="on">Desktop</span><span>Mobile</span><span>Plain text</span></div>
+          <div class="card">
+            <b class="small">Example Exports</b>
+            <span class="small">Asha, our festive offer is live</span>
+            <div class="ph">Banner image</div>
+            <b>Festive offer</b>
+            <span class="small">Hi Asha, get 15% off all orders placed this week.</span>
+            <button type="button" class="pri">View offer</button>
+            <span class="small muted">Example Exports, [YOUR BUSINESS ADDRESS]</span>
+            <span class="small"><u>Unsubscribe</u></span>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <h1>S-11 Email designer</h1>
+    <p>Build a marketing email from blocks. No outside approval is needed. Spec §5.12.</p>
+    <ol>
+      <li><span class="pin">1</span><div><b>Subject</b>Required, and can use variables but no HTML. A marker shows how much fits in most inboxes.</div></li>
+      <li><span class="pin">2</span><div><b>Preheader</b>The hidden preview text beside the subject. Leaving it out gives a warning.</div></li>
+      <li><span class="pin">3</span><div><b>Blocks</b>Heading, Text, Image, Button, Divider and Spacer. Drag to reorder, up to 30 blocks.</div></li>
+      <li><span class="pin">4</span><div><b>Image rules</b>Up to 1 MB, and alt text is required. A missing alt blocks Mark ready.</div></li>
+      <li><span class="pin">5</span><div><b>Fixed footer</b>Business name, postal address and unsubscribe link. It can't be edited or removed, because the sender rules require it.</div></li>
+      <li><span class="pin">6</span><div><b>Live validation</b>Errors include a button without https and HTML over 100 KB, where Gmail starts clipping. Warnings cover spam risks such as all caps.</div></li>
+      <li><span class="pin">7</span><div><b>Test and ready</b>Send test uses the sample values. Mark ready needs zero errors. Running campaigns keep their own snapshot, so later edits never change an email mid-send.</div></li>
+      <li><span class="pin">8</span><div><b>Three previews</b>Desktop, mobile and plain text all update as you type.</div></li>
+    </ol>
+  </aside>
+</div>
+</section>
+<section id="S12-Unsubscribe" aria-label="S-12 Unsubscribe page">
+<div class="wf">
+  <div class="stack grow" style="gap: 16px">
+    <div class="frame" style="flex: none; align-self: stretch">
+      <div class="main" style="align-items: center; padding: 32px; text-align: center">
+        <b>Example Exports</b>
+        <div class="row" style="justify-content: center"><span class="pin">1</span><h2>Unsubscribe a••••@example.com from marketing emails from Example Exports?</h2></div>
+        <div class="row" style="justify-content: center"><span class="pin">2</span><button type="button" class="pri">Unsubscribe</button></div>
+      </div>
+    </div>
+    <div class="frame" style="flex: none; align-self: stretch">
+      <div class="main" style="align-items: center; padding: 32px; text-align: center">
+        <b>Example Exports</b>
+        <div class="row" style="justify-content: center"><span class="pin">3</span><h2>You're unsubscribed. You won't receive marketing emails from us any more.</h2></div>
+      </div>
+    </div>
+    <div class="frame" style="flex: none; align-self: stretch">
+      <div class="main" style="align-items: center; padding: 32px; text-align: center">
+        <b>Example Exports</b>
+        <div class="row" style="justify-content: center"><span class="pin">4</span><h2>This link isn't valid.</h2></div>
+        <span>To unsubscribe, contact sales@example.com.</span>
+      </div>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <h1>S-12 Unsubscribe page</h1>
+    <p>A public page with no sign-in, reached from an email. Three states are shown. Spec §5.13.</p>
+    <ol>
+      <li><span class="pin">1</span><div><b>Confirm first</b>Opening the link changes nothing, because mail scanners open links automatically. The address is masked.</div></li>
+      <li><span class="pin">2</span><div><b>The button unsubscribes</b>It adds the address to the email suppression list and logs it. Gmail's one-click Unsubscribe does the same without opening this page.</div></li>
+      <li><span class="pin">3</span><div><b>Done</b>Repeating it is harmless and shows the same message. WhatsApp consent isn't affected.</div></li>
+      <li><span class="pin">4</span><div><b>Invalid link</b>A tampered link writes nothing and shows the reply-to address instead. The wording here is a placeholder; the spec only calls it a generic page.</div></li>
+    </ol>
+    <p class="small muted">Deliberately minimal, accessible, and free of tracking scripts.</p>
+  </aside>
+</div>
+</section>
+
+<h2 class="group">Campaigns</h2>
+<section id="S07-Campaign-Wizard" aria-label="S-07 Campaign wizard">
+<div class="wf">
+  <div class="frame">
+    <nav class="side" aria-label="Main">
+      <b>Bulk Messenger</b>
+      <a href="#S03-Contacts">Contacts</a>
+      <a href="#S02a-Import-Map">Import</a>
+      <a href="#S05-Templates">Templates</a>
+      <a class="on" href="#S09-Campaigns">Campaigns</a>
+      <a href="#S10-Activity">Activity</a>
+      <a href="#S01-Settings">Settings</a>
+    </nav>
+    <div class="main">
+      <h2>New campaign</h2>
+      <div class="row"><span class="pin">1</span><div class="steps"><span class="on">0 Channel</span><span class="on">1 Audience</span><span class="on">2 Template</span><span class="on">3 Variables</span><span class="on">4 Preview</span><span class="on">5 Review and send</span></div></div>
+
+      <section class="card">
+        <div class="row"><h3>Step 0: Channel</h3><span class="pin">2</span><span class="chip dark">WhatsApp</span><span class="chip">Email</span></div>
+      </section>
+
+      <section class="card">
+        <div class="row"><h3>Step 1: Audience</h3><span class="pin">3</span></div>
+        <div class="tblbox"><table>
+          <tbody>
+            <tr><td>Selected from Contacts</td><td class="num">8,412</td></tr>
+            <tr><td>Suppressed or opted out</td><td class="num">− 212</td></tr>
+            <tr><td>Unknown opt-in <span class="pin">4</span> <label class="inline" style="display: inline-flex; margin-left: 8px"><input type="checkbox"> Include (needs acknowledgement)</label></td><td class="num">− 640</td></tr>
+            <tr><td>Messaged within the frequency cap</td><td class="num">− 310</td></tr>
+            <tr><td>Deleted</td><td class="num">− 10</td></tr>
+            <tr><td><b>Final recipients</b></td><td class="num"><b>7,240</b></td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <div class="cols2">
+        <section class="card">
+          <div class="row"><h3>Step 2: Template</h3><span class="pin">5</span></div>
+          <select aria-label="Template"><option>festive_offer_nov26 (APPROVED)</option></select>
+          <div class="ph">Template preview</div>
+        </section>
+        <section class="card">
+          <div class="row"><h3>Step 4: Preview</h3><span class="pin">7</span></div>
+          <div class="row"><button type="button" aria-label="Previous recipient">◀</button><span class="grow small">Recipient 1 of 7,240: Asha Rao</span><button type="button" aria-label="Next recipient">▶</button></div>
+          <div class="phone"><div class="bubble"><span class="small">Hi Asha, our festive offer is live! Get 15% off all orders placed this week.</span></div></div>
+        </section>
+      </div>
+
+      <section class="card">
+        <div class="row"><h3>Step 3: Variables</h3><span class="pin">6</span></div>
+        <div class="tblbox"><table>
+          <thead><tr><th>Variable</th><th>Comes from</th><th>Fallback if empty</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">first_name</td><td><select aria-label="first_name source"><option>Contact field: First name</option></select></td><td><input aria-label="first_name fallback" placeholder="there"></td></tr>
+            <tr><td class="mono">discount</td><td><select aria-label="discount source"><option>Static value: 15%</option></select></td><td><input aria-label="discount fallback" placeholder="None"></td></tr>
+          </tbody>
+        </table></div>
+        <span class="small muted">20 recipients have an empty variable and no fallback. They will be skipped. <a href="#S07-Campaign-Wizard">View list</a></span>
+      </section>
+
+      <section class="card">
+        <div class="row"><h3>Step 5: Review and send</h3></div>
+        <div class="row">
+          <div class="stat grow"><b>7,220</b><span class="small muted">Recipients</span></div>
+          <div class="stat grow"><b>[EST. COST]</b><span class="small muted">Estimate, from Settings price</span></div>
+          <div class="stat grow"><b>6 min</b><span class="small muted">At 20 messages/s</span></div>
+        </div>
+        <div class="banner row"><span class="pin">8</span><span>This is over your messaging limit for the next 24 hours.</span><button type="button">Split across days</button></div>
+        <div class="row">
+          <span class="pin">9</span>
+          <button type="button">Send test</button>
+          <label>Timing<select><option>Within send window</option><option>Now</option><option>Scheduled</option></select></label>
+          <label class="grow">Campaign name<input placeholder="Festive offer"></label>
+        </div>
+        <div class="row">
+          <span class="pin">10</span>
+          <label class="grow">Type 7220 to confirm<input placeholder="7220"></label>
+          <a href="#S08-Campaign-Monitor" style="align-self: flex-end; padding: 6px 14px; background: #1F1F1C; color: #fff; border-radius: 4px; text-decoration: none; font-size: 13px">Send</a>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <h1>S-07 Campaign wizard</h1>
+    <p>All steps are drawn on one board; in the app they run one at a time. Opened from Contacts or Campaigns. Spec §5.8.</p>
+    <ol>
+      <li><span class="pin">1</span><div><b>Six steps</b>The steps adapt to the channel chosen first.</div></li>
+      <li><span class="pin">2</span><div><b>Channel</b>Preset from the Contacts split button, and fixed once the campaign is created.</div></li>
+      <li><span class="pin">3</span><div><b>Exclusions with counts</b>Shows exactly who is removed and why. Email adds: no address, email suppressed and duplicate address.</div></li>
+      <li><span class="pin">4</span><div><b>Unknown opt-in</b>Excluded by default. Including these contacts needs a toggle and an acknowledgement, and is audit-logged on email.</div></li>
+      <li><span class="pin">5</span><div><b>Template</b>Only APPROVED MARKETING templates, or READY email templates, are offered.</div></li>
+      <li><span class="pin">6</span><div><b>Variables</b>Each maps to a field, attribute or static value, with a fallback. Recipients still empty are listed, then skipped.</div></li>
+      <li><span class="pin">7</span><div><b>Preview</b>Step through real rendered messages, or search for one contact. Email also shows the inbox line, HTML and plain text.</div></li>
+      <li><span class="pin">8</span><div><b>Limit check</b>Compares recipients plus the last 24 hours with Meta's tier, and offers to split. Email checks the daily send cap, and blocks sending without a key, verified domain or postal address.</div></li>
+      <li><span class="pin">9</span><div><b>Test and timing</b>Test goes to the numbers in Settings and isn't recorded in the campaign. A send outside the window waits until it reopens.</div></li>
+      <li><span class="pin">10</span><div><b>Typed confirmation</b>Send stays disabled until the count is typed. Recipients are then frozen, and suppression and the frequency cap are re-checked before each send.</div></li>
+    </ol>
+  </aside>
+</div>
+</section>
+<section id="S08-Campaign-Monitor" aria-label="S-08 Campaign monitor">
+<div class="wf">
+  <div class="frame">
+    <nav class="side" aria-label="Main">
+      <b>Bulk Messenger</b>
+      <a href="#S03-Contacts">Contacts</a>
+      <a href="#S02a-Import-Map">Import</a>
+      <a href="#S05-Templates">Templates</a>
+      <a class="on" href="#S09-Campaigns">Campaigns</a>
+      <a href="#S10-Activity">Activity</a>
+      <a href="#S01-Settings">Settings</a>
+    </nav>
+    <div class="main">
+      <div class="row between">
+        <div class="stack" style="gap: 2px">
+          <div class="row"><h2>Festive offer</h2><span class="chip dark">Running</span><span class="pin">1</span></div>
+          <span class="small muted">festive_offer_nov26 · Started by Asha, 2 Nov 14:32 · ETA 14:38</span>
+        </div>
+        <div class="row">
+          <span class="pin">2</span>
+          <button type="button">Pause</button>
+          <button type="button">Cancel</button>
+          <button type="button">Retry failed</button>
+          <button type="button">Resend 3 unknown</button>
+        </div>
+      </div>
+
+      <div class="banner row"><span class="pin">3</span><span>Paused automatically: failure rate above 25% over the last 200 attempts.</span><button type="button">Resume</button></div>
+
+      <div class="row"><span class="pin">4</span><h3>WhatsApp counters</h3><span class="small muted">Polled every 2 s while running</span></div>
+      <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px">
+        <div class="stat"><b>3,010</b><span class="small muted">Pending</span></div>
+        <div class="stat"><b>1,400</b><span class="small muted">Accepted</span></div>
+        <div class="stat"><b>900</b><span class="small muted">Sent</span></div>
+        <div class="stat"><b>1,320</b><span class="small muted">Delivered</span></div>
+        <div class="stat"><b>400</b><span class="small muted">Read</span></div>
+        <div class="stat"><b>120</b><span class="small muted">Failed</span></div>
+        <div class="stat"><b>67</b><span class="small muted">Skipped</span></div>
+        <div class="stat"><b>3</b><span class="small muted">Unknown</span></div>
+      </div>
+      <div class="bar" role="img" aria-label="Progress across statuses">
+        <i style="width: 24%; background: #1F1F1C"></i>
+        <i style="width: 12%; background: #55554F"></i>
+        <i style="width: 18%; background: #8A8A85"></i>
+        <i style="width: 2%; background: #B4380B"></i>
+        <i style="width: 44%; background: #F2F2EE"></i>
+      </div>
+
+      <section class="card">
+        <div class="row"><span class="pin">5</span><h3>Email campaigns show instead</h3></div>
+        <div class="small">Pending · Accepted · Sent · Delayed · Delivered · Opened (approximate) · Clicked · Bounced · Complained · Failed · Skipped · Unknown · Unsubscribed</div>
+        <div class="cols2">
+          <div class="stack" style="gap: 4px">
+            <div class="row between small"><span>Bounce rate (pauses at 5%)</span><b>1.2%</b></div>
+            <div class="bar"><i style="width: 24%; background: #1F1F1C"></i></div>
+            <div class="row between small"><span>Complaint rate (pauses at 0.3%)</span><b>0.1%</b></div>
+            <div class="bar"><i style="width: 33%; background: #1F1F1C"></i></div>
+          </div>
+          <div class="tblbox"><table>
+            <thead><tr><th>Top links</th><th class="num">Clicks</th></tr></thead>
+            <tbody><tr><td>example.com/offer</td><td class="num">412</td></tr><tr><td>example.com/catalogue</td><td class="num">96</td></tr></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <section class="stack">
+        <div class="row between"><div class="row"><span class="pin">6</span><h3>Failures</h3></div><button type="button">Export CSV</button></div>
+        <div class="tblbox"><table>
+          <thead><tr><th>Phone</th><th>Name</th><th>Code</th><th>Explanation</th><th>Attempts</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">+91******3210</td><td>Asha Rao</td><td>131026</td><td>Undeliverable: may not be on WhatsApp</td><td>1</td></tr>
+            <tr><td class="mono">+91******2345</td><td>Ravi Shah</td><td>131049</td><td>Not delivered to keep the ecosystem healthy. Retry after 24 h</td><td>1</td></tr>
+            <tr><td class="mono">+91******2233</td><td>Priya Nair</td><td>131050</td><td>User stopped marketing messages. Added to suppression list</td><td>1</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <h1>S-08 Campaign monitor</h1>
+    <p>Follow a campaign live and step in when needed. Spec §5.9.</p>
+    <ol>
+      <li><span class="pin">1</span><div><b>Header</b>Name, template, status, who started it, when, and the ETA.</div></li>
+      <li><span class="pin">2</span><div><b>Controls</b>Any team member can use them, and each is audit-logged. Pause takes effect within about one batch.</div></li>
+      <li><span class="pin">3</span><div><b>Auto-pause banner</b>Explains why the circuit breaker stopped the campaign. This banner is an example; a campaign shows Running or Paused, not both.</div></li>
+      <li><span class="pin">4</span><div><b>Live counters</b>Accepted only means Meta queued the message; webhooks confirm delivery. Delivered and read also show as a percentage of accepted. Polling drops to every 30 s after the run, since webhooks keep arriving for days.</div></li>
+      <li><span class="pin">5</span><div><b>Email version</b>Different counters, rates that turn amber then red near the thresholds, and clicks per link. Opens are approximate because of Apple Mail Privacy Protection.</div></li>
+      <li><span class="pin">6</span><div><b>Failures table</b>Error code plus a plain explanation, exportable as CSV. Email shows the address, bounce type and Resend error.</div></li>
+    </ol>
+    <p><b>Resend unknown</b> needs an explicit choice. These messages may already have reached people, so the app never resends them by itself.</p>
+  </aside>
+</div>
+</section>
+<section id="S09-Campaigns" aria-label="S-09 Campaign list">
+<div class="wf">
+  <div class="frame">
+    <nav class="side" aria-label="Main">
+      <b>Bulk Messenger</b>
+      <a href="#S03-Contacts">Contacts</a>
+      <a href="#S02a-Import-Map">Import</a>
+      <a href="#S05-Templates">Templates</a>
+      <a class="on" href="#S09-Campaigns">Campaigns</a>
+      <a href="#S10-Activity">Activity</a>
+      <a href="#S01-Settings">Settings</a>
+    </nav>
+    <div class="main">
+      <div class="row between">
+        <h2>Campaigns</h2>
+        <a href="#S07-Campaign-Wizard" class="small" style="padding: 6px 12px; background: #1F1F1C; color: #fff; border-radius: 4px; text-decoration: none">New campaign</a>
+      </div>
+
+      <div class="cols2">
+        <section class="card">
+          <div class="row"><span class="pin">1</span><h3>WhatsApp queue</h3></div>
+          <span class="small">Sending: Festive offer · Next: Steel update</span>
+        </section>
+        <section class="card">
+          <h3>Email queue</h3>
+          <span class="small">Sending: Festive offer (email) · Nothing queued</span>
+        </section>
+      </div>
+
+      <div class="row"><span class="pin">2</span><label>Channel<select><option>All</option><option>WhatsApp</option><option>Email</option></select></label></div>
+
+      <div class="tblbox"><table>
+        <thead><tr><th>Channel</th><th>Name</th><th>Template</th><th>Status</th><th>By</th><th>Created</th><th class="num">Recipients</th><th class="num">Sent</th><th class="num">Delivered</th><th class="num">Read / opened <span class="pin">3</span></th><th class="num">Clicked</th><th class="num">Failed / bounced</th><th class="num">Opt-outs <span class="pin">4</span></th><th>Actions <span class="pin">5</span></th></tr></thead>
+        <tbody>
+          <tr><td>WhatsApp</td><td><a href="#S08-Campaign-Monitor">Festive offer</a></td><td class="mono">festive_offer_nov26</td><td><span class="chip dark">Running</span></td><td>Asha</td><td>2 Nov</td><td class="num">7,220</td><td class="num">42%</td><td class="num">23%</td><td class="num">6%</td><td class="num">—</td><td class="num">2%</td><td class="num">4</td><td>Open · Duplicate</td></tr>
+          <tr><td>Email</td><td><a href="#S08-Campaign-Monitor">Festive offer (email)</a></td><td class="mono">festive_offer_nov26_email</td><td><span class="chip dark">Running</span></td><td>Asha</td><td>2 Nov</td><td class="num">3,100</td><td class="num">88%</td><td class="num">81%</td><td class="num">34%</td><td class="num">9%</td><td class="num">1%</td><td class="num">7</td><td>Open · Duplicate</td></tr>
+          <tr><td>WhatsApp</td><td>Steel update</td><td class="mono">steel_price_update</td><td><span class="chip">Queued</span></td><td>Ravi</td><td>2 Nov</td><td class="num">1,240</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td>Open</td></tr>
+          <tr><td>WhatsApp</td><td>Diwali list</td><td class="mono">diwali_greeting</td><td><span class="chip">Completed</span></td><td>Asha</td><td>20 Oct</td><td class="num">5,800</td><td class="num">99%</td><td class="num">94%</td><td class="num">61%</td><td class="num">—</td><td class="num">1%</td><td class="num">18</td><td>Open · Duplicate</td></tr>
+          <tr><td>Email</td><td>Spring launch</td><td class="mono">spring_launch_email</td><td><span class="chip">Draft</span></td><td>Ravi</td><td>25 Oct</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td>Open · Delete draft</td></tr>
+        </tbody>
+      </table></div>
+      <span class="small muted">All counts and percentages on these screens are sample data.</span>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <h1>S-09 Campaign list</h1>
+    <p>Every campaign on both channels, and what's next to send. Spec §5.10.</p>
+    <ol>
+      <li><span class="pin">1</span><div><b>One queue per channel</b>Only one campaign per channel sends at a time, and queued ones start automatically. WhatsApp and email can run together.</div></li>
+      <li><span class="pin">2</span><div><b>Channel filter</b>Each row also shows its channel with an icon, drawn here as text.</div></li>
+      <li><span class="pin">3</span><div><b>Metrics by channel</b>WhatsApp shows read %. Email shows opened % and clicked %, and bounced % in place of failed %.</div></li>
+      <li><span class="pin">4</span><div><b>Opt-outs caused</b>Shows how many people left after a campaign. For email, it counts unsubscribes plus complaints.</div></li>
+      <li><span class="pin">5</span><div><b>Actions</b>Open goes to S-08. Duplicate keeps the channel, template and mapping with a new audience. Only drafts can be deleted.</div></li>
+    </ol>
+  </aside>
+</div>
+</section>
+</body>
+</html>
