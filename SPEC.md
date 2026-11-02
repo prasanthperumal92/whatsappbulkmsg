@@ -471,6 +471,7 @@ Only one import can be committed at a time; a second user sees *"An import by Ra
   - Banner: *"100 selected on this page. Select all 8,412 matching contacts?"*. This switches to filter-based selection (filter + excluded IDs), so selection does not depend on paging.
   - The selection count is always shown in the action bar. Selection persists across pages and in the URL (so it can be shared with a teammate).
 - **Bulk action bar:** **Send campaign ▾** (primary split button: *WhatsApp* · *Email*; opens S-07 with the channel preset), Add tags, Remove tags, Mark opted-out ▾ (*WhatsApp* · *Email* · *All channels*), Set email opt-in, Delete, Export CSV.
+- **Add contact** opens a form: phone or email (one is required), name, company, city, country, tags, consent proof reference and one consent confirmation per channel. It uses the import's normalisation and consent rules. An invalid identifier, or one another contact holds under §4.7, is refused rather than merged.
 - Empty state: "No contacts yet. [Import CSV]".
 
 ### 5.5 S-04 Contact drawer
@@ -1174,6 +1175,7 @@ Next.js route handlers under `/api`. JSON. Every route needs a Clerk session **e
 | GET | `/imports/{id}` | Status / result |
 | POST | `/imports/{id}/undo` | Revert the latest import |
 | GET | `/contacts` | `?q=&filters=&sort=&page=&page_size=` → `{items, total}` |
+| POST | `/contacts` | Add one contact from the S-03 form |
 | POST | `/contacts/count` | Selection object → count after exclusions |
 | GET / PATCH / DELETE | `/contacts/{id}` | Single contact |
 | POST | `/contacts/{id}/erase` | Immediate erasure (§12A) |

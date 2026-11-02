@@ -5,7 +5,8 @@ import { TEXT_FIELDS, type ConsentValue, type NormalisedRow } from './rows';
 
 export type ExistingPolicy = 'skip' | 'fill_empty' | 'overwrite';
 export type MergeContext = {
-  batchId: string;
+  /** Null for a contact added by hand. */
+  batchId: string | null;
   source: string;
   now: string;
   userId: string;

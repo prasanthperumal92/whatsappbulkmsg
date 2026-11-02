@@ -11,6 +11,7 @@ export const ACTION_LABELS: Record<string, string> = {
   'import.undo': 'Import undone',
   'mapping_preset.save': 'Mapping preset saved',
   'mapping_preset.delete': 'Mapping preset deleted',
+  'contact.create': 'Contact added',
   'suppression.add': 'Added to suppression list',
   'suppression.remove': 'Removed from suppression list',
   'snapshot.create': 'Snapshot created',

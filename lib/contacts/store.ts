@@ -95,6 +95,14 @@ export class ContactStore {
     return rows;
   }
 
+  /** `identities()` narrowed to the contacts one row can match, for a single write. */
+  async identitiesMatching(phone: string | null, email: string | null) {
+    const { rows } = await this.tx.execute<{ id: string; phone: string | null; email: string | null }>(
+      sql`SELECT contact_id AS id, phone_e164 AS phone, email FROM contacts WHERE is_deleted = false AND (phone_e164 = ${phone} OR email = ${email}) ORDER BY contact_id`,
+    );
+    return rows;
+  }
+
   async getMany(ids: string[]): Promise<ContactRow[]> {
     const out: ContactRow[] = [];
     for (let i = 0; i < ids.length; i += CHUNK) {

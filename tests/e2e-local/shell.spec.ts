@@ -41,7 +41,7 @@ test('T1.6 every sidebar route renders, with the Mock banners', async ({ page, c
     await expect(page.locator('[data-banner="email-mock"]')).toContainText('Email mock mode');
   }
   await nav.getByRole('link', { name: 'Contacts' }).click();
-  await expect(page.getByText('No contacts yet')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add contact' })).toBeVisible();
   await nav.getByRole('link', { name: 'Templates' }).click();
   await page.getByRole('tab', { name: 'Email' }).click();
   await expect(page.getByText('No email templates yet')).toBeVisible();
@@ -82,4 +82,29 @@ test('team changes appear in the activity log, and filters work', async ({ page,
   await page.getByLabel('Channel').click();
   await page.getByRole('option', { name: 'Email' }).click();
   await expect(page.getByText('No activity matches these filters.')).toBeVisible();
+});
+
+test('a contact can be added from the Contacts page', async ({ page, context, baseURL }) => {
+  await signIn(context, baseURL!, 'member@example.com');
+  const email = `form-${Date.now()}@example.com`;
+  await page.goto('/contacts');
+
+  await page.getByRole('button', { name: 'Add contact' }).click();
+  await page.getByLabel('Email', { exact: true }).fill('not-an-email');
+  await page.locator('form').evaluate((f) => ((f as HTMLFormElement).noValidate = true));
+  await page.getByRole('button', { name: 'Add contact' }).click();
+  await expect(page.getByText('This is not a valid email address.')).toBeVisible();
+
+  await page.getByLabel('Email', { exact: true }).fill(email);
+  await page.getByLabel('First name').fill('Asha');
+  await expect(page.getByRole('checkbox', { name: /WhatsApp/ })).toBeDisabled();
+  await page.getByRole('button', { name: 'Add contact' }).click();
+  await expect(page.getByText('Added Asha.')).toBeVisible();
+  await expect(page.getByText('No contacts yet')).toBeHidden();
+  await expect(page.locator('p', { hasText: /^[\d,]+ contacts?$/ })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Add contact' }).click();
+  await page.getByLabel('Email', { exact: true }).fill(email);
+  await page.getByRole('button', { name: 'Add contact' }).click();
+  await expect(page.getByText('A contact with this email address already exists.')).toBeVisible();
 });
