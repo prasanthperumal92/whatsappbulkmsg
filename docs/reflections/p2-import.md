@@ -31,7 +31,7 @@ Date: 2026-11-02. Branch: `p2/import`, based on `p1/foundation`, not pushed.
 
 ### Evidence
 
-From a fresh clone at the final commit: type check and `evals:check` pass, 358 Vitest tests pass, the production build passes, `test:proxy` passes, and `npm audit --omit=dev` reports 0. In the working copy, 11 of 11 browser tests pass.
+From a fresh clone at `a40881e`: type check and `evals:check` pass, 358 Vitest tests pass, the production build passes, `test:proxy` passes, and `npm audit --omit=dev` reports 0. In the working copy at `e210334`, 11 of 11 browser tests pass. The one later commit changes the cron schedule and a banner's wording, and only the type check and Vitest were re-run after it.
 
 **Never run:** the `VercelBlobStore` adapter, the browser's direct upload to Blob, signed download URLs, and the crons on Vercel. They have type checks and nothing else. `SPK-05` is the task meant to prove them, and the installed `@vercel/blob` is newer than anything in the spec, so this is the likeliest part of P2 to need changes.
 
@@ -68,7 +68,7 @@ From a fresh clone at the final commit: type check and `evals:check` pass, 358 V
 
 TASKS.md says to report mismatches rather than resolve them quietly. No golden or scenario was changed.
 
-1. **The Vercel team is on Hobby (needs a decision).** Hobby allows only daily crons and refuses a deployment asking for more, so §10's hourly `snapshot-contacts` runs **daily** for now. P5 needs crons every 5 minutes, so H-1 will block that regardless. Hobby is also for non-commercial use, which this isn't.
+1. **The Vercel team is on Hobby (needs a decision).** Vercel's API reports the plan as `hobby`. Vercel documents Hobby as daily crons only, with deployments asking for more refused, though I haven't tried one on this account. So §10's hourly `snapshot-contacts` runs **daily** for now. P5 needs crons every 5 minutes, so H-1 will block that regardless. Hobby is also for non-commercial use, which this isn't.
 2. **`rejects.csv` isn't escaped against formula injection.** §12 requires this for "CSV export", and the rejects file repeats untrusted cells that someone will open in Excel. IS-01 asks it to keep the original columns, and CE-* is wired in P3, so I left it. I recommend applying the P3 escaper to this file too (T3.3).
 3. **Adding a phone under the Skip policy.** §4.7 says a phone is added to a matching email-only contact, with no exception for Skip, so it's added. Someone who chose Skip might not expect that.
 4. **A later row in the same file adds a phone to an email-only contact created earlier.** It counts as a duplicate, but the phone is kept, not dropped. "First occurrence kept" could be read as dropping it, and that would lose data.
