@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Type check
+        run: npm run typecheck
+      - name: Evals check
+        run: npm run evals:check
+      # Integration tests start a throwaway Postgres, unless TEST_DATABASE_URL points at a Neon test branch.
+      - name: Unit and integration tests
+        run: npm test
+      - name: Build
+        run: npm run build
