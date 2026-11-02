@@ -1,4 +1,5 @@
 import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { attachDatabasePool } from '@vercel/functions';
 import { Pool } from 'pg';
 import * as schema from './schema';
 
@@ -15,6 +16,7 @@ export function getDb(): Db {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) throw new Error('DATABASE_URL is not set');
   cache.__appPool = new Pool({ connectionString, max: 10, idleTimeoutMillis: 10_000 });
+  attachDatabasePool(cache.__appPool); // closes idle connections before Fluid Compute suspends the instance
   cache.__appDb = drizzle(cache.__appPool, { schema });
   return cache.__appDb;
 }

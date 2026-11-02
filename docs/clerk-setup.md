@@ -6,7 +6,7 @@ Dashboard settings the code relies on. Do these on the development instance (pre
 
 1. **Sign-in options:** email verification code and Google. No passwords.
 2. **Restrictions → Sign-up mode: Restricted.** This is what makes "no public sign-up" true. The app has no sign-up page, but Clerk's own API would otherwise still accept sign-ups.
-3. **Sessions → Customize session token:** add `{ "email": "{{user.primary_email_address}}" }`. Without it the app still works, but each request makes an extra call to Clerk's API.
+3. **Sessions → Customize session token:** add `{ "email": "{{user.primary_email_address}}" }`. Without it the app still works, but each request makes an extra call to Clerk's API. Keep this claim as the primary address only, because the app trusts it as verified.
 4. **First team member:** set `TEAM_BOOTSTRAP_EMAILS`, and invite the same address from the Clerk dashboard. After that, adding someone on Settings → Team sends their invitation.
 
 To check: SEC-01 signs in with an email that isn't on the list, and must be refused.

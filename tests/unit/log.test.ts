@@ -47,6 +47,14 @@ describe('T1.7 safe logging', () => {
     },
   );
 
+  it('masks a phone field in any format, including raw CSV values', () => {
+    expect(sanitize({ phone: '098765 43210', raw_mobile: '98765-43210', wa_to: '919876543210' })).toEqual({
+      phone: '09*****3210',
+      raw_mobile: '98****3210',
+      wa_to: '91******3210',
+    });
+  });
+
   it('leaves ordinary values alone', () => {
     const input = {
       id: '01900000-0000-7000-8000-00000000000a',

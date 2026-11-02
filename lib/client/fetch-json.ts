@@ -10,6 +10,7 @@ export class RequestError extends Error {
 export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, init && { ...init, headers: { 'content-type': 'application/json', ...init.headers } });
   const body = await res.json().catch(() => null);
+  if (res.status === 401 && typeof window !== 'undefined') window.location.assign('/sign-in');
   if (!res.ok) throw new RequestError(res.status, body?.error?.message ?? 'Something went wrong. Please try again.');
   return body as T;
 }

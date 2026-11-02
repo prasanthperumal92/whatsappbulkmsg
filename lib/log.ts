@@ -2,12 +2,18 @@
 // so call sites can't leak them by accident. `sanitize` is also used for audit details.
 
 const SENSITIVE_KEY = /token|secret|password|passwd|authorization|api[-_]?key|private[-_]?key|encryption[-_]?key|cookie|credential|signature|connection[-_]?string|database[-_]?url/i;
+const PHONE_KEY = /phone|mobile|msisdn|wa_to/i;
 const REDACTED = '[REDACTED]';
 
 const maskDigits = (digits: string, prefix: string) => {
   if (digits.length < 7) return `${prefix}${'*'.repeat(digits.length)}`;
   return `${prefix}${digits.slice(0, 2)}${'*'.repeat(digits.length - 6)}${digits.slice(-4)}`;
 };
+
+function maskPhoneField(value: string) {
+  const digits = value.replace(/\D/g, '');
+  return maskDigits(digits, value.trim().startsWith('+') ? '+' : '');
+}
 
 const RULES: [RegExp, string | ((match: string) => string)][] = [
   [/\b(postgres(?:ql)?:\/\/)[^@\s/]+@/gi, `$1${REDACTED}@`],
@@ -41,7 +47,12 @@ export function sanitize(value: unknown, depth = 0, seen = new WeakSet<object>()
   }
   if (Array.isArray(value)) return value.map((v) => sanitize(v, depth + 1, seen));
   return Object.fromEntries(
-    Object.entries(value).map(([k, v]) => [k, SENSITIVE_KEY.test(k) ? REDACTED : sanitize(v, depth + 1, seen)]),
+    Object.entries(value).map(([k, v]) => {
+      if (SENSITIVE_KEY.test(k)) return [k, REDACTED];
+      // A raw CSV value such as "098765 43210" doesn't look like a phone to the text patterns.
+      if (PHONE_KEY.test(k) && typeof v === 'string') return [k, maskPhoneField(v)];
+      return [k, sanitize(v, depth + 1, seen)];
+    }),
   );
 }
 

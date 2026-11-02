@@ -112,7 +112,7 @@ describe('T1.5 team allowlist', () => {
   it('rolls back the allowlist entry when Clerk refuses the invitation', async () => {
     clerkState.inviteError = new Error('Clerk down');
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    expect((await post('ravi@example.com')).status).toBe(500);
+    expect((await post('ravi@example.com')).status).toBe(502);
     spy.mockRestore();
     expect(await db.select().from(teamAllowlist).where(eq(teamAllowlist.email, 'ravi@example.com'))).toHaveLength(0);
   });

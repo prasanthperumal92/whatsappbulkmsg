@@ -14,6 +14,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:local": "playwright test --config playwright.local.config.ts",
+    "test:proxy": "node scripts/smoke-proxy.mjs",
     "evals:check": "node evals/check.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts"
@@ -21,6 +22,7 @@
   "dependencies": {
     "@clerk/nextjs": "^7.9.23",
     "@tanstack/react-query": "^5.105.1",
+    "@vercel/functions": "^3.10.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cn": "^0.5.2",

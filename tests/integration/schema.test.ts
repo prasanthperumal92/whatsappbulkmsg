@@ -1,6 +1,7 @@
 import { eq, sql } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { getDb, schema } from '@/lib/db';
+import { parseBootstrapEmails, runMigrations } from '@/lib/db/migrate';
 import { resetDb } from '../support/reset';
 
 const db = getDb();
@@ -110,5 +111,23 @@ describe('T1.4 schema', () => {
   it('generates UUIDv7 contact ids', async () => {
     const [row] = await db.insert(contacts).values({ email: 'v7@example.com' }).returning();
     expect(row!.contactId[14]).toBe('7');
+  });
+});
+
+describe('deploy-time migrations', () => {
+  const url = () => process.env.DATABASE_URL!;
+
+  it('applying them again changes nothing', async () => {
+    await db.insert(contacts).values({ email: 'keep@example.com' });
+    await runMigrations(url());
+    expect(await db.select().from(contacts)).toHaveLength(1);
+  });
+
+  it('seeds bootstrap emails only while the allowlist is empty', async () => {
+    await runMigrations(url(), parseBootstrapEmails(' First@Example.com, first@example.com ,second@example.com'));
+    const seeded = await db.select().from(schema.teamAllowlist);
+    expect(seeded.map((r) => r.email).sort()).toEqual(['first@example.com', 'second@example.com']);
+    await runMigrations(url(), ['third@example.com']);
+    expect(await db.select().from(schema.teamAllowlist)).toHaveLength(2);
   });
 });

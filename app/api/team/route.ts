@@ -4,6 +4,7 @@ import { withAudit, withSession } from '@/lib/api/route';
 import { ApiError, parseJson } from '@/lib/api/errors';
 import { inviteToClerk, revokePendingInvitation } from '@/lib/auth/invitations';
 import { schema } from '@/lib/db';
+import { log } from '@/lib/log';
 
 const { teamAllowlist } = schema;
 const body = z.object({ email: z.string().trim().toLowerCase().pipe(z.email()) });
@@ -17,7 +18,12 @@ export const POST = withAudit({ action: 'team.add', entity: 'team_allowlist' }, 
   const { email } = await parseJson(req, body);
   const [row] = await tx.insert(teamAllowlist).values({ email, addedBy: user.email }).onConflictDoNothing().returning();
   if (!row) throw new ApiError(409, 'already_on_allowlist', `${email} is already on the team`);
-  await inviteToClerk(email);
+  try {
+    await inviteToClerk(email);
+  } catch (err) {
+    log.error('Could not send a Clerk invitation', { email, err });
+    throw new ApiError(502, 'invite_failed', `Could not send an invitation to ${email}. They haven't been added. Please try again.`);
+  }
   audit({ entityId: email });
   return Response.json(row, { status: 201 });
 });

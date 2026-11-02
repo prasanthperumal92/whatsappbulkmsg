@@ -104,6 +104,17 @@ export function withAudit(meta: { action: string; entity: string }, handler: (re
   });
 }
 
+/** Public route that must verify its own signature. Used by T5.5 and T8.4. */
+export function withWebhook(handler: (req: Request) => Promise<Response>) {
+  return brand('webhook', async (req) => {
+    try {
+      return await handler(req);
+    } catch (err) {
+      return handleError(err, req);
+    }
+  });
+}
+
 function safeEqual(a: string, b: string) {
   const digest = (s: string) => createHash('sha256').update(s).digest();
   return timingSafeEqual(digest(a), digest(b));

@@ -26,5 +26,12 @@ jobs:
       # Integration tests start a throwaway Postgres, unless TEST_DATABASE_URL points at a Neon test branch.
       - name: Unit and integration tests
         run: npm test
-      - name: Build
-        run: npm run build
+      # Placeholder Clerk keys: enough to run the real SDK's proxy logic, with no account behind them.
+      - name: Build and check the proxy with the real Clerk SDK
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk
+          CLERK_SECRET_KEY: sk_test_placeholderplaceholderplaceholder
+          NEXT_PUBLIC_CLERK_TELEMETRY_DISABLED: '1'
+        run: |
+          npm run build
+          npm run test:proxy
