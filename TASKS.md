@@ -315,7 +315,7 @@ Email consent columns are built here, not in P8, because the IS-* goldens need t
   - **Build:** `PUT /settings/credentials`, `POST /settings/test-connection`, precedence and "set by env var" status, app URLs card, webhook setup card, sending settings, price table, restricted countries, opt-out keywords, and the S-01 Audience rules section.
   - **Done when:** FR-SET-08, E2E-07, FR-SET-02, SEC-04 and SEC-05 pass.
 
-- [ ] **T5.3 Payload builder and send window**
+- [x] **T5.3 Payload builder and send window**
   - **Depends:** T1.1, T2.12
   - **Spec:** §5.2, §5.8, §7.4, §8.2
   - **Build:** template payload builder with variable mapping, fallbacks and `biz_opaque_callback_data`; open-zone and `waitUntil` calculation.
