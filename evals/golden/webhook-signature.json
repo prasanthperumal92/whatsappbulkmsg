@@ -1,6 +1,6 @@
 {
   "$spec": "SPEC.md §7.8, §12",
-  "description": "X-Hub-Signature-256 = \"sha256=\" + hex(HMAC-SHA256(app_secret, raw request body bytes)). Valid → processed. Invalid → stored in webhook_events with signature_ok=false, NOT processed, still respond 200 (or 401 — SPEC GAP G-13: §7.8 only fixes the response for processing errors). Bodies are given exactly; do not re-serialise.",
+  "description": "X-Hub-Signature-256 = \"sha256=\" + hex(HMAC-SHA256(app_secret, raw request body bytes)). Valid → processed. Invalid → stored in webhook_events with signature_ok=false, NOT processed, respond 401 (G-13, SPEC §2.3). Bodies are given exactly; do not re-serialise.",
   "app_secret": "test_app_secret_do_not_use",
   "cases": [
     {

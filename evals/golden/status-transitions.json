@@ -1,6 +1,6 @@
 {
   "$spec": "SPEC.md §7.8 (status handling), §8.1, §8.4",
-  "description": "Webhook status precedence. Given a campaign_messages row in `current` and an incoming webhook status, the row must end in `expect`. Rule: forward only (accepted → sent → delivered → read); failed overrides accepted/sent; unknown is resolved by any status. Timestamps for statuses that arrive out of order must still be recorded (e.g. delivered_at is set even when the row is already read).",
+  "description": "Webhook status precedence. Given a campaign_messages row in `current` and an incoming webhook status, the row must end in `expect`. Rule: forward only (accepted → sent → delivered → read); failed overrides accepted/sent; unknown and sending rows are resolved by any status (matched by biz_opaque_callback_data). `engine_accepted` is the send step saving its result after a webhook already arrived: it must not lower the status. Timestamps for statuses that arrive out of order must still be recorded (e.g. delivered_at is set even when the row is already read).",
   "cases": [
     { "id": "ST-01", "current": "accepted",  "incoming": "sent",      "expect": "sent" },
     { "id": "ST-02", "current": "sent",      "incoming": "delivered", "expect": "delivered" },
@@ -17,6 +17,10 @@
     { "id": "ST-13", "current": "unknown",   "incoming": "delivered", "expect": "delivered" },
     { "id": "ST-14", "current": "unknown",   "incoming": "failed",    "expect": "failed" },
     { "id": "ST-15", "current": "failed",    "incoming": "delivered", "expect": "failed", "note": "SPEC GAP G-05: can a later delivered/read override failed? Assumed no." },
-    { "id": "ST-16", "current": "skipped",   "incoming": "delivered", "expect": "skipped", "note": "Row was never sent; webhook cannot match a wamid it does not have. Should be logged as unmatched." }
+    { "id": "ST-16", "current": "skipped",   "incoming": "delivered", "expect": "skipped", "note": "Row was never sent; webhook cannot match a wamid it does not have. Should be logged as unmatched." },
+    { "id": "ST-17", "current": "sending", "incoming": "sent", "expect": "sent", "also": "wamid saved from the webhook", "note": "Webhook beat the send step" },
+    { "id": "ST-18", "current": "sending", "incoming": "failed", "expect": "failed" },
+    { "id": "ST-19", "current": "delivered", "incoming": "engine_accepted", "expect": "delivered", "also": "accepted_at is set if null" },
+    { "id": "ST-20", "current": "failed", "incoming": "engine_accepted", "expect": "failed" }
   ]
 }

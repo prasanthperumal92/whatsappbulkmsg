@@ -1,0 +1,9 @@
+Mobile No,Name,Email,Segment
+9876543210,Asha,asha@example.com,steel
+,Hans,hans@example.de,steel
+12345,Joe,joe@example.com,export
+9.19876E+11,Kiran,kiran@example.com,
+,Meena,not-an-email,
+12345,Bad,not-an-email,
+,Hans W,HANS@example.de,export
+9812345678,Ravi,ravi@example.in,steel

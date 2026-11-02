@@ -17,13 +17,16 @@
     { "id": "OO-12", "type": "text", "body": "STOP!", "suppress": true, "note": "SPEC GAP G-08: trailing punctuation not covered by the spec. Recommended: strip trailing punctuation and emoji before matching" },
     { "id": "OO-13", "type": "text", "body": "Stop.", "suppress": true, "note": "Same gap as OO-12" },
     { "id": "OO-14", "type": "button", "payload": "View offer", "text": "View offer", "suppress": false },
-    { "id": "OO-15", "type": "image", "caption": "STOP", "suppress": false, "note": "SPEC GAP G-09: captions on media are not mentioned. Assumed ignored" }
+    { "id": "OO-15", "type": "image", "caption": "STOP", "suppress": false, "note": "SPEC GAP G-09: captions on media are not mentioned. Assumed ignored" },
+    { "id": "OO-16", "type": "text", "body": "STOP", "from": null, "from_user_id": "IN.1234567890", "identity_mapping": { "IN.1234567890": "+919876543210" }, "suppress": true, "expect_suppressed_phone": "+919876543210", "note": "No phone in the webhook; mapping known" },
+    { "id": "OO-17", "type": "text", "body": "STOP", "from": null, "from_user_id": "IN.9999999999", "identity_mapping": {}, "suppress": true, "expect_suppressed_phone": null, "expect_suppressed_bsuid": "IN.9999999999", "note": "No mapping yet: BSUID suppressed, shown on S-01, phone suppressed once mapped" },
+    { "id": "OO-18", "type": "text", "body": "hello", "from": null, "from_user_id": "IN.9999999999", "identity_mapping": {}, "suppress": false }
   ],
   "side_effects_when_suppressed": [
     "suppression_list row with reason stop_keyword (text) or button (quick reply)",
     "audit_log row with user_id = system:webhook",
-    "no Parquet rewrite in the webhook request (copied by apply-suppressions cron within 5 min)",
-    "UI shows the contact as opted-out immediately (overlay)",
+    "contacts.opt_in_status set to opted_out in the same transaction",
+    "UI shows the contact as opted-out immediately",
     "pending campaign_messages for that number become skipped at send time"
   ]
 }

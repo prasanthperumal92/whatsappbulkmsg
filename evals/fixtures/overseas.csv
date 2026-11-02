@@ -1,0 +1,8 @@
+phone,name,country,time_zone,email
++44 7400 123456,Tom,,,tom@example.co.uk
++1 202 555 0123,Amy,,America/New_York,
++1 416 555 0123,Liam,,,
++971 50 123 4567,Omar,,,
+9876543210,Asha,,,
+,Hans,DE,,hans@example.de
+,Ana,,,ana@example.com

@@ -1,0 +1,228 @@
+{
+  "$spec": "SPEC.md §4.7, FR-IMP-04",
+  "description": "Given a normalised row and existing non-deleted contacts, decide the import action. `action`: match (existing contact, optionally add_phone) | create | reject. Contacts are listed in contact_id order. `phone` and `email` of null mean unusable or empty; `phone_reason` is why.",
+  "cases": [
+    {
+      "id": "MA-01",
+      "row": {
+        "phone": "+919876543210",
+        "email": null
+      },
+      "store": [
+        {
+          "id": "c1",
+          "phone": "+919876543210",
+          "email": null
+        }
+      ],
+      "expect": {
+        "action": "match",
+        "contact_id": "c1"
+      }
+    },
+    {
+      "id": "MA-02",
+      "row": {
+        "phone": "+919876543210",
+        "email": "a@example.com"
+      },
+      "store": [],
+      "expect": {
+        "action": "create"
+      }
+    },
+    {
+      "id": "MA-03",
+      "row": {
+        "phone": "+919876543210",
+        "email": "a@example.com"
+      },
+      "store": [
+        {
+          "id": "c1",
+          "phone": null,
+          "email": "a@example.com"
+        }
+      ],
+      "expect": {
+        "action": "match",
+        "contact_id": "c1",
+        "add_phone": true
+      },
+      "note": "Enriches the email-only contact"
+    },
+    {
+      "id": "MA-04",
+      "row": {
+        "phone": "+919876543210",
+        "email": "a@example.com"
+      },
+      "store": [
+        {
+          "id": "c1",
+          "phone": "+919812345678",
+          "email": "a@example.com"
+        }
+      ],
+      "expect": {
+        "action": "create"
+      },
+      "note": "Different phone, shared address: separate contacts"
+    },
+    {
+      "id": "MA-05",
+      "row": {
+        "phone": "+919876543210",
+        "email": "a@example.com"
+      },
+      "store": [
+        {
+          "id": "c1",
+          "phone": "+919876543210",
+          "email": "b@example.com"
+        },
+        {
+          "id": "c2",
+          "phone": null,
+          "email": "a@example.com"
+        }
+      ],
+      "expect": {
+        "action": "match",
+        "contact_id": "c1"
+      },
+      "note": "Phone match wins"
+    },
+    {
+      "id": "MA-06",
+      "row": {
+        "phone": null,
+        "email": "a@example.com"
+      },
+      "store": [],
+      "expect": {
+        "action": "create",
+        "email_only": true
+      }
+    },
+    {
+      "id": "MA-07",
+      "row": {
+        "phone": null,
+        "email": "a@example.com"
+      },
+      "store": [
+        {
+          "id": "c1",
+          "phone": null,
+          "email": "a@example.com"
+        }
+      ],
+      "expect": {
+        "action": "match",
+        "contact_id": "c1"
+      }
+    },
+    {
+      "id": "MA-08",
+      "row": {
+        "phone": null,
+        "email": "a@example.com"
+      },
+      "store": [
+        {
+          "id": "c1",
+          "phone": "+919812345678",
+          "email": "a@example.com"
+        }
+      ],
+      "expect": {
+        "action": "match",
+        "contact_id": "c1"
+      }
+    },
+    {
+      "id": "MA-09",
+      "row": {
+        "phone": null,
+        "email": "a@example.com"
+      },
+      "store": [
+        {
+          "id": "c1",
+          "phone": "+919812345678",
+          "email": "a@example.com"
+        },
+        {
+          "id": "c2",
+          "phone": "+919845012345",
+          "email": "a@example.com"
+        }
+      ],
+      "expect": {
+        "action": "match",
+        "contact_id": "c1",
+        "warning": "AMBIGUOUS_EMAIL"
+      }
+    },
+    {
+      "id": "MA-10",
+      "row": {
+        "phone": null,
+        "phone_reason": "SCIENTIFIC_NOTATION",
+        "email": "a@example.com"
+      },
+      "store": [],
+      "expect": {
+        "action": "create",
+        "email_only": true,
+        "warning": "SCIENTIFIC_NOTATION"
+      }
+    },
+    {
+      "id": "MA-11",
+      "row": {
+        "phone": null,
+        "phone_reason": "INVALID_PHONE",
+        "email": null
+      },
+      "store": [],
+      "expect": {
+        "action": "reject",
+        "reason": "INVALID_PHONE"
+      }
+    },
+    {
+      "id": "MA-12",
+      "row": {
+        "phone": null,
+        "phone_reason": "EMPTY_PHONE",
+        "email": null
+      },
+      "store": [],
+      "expect": {
+        "action": "reject",
+        "reason": "EMPTY_PHONE"
+      }
+    },
+    {
+      "id": "MA-13",
+      "row": {
+        "phone": "+919876543210",
+        "email": null
+      },
+      "store": [
+        {
+          "id": "c1",
+          "phone": "+919876543210",
+          "email": null,
+          "is_deleted": true
+        }
+      ],
+      "expect": {
+        "action": "create"
+      },
+      "note": "Soft-deleted contacts are ignored; suppression still follows the phone"
+    }
+  ]
+}

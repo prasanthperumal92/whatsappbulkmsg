@@ -1,6 +1,6 @@
 {
   "$spec": "SPEC.md §5.2 (send window), §8.2 (loadControlState.waitUntil), FR-CMP-08",
-  "description": "Send window 09:00–20:00 Asia/Kolkata (UTC+05:30, no DST). Given `now` (UTC) and optional scheduled_at, the engine either sends now (wait_until = null) or sleeps until `wait_until` (UTC).",
+  "description": "Send window 09:00–20:00 Asia/Kolkata (UTC+05:30, no DST). SW-01…10: for one zone, given `now` (UTC) and optional scheduled_at, either send now (wait_until = null) or wait until `wait_until` (UTC). SW-11 onward: for a campaign with recipients in several `zones`, `open_zones` can be claimed now; if none is open, wait until the earliest window. The window applies in each zone's local time, including DST.",
   "window": { "start": "09:00", "end": "20:00", "tz": "Asia/Kolkata" },
   "cases": [
     { "id": "SW-01", "now": "2026-11-02T05:00:00Z", "wait_until": null, "note": "10:30 IST, inside window" },
@@ -12,6 +12,13 @@
     { "id": "SW-07", "now": "2026-11-02T19:00:00Z", "wait_until": "2026-11-03T03:30:00Z", "note": "00:30 IST (after UTC midnight boundary trap): wait until 09:00 the same IST day" },
     { "id": "SW-08", "now": "2026-11-02T05:00:00Z", "scheduled_at": "2026-11-02T08:30:00Z", "wait_until": "2026-11-02T08:30:00Z", "note": "Scheduled inside the window" },
     { "id": "SW-09", "now": "2026-11-02T05:00:00Z", "scheduled_at": "2026-11-02T15:30:00Z", "wait_until": "2026-11-03T03:30:00Z", "note": "Scheduled at 21:00 IST → also respects window" },
-    { "id": "SW-10", "now": "2026-12-31T18:45:00Z", "wait_until": "2027-01-01T03:30:00Z", "note": "Year rollover (00:15 IST on 1 Jan)" }
+    { "id": "SW-10", "now": "2026-12-31T18:45:00Z", "wait_until": "2027-01-01T03:30:00Z", "note": "Year rollover (00:15 IST on 1 Jan)" },
+    { "id": "SW-11", "now": "2026-11-02T10:00:00Z", "zones": ["Asia/Kolkata", "Europe/London", "America/Chicago"], "open_zones": ["Asia/Kolkata", "Europe/London"], "wait_until": null, "note": "15:30 IST and 10:00 London open; 04:00 Chicago closed" },
+    { "id": "SW-12", "now": "2026-11-02T22:00:00Z", "zones": ["Asia/Kolkata", "Europe/London", "America/Chicago"], "open_zones": ["America/Chicago"], "wait_until": null },
+    { "id": "SW-13", "now": "2026-11-02T22:00:00Z", "zones": ["Asia/Kolkata", "Europe/London"], "open_zones": [], "wait_until": "2026-11-03T03:30:00Z", "note": "Earliest of the closed windows" },
+    { "id": "SW-14", "now": "2026-11-03T02:00:00Z", "zones": ["Europe/London", "America/New_York"], "open_zones": [], "wait_until": "2026-11-03T09:00:00Z" },
+    { "id": "SW-15", "now": "2026-07-01T08:30:00Z", "zones": ["Europe/London"], "open_zones": ["Europe/London"], "wait_until": null, "note": "09:30 in British Summer Time" },
+    { "id": "SW-16", "now": "2026-01-15T08:30:00Z", "zones": ["Europe/London"], "open_zones": [], "wait_until": "2026-01-15T09:00:00Z", "note": "Same UTC time in winter is before the window" },
+    { "id": "SW-17", "now": "2026-03-08T07:30:00Z", "zones": ["America/Chicago"], "open_zones": [], "wait_until": "2026-03-08T14:00:00Z", "note": "US DST starts this day: 09:00 is UTC-5" }
   ]
 }

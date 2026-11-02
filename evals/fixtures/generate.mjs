@@ -90,6 +90,31 @@ write('email-opt-in.csv', lines([
   '7012345678,Tom,,,steel',
 ]));
 
+// IS-16/IS-18: email-only rows, unusable phones with usable emails, and rows with neither (SPEC §4.7).
+write('email-only.csv', lines([
+  'Mobile No,Name,Email,Segment',
+  '9876543210,Asha,asha@example.com,steel',
+  ',Hans,hans@example.de,steel',
+  '12345,Joe,joe@example.com,export',
+  '9.19876E+11,Kiran,kiran@example.com,',
+  ',Meena,not-an-email,',
+  '12345,Bad,not-an-email,',
+  ',Hans W,HANS@example.de,export',
+  '9812345678,Ravi,ravi@example.in,steel',
+]));
+
+// IS-17: overseas numbers, mapped country and time zone, no known country (SPEC §4.8).
+write('overseas.csv', lines([
+  'phone,name,country,time_zone,email',
+  '+44 7400 123456,Tom,,,tom@example.co.uk',
+  '+1 202 555 0123,Amy,,America/New_York,',
+  '+1 416 555 0123,Liam,,,',
+  '+971 50 123 4567,Omar,,,',
+  '9876543210,Asha,,,',
+  ',Hans,DE,,hans@example.de',
+  ',Ana,,,ana@example.com',
+]));
+
 // IMP-F08: formula-injection payloads in text fields (export round-trip).
 write('injection.csv', lines([
   'phone,name,company',

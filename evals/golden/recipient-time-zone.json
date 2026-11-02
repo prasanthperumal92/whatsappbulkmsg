@@ -1,0 +1,86 @@
+{
+  "$spec": "SPEC.md §4.8",
+  "description": "Resolve a recipient's send-window zone. A valid mapped zone wins, then the country's representative zone, then the Settings fallback (Asia/Kolkata here). An invalid mapped zone is ignored with warning INVALID_TIME_ZONE.",
+  "fallback": "Asia/Kolkata",
+  "cases": [
+    {
+      "id": "TZ-01",
+      "country_iso": "IN",
+      "mapped": null,
+      "expect": "Asia/Kolkata",
+      "uses_fallback": false
+    },
+    {
+      "id": "TZ-02",
+      "country_iso": "GB",
+      "mapped": null,
+      "expect": "Europe/London",
+      "uses_fallback": false
+    },
+    {
+      "id": "TZ-03",
+      "country_iso": "US",
+      "mapped": null,
+      "expect": "America/Chicago",
+      "uses_fallback": false,
+      "note": "Representative zone"
+    },
+    {
+      "id": "TZ-04",
+      "country_iso": "US",
+      "mapped": "America/New_York",
+      "expect": "America/New_York",
+      "uses_fallback": false
+    },
+    {
+      "id": "TZ-05",
+      "country_iso": "CA",
+      "mapped": null,
+      "expect": "America/Toronto",
+      "uses_fallback": false
+    },
+    {
+      "id": "TZ-06",
+      "country_iso": "GG",
+      "mapped": null,
+      "expect": "Europe/Guernsey",
+      "uses_fallback": false
+    },
+    {
+      "id": "TZ-07",
+      "country_iso": "AE",
+      "mapped": null,
+      "expect": "Asia/Dubai",
+      "uses_fallback": false
+    },
+    {
+      "id": "TZ-08",
+      "country_iso": "DE",
+      "mapped": null,
+      "expect": "Europe/Berlin",
+      "uses_fallback": false
+    },
+    {
+      "id": "TZ-09",
+      "country_iso": null,
+      "mapped": null,
+      "expect": "Asia/Kolkata",
+      "uses_fallback": true
+    },
+    {
+      "id": "TZ-10",
+      "country_iso": null,
+      "mapped": "Asia/Singapore",
+      "expect": "Asia/Singapore",
+      "uses_fallback": false
+    },
+    {
+      "id": "TZ-11",
+      "country_iso": "DE",
+      "mapped": "Mars/Base",
+      "expect": "Europe/Berlin",
+      "uses_fallback": false,
+      "warning": "INVALID_TIME_ZONE"
+    }
+  ]
+}

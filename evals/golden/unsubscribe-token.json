@@ -1,8 +1,8 @@
 {
   "$spec": "SPEC.md §7A.5, §5.13, FR-EML-10",
-  "description": "token = base64url(message_id) + \".\" + base64url(HMAC-SHA256(EMAIL_UNSUBSCRIBE_SECRET, message_id)), no padding. Constant-time compare. Tokens never expire. An invalid token writes nothing.",
+  "description": "token = base64url(message_id) + \".\" + base64url(HMAC-SHA256(EMAIL_UNSUBSCRIBE_SECRET, message_id)), no padding. Constant-time compare. Tokens never expire, and old secrets stay valid for verification indefinitely after a rotation. A test-send token signs `test:{random}`: it verifies, shows the page and writes nothing. An invalid token writes nothing.",
   "secret": "test_unsubscribe_secret_do_not_use",
-  "previous_secret": "previous_unsubscribe_secret_rotated",
+  "previous_secrets": ["previous_unsubscribe_secret_rotated"],
   "cases": [
     {
       "id": "UT-01",
@@ -47,9 +47,8 @@
     },
     {
       "id": "UT-06",
-      "note": "Signed with the previous secret, within the 90-day rotation window",
+      "note": "Signed with a previous secret, soon after rotation",
       "token": "MDE5MmY0ZTAtMDAwMC03MDAwLTgwMDAtMDAwMDAwMDAwMDQy.mo0EBMIZtFkLwLYqV3u-iyGyuEJ2Aauo2rm0FV5G6nk",
-      "previous_secret_active": true,
       "expect": {
         "valid": true,
         "message_id": "0192f4e0-0000-7000-8000-000000000042"
@@ -57,11 +56,12 @@
     },
     {
       "id": "UT-07",
-      "note": "Signed with the previous secret after the rotation window",
+      "note": "Signed with a previous secret, years after rotation: unsubscribe links must keep working",
       "token": "MDE5MmY0ZTAtMDAwMC03MDAwLTgwMDAtMDAwMDAwMDAwMDQy.mo0EBMIZtFkLwLYqV3u-iyGyuEJ2Aauo2rm0FV5G6nk",
-      "previous_secret_active": false,
+      "now": "2036-01-01T00:00:00Z",
       "expect": {
-        "valid": false
+        "valid": true,
+        "message_id": "0192f4e0-0000-7000-8000-000000000042"
       }
     },
     {
@@ -70,6 +70,24 @@
       "token": "../../etc/passwd",
       "expect": {
         "valid": false
+      }
+    },
+    {
+      "id": "UT-09",
+      "note": "Signed with a secret that was never configured",
+      "token": "MDE5MmY0ZTAtMDAwMC03MDAwLTgwMDAtMDAwMDAwMDAwMDQy.U1uapM7JDjL6uIpD9xlc0q1_FWs1VSTsnK7sB_o1bjk",
+      "expect": {
+        "valid": false
+      }
+    },
+    {
+      "id": "UT-10",
+      "note": "Test-send token: valid, but must write nothing",
+      "token": "dGVzdDowMTkyZjRlMC1hYWFhLTcwMDAtODAwMC0wMDAwMDAwMHRlc3Q.dPSdOyMiMpc56r0JFRcX5QlEd_zq6qLD3emiZQmEvs4",
+      "expect": {
+        "valid": true,
+        "is_test": true,
+        "writes": false
       }
     }
   ]

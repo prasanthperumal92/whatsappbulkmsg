@@ -1,5 +1,5 @@
 {
-  "$spec": "SPEC.md §5.3, §4.5, §6.1, §12 (upload limits)",
+  "$spec": "SPEC.md §5.3, §4.5, §4.7, §4.8, §6.1, §12 (upload limits)",
   "description": "Expected analyze/validate/commit results for each fixture in evals/fixtures (generate them first). `store` is the contact store state before the import. Counts use the validate summary metrics from §5.3 step 3.",
   "cases": [
     {
@@ -11,12 +11,12 @@
       "options": { "tag_separator": ";" },
       "validate": { "total": 8, "valid_new": 4, "valid_existing": 0, "duplicates_in_file": 1, "suppressed": 0,
         "invalid": { "INVALID_PHONE": 1, "SCIENTIFIC_NOTATION": 1, "EMPTY_PHONE": 1 } },
-      "commit": { "new_rows": 4, "store_version_delta": 1,
+      "commit": { "new_rows": 4,
         "rows": [
           { "phone_e164": "+919876543210", "first_name": "Asha", "tags": ["steel", "export"], "note": "First occurrence kept, not 'Asha R'" },
           { "phone_e164": "+919845012345", "first_name": "Ravi", "tags": ["steel"] },
           { "phone_e164": "+917012345678", "first_name": "Priya", "tags": ["export"] },
-          { "phone_e164": "+447911123456", "first_name": "Tom", "tags": ["export"], "country_iso": "GB" }
+          { "phone_e164": "+447911123456", "first_name": "Tom", "tags": ["export"], "country_iso": "GG", "note": "libphonenumber assigns this +44 range to Guernsey, not GB" }
         ] },
       "rejects_csv": { "rows": 3, "has_column": "reject_reason", "keeps_original_columns": true }
     },
@@ -122,6 +122,44 @@
       "validate": { "suppressed": 1 },
       "commit": { "opt_in_status_by_phone": { "+919845012345": "opted_out", "+919876543210": "opted_in" } },
       "acceptance": "FR-IMP-10: suppressed number is imported but stays opted-out"
+    },
+    {
+      "id": "IS-16", "fixture": "email-only.csv", "store": "empty",
+      "auto_mapping": { "Mobile No": "phone", "Name": "first_name", "Email": "email", "Segment": "tags" },
+      "validate": { "total": 8, "valid_new": 5, "valid_existing": 0, "duplicates_in_file": 1, "email_only": 3,
+        "phone_warnings": { "INVALID_PHONE": 1, "SCIENTIFIC_NOTATION": 1 },
+        "invalid": { "EMPTY_PHONE": 1, "INVALID_PHONE": 1 } },
+      "commit": { "new_rows": 5, "rows": [
+        { "phone_e164": "+919876543210", "email": "asha@example.com", "first_name": "Asha" },
+        { "phone_e164": null, "wa_to": null, "email": "hans@example.de", "first_name": "Hans", "opt_in_status": "unknown", "note": "First occurrence kept; HANS@ is an in-file duplicate" },
+        { "phone_e164": null, "email": "joe@example.com", "first_name": "Joe", "note": "Unusable phone, usable email" },
+        { "phone_e164": null, "email": "kiran@example.com", "first_name": "Kiran" },
+        { "phone_e164": "+919812345678", "email": "ravi@example.in", "first_name": "Ravi" }
+      ] },
+      "rejects_csv": { "rows": 2, "has_column": "reject_reason" },
+      "acceptance": "FR-IMP-04: a row with only a valid email imports as an email-only contact (§4.7)"
+    },
+    {
+      "id": "IS-17", "fixture": "overseas.csv", "store": "empty",
+      "auto_mapping": { "phone": "phone", "name": "first_name", "country": "country", "time_zone": "time_zone", "email": "email" },
+      "settings": { "restricted_countries": ["US"], "fallback_time_zone": "Asia/Kolkata" },
+      "validate": { "total": 7, "valid_new": 7, "email_only": 2, "no_country": 1, "restricted_country": 1 },
+      "commit": { "rows": [
+        { "phone_e164": "+447400123456", "country_iso": "GB", "time_zone": "Europe/London" },
+        { "phone_e164": "+12025550123", "country_iso": "US", "time_zone": "America/New_York", "note": "Mapped zone wins" },
+        { "phone_e164": "+14165550123", "country_iso": "CA", "time_zone": "America/Toronto" },
+        { "phone_e164": "+971501234567", "country_iso": "AE", "time_zone": "Asia/Dubai" },
+        { "phone_e164": "+919876543210", "country_iso": "IN", "time_zone": "Asia/Kolkata" },
+        { "phone_e164": null, "email": "hans@example.de", "country_iso": "DE", "time_zone": "Europe/Berlin" },
+        { "phone_e164": null, "email": "ana@example.com", "country_iso": null, "time_zone": null, "note": "Uses the fallback at campaign freeze; never guessed from the domain" }
+      ] }
+    },
+    {
+      "id": "IS-18", "fixture": "email-only.csv", "store": "empty; hans@example.de in email_suppression_list",
+      "options": { "email_opt_in_value_for_file": "opted_in", "email_consent_confirmed": true },
+      "validate": { "suppressed_emails": 1 },
+      "commit": { "email_opt_in_status_by_email": { "hans@example.de": "opted_out", "joe@example.com": "opted_in" } },
+      "acceptance": "FR-IMP-10: a suppressed address stays opted-out on an email-only contact"
     }
   ]
 }

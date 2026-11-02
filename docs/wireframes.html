@@ -111,7 +111,7 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
 <div class="wf" style="flex-direction: column; gap: 22px">
   <div class="stack" style="gap: 6px">
     <h1 style="margin: 0; font-size: 34px; line-height: 1.1">WhatsApp Bulk Messenger: screen wireframes</h1>
-    <p style="margin: 0; max-width: 900px">Low-fidelity layouts for all 12 screens in SPEC.md §5. They show where things go and what they do, not the final colours or styling.</p>
+    <p style="margin: 0; max-width: 900px">Low-fidelity layouts for all 12 screens in SPEC.md v2.3 §5. They show where things go and what they do, not the final colours or styling.</p>
   </div>
 
   <div class="stack">
@@ -176,7 +176,7 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
         <div class="row between"><h3>WhatsApp connection</h3><span class="chip">Disconnected</span></div>
         <div class="cols2">
           <label><span class="row"><span class="pin">2</span> Access token</span><input type="password" placeholder="Write-only, never shown again"></label>
-          <label>Provider<select><option>Graph API</option><option>Mock</option></select></label>
+          <label>Provider (local dev only)<select><option>Graph API</option><option>Mock</option></select></label>
           <label>WABA ID<input placeholder="1098…"></label>
           <label>Phone Number ID<input placeholder="1065…"></label>
           <label>App ID<input placeholder="8841…"></label>
@@ -186,7 +186,7 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
         <div class="row">
           <span class="pin">3</span>
           <button type="button" class="pri">Test connection</button>
-          <span class="small muted">+91 98450 12345 · Example Exports · Quality GREEN · Limit 250/24 h</span>
+          <span class="small muted">+91 98450 12345 · Grace Ferro Exports · Quality GREEN · Limit 250/24 h</span>
         </div>
         <div class="card">
           <div class="row"><span class="pin">4</span><h3>Webhook setup</h3></div>
@@ -197,13 +197,13 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
       </section>
 
       <section class="card">
-        <div class="row between"><h3>Email (Resend)</h3><span class="chip">Mock</span></div>
+        <div class="row between"><h3>Email (Resend)</h3><span class="chip">Not connected</span></div>
         <div class="cols2">
           <label><span class="row"><span class="pin">5</span> API key</span><input type="password" placeholder="Not set: add RESEND_API_KEY=re_… to .local.bin"></label>
-          <label>Provider<select><option>Mock</option><option>Resend</option></select></label>
+          <label>Provider (local dev only)<select><option>Mock</option><option>Resend</option></select></label>
         </div>
         <div class="card">
-          <div class="row between"><div class="row"><span class="pin">6</span><h3>Sending domain: mail.example.com</h3></div><span class="chip">pending</span></div>
+          <div class="row between"><div class="row"><span class="pin">6</span><h3>Sending domain: mail.graceferroexports.com</h3></div><span class="chip">pending</span></div>
           <div class="tblbox"><table>
             <thead><tr><th>Record</th><th>Name</th><th>Value</th><th>Status</th></tr></thead>
             <tbody>
@@ -215,10 +215,10 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
           <div class="row"><button type="button">Re-check</button><button type="button">Copy records</button></div>
         </div>
         <div class="cols2">
-          <label>From name<input placeholder="Example Exports"></label>
-          <label>From address<input placeholder="offers@mail.example.com"></label>
-          <label>Reply-to<input placeholder="sales@example.com"></label>
-          <label><span class="row"><span class="pin">7</span> Postal address (required to send)</span><input placeholder="[YOUR BUSINESS ADDRESS]"></label>
+          <label>From name<input placeholder="Grace Ferro Exports"></label>
+          <label>From address<input placeholder="offers@mail.graceferroexports.com"></label>
+          <label>Reply-to<input placeholder="info@graceferroexports.com"></label>
+          <label><span class="row"><span class="pin">7</span> Postal address (required to send)</span><input placeholder="Door No 29-12, Second floor, RS Plaza, Palakkad Main Road, Kasturi Nagar, Kuniamuthur PO, Coimbatore 641008, Tamil Nadu, India"></label>
         </div>
         <div class="row"><button type="button">Test connection</button><button type="button">Send test email</button></div>
       </section>
@@ -230,11 +230,14 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
           <tbody>
             <tr><td>Rate</td><td>20 messages/s (max 80)</td><td>2 batch requests/s (max 10)</td></tr>
             <tr><td>Frequency cap</td><td>Skip if messaged in last 7 days</td><td>Skip if emailed in last 7 days</td></tr>
-            <tr><td>Send window</td><td>09:00–20:00 Asia/Kolkata</td><td>09:00–20:00 Asia/Kolkata</td></tr>
-            <tr><td>Volume limit</td><td>Messaging limit tier from Meta</td><td>Daily send cap from Resend plan</td></tr>
+            <tr><td>Send window</td><td>09:00–20:00, recipient's local time</td><td>09:00–20:00, recipient's local time</td></tr>
+            <tr><td>Volume limit</td><td>Messaging limit tier from Meta</td><td>Resend Free: 100 per day, 3,000 per month · 5,000 per hour</td></tr>
+            <tr><td>Staged sending</td><td class="muted">—</td><td>From 500, doubling, 15 min between stages</td></tr>
+            <tr><td>New-domain ramp</td><td class="muted">—</td><td>500, 2,000, 5,000, then 10,000 per day over 4 weeks</td></tr>
+            <tr><td>Restricted countries</td><td>US</td><td class="muted">—</td></tr>
             <tr><td>Circuit breaker</td><td>Failure rate above 25%</td><td>Bounces above 5%, complaints above 0.3%</td></tr>
             <tr><td>Test recipients</td><td>Test phone numbers</td><td>Test email addresses</td></tr>
-            <tr><td>Cost estimate</td><td>Price per message (India)</td><td>Price per 1,000 emails</td></tr>
+            <tr><td>Cost estimate</td><td>Price table by country</td><td>Price per 1,000 emails</td></tr>
           </tbody>
         </table></div>
       </section>
@@ -242,7 +245,7 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
       <div class="cols2">
         <section class="card">
           <h3>Import defaults</h3>
-          <span class="small">Default country: IN · Opt-in defaults per channel · Existing-contact policy · Max file size: 50 MB</span>
+          <span class="small">Default country: IN · Fallback time zone: Asia/Kolkata · Opt-in defaults per channel · Existing-contact policy · Max file size: 50 MB</span>
         </section>
         <section class="card">
           <div class="row"><span class="pin">9</span><h3>Team</h3></div>
@@ -253,9 +256,27 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
 
       <section class="card">
         <div class="row"><span class="pin">10</span><h3>Data</h3></div>
-        <div class="row"><span class="grow">Store version v000123 · 8,412 contacts</span><button type="button">Version history</button><button type="button">Export all contacts</button></div>
+        <div class="row"><span class="grow">8,412 contacts · Latest snapshot s000123, 14:00</span><button type="button">Snapshots</button><button type="button">Export all contacts</button></div>
         <div class="row"><span class="grow">Opt-out keywords: STOP, UNSUBSCRIBE, STOP PROMOTIONS</span><button type="button">Edit</button></div>
         <div class="row"><span class="grow">Email suppression list: 46 addresses</span><button type="button">Manage</button></div>
+        <div class="row"><span class="grow">WhatsApp opt-outs with no matched contact: 2</span><button type="button">Review</button></div>
+      </section>
+
+      <section class="card">
+        <div class="row"><span class="pin">12</span><h3>App URLs</h3></div>
+        <div class="row"><span class="mono grow">App: https://wa.graceferroexports.com</span><button type="button">Copy</button></div>
+        <div class="row"><span class="mono grow">WhatsApp webhook: https://wa.graceferroexports.com/api/webhooks/whatsapp</span><button type="button">Copy</button></div>
+        <div class="row"><span class="mono grow">Resend webhook: https://wa.graceferroexports.com/api/webhooks/resend</span><button type="button">Copy</button></div>
+        <span class="small muted">Read from this deployment. On a vercel.app URL, a warning says production sign-in needs a custom domain.</span>
+      </section>
+
+      <section class="card">
+        <div class="row"><span class="pin">11</span><h3>Audience rules</h3></div>
+        <div class="cols2">
+          <label>Unknown-consent limit per campaign<input placeholder="500"></label>
+          <label>Strict-consent countries<input placeholder="EU/EEA, UK, GG, JE, IM, CA"></label>
+          <label>Privacy notice URL<input placeholder="https://graceferroexports.com/privacy-policy"></label>
+        </div>
       </section>
     </div>
   </div>
@@ -264,7 +285,7 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
     <h1>S-01 Settings</h1>
     <p>Where the app connects to Meta and Resend, and where the sending rules live. Spec §5.2.</p>
     <ol>
-      <li><span class="pin">1</span><div><b>Connection banners</b>These show on every screen until a channel is connected. Previews always show Mock mode.</div></li>
+      <li><span class="pin">1</span><div><b>Connection banners</b>These show on every screen until a channel is connected. Local dev and previews show Mock mode; production never uses Mock.</div></li>
       <li><span class="pin">2</span><div><b>Write-only secrets</b>Saved values are encrypted and never shown again. A value supplied by an env var reads "set by env var" and takes priority.</div></li>
       <li><span class="pin">3</span><div><b>Test connection</b>Calls Meta and shows the number, verified name, quality rating and messaging limit, or the error.</div></li>
       <li><span class="pin">4</span><div><b>Webhook card</b>Everything to paste into Meta's dashboard (§7B Step 7). The last-event time confirms the webhook is working.</div></li>
@@ -273,7 +294,9 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
       <li><span class="pin">7</span><div><b>Postal address</b>Required before the first email, because it goes into every email footer.</div></li>
       <li><span class="pin">8</span><div><b>Sending rules</b>Each channel has its own limits. The wireframe groups them side by side for easy comparison; the spec lists them per channel.</div></li>
       <li><span class="pin">9</span><div><b>Team allowlist</b>Only these emails can sign in. All team members have equal access, and changes are audit-logged.</div></li>
-      <li><span class="pin">10</span><div><b>Data</b>Restore an earlier contact version, export contacts, and manage opt-out keywords and suppressions. A restore can never re-enable an opted-out contact.</div></li>
+      <li><span class="pin">10</span><div><b>Data</b>Restore a Parquet snapshot, export contacts, and manage opt-out keywords and suppressions. A restore can never re-enable an opted-out contact or bring back an erased one. Opt-outs that arrived with no phone number are listed for review.</div></li>
+      <li><span class="pin">11</span><div><b>Audience rules</b>Limits who can be included with unknown consent, and where that's never allowed. Changes are audit-logged.</div></li>
+      <li><span class="pin">12</span><div><b>App URLs</b>Shows the addresses to paste into Clerk, Meta and Resend, so nobody types them by hand.</div></li>
     </ol>
   </aside>
 </div>
@@ -306,7 +329,9 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
           <tr><td>2 Nov, 14:30</td><td>Asha</td><td>WhatsApp</td><td>Campaign created</td><td>Festive offer</td></tr>
           <tr><td>2 Nov, 12:05</td><td class="mono">system:webhook</td><td>WhatsApp</td><td>Opt-out added</td><td>+91******3210 · STOP keyword</td></tr>
           <tr><td>2 Nov, 11:47</td><td class="mono">system:unsubscribe</td><td>Email</td><td>Unsubscribed</td><td>a••••@example.com</td></tr>
-          <tr><td>1 Nov, 18:20</td><td>Ravi</td><td>Both</td><td>Import committed</td><td>expo_leads.csv · 10,902 new · v000123</td></tr>
+          <tr><td>2 Nov, 10:15</td><td>Asha</td><td>Email</td><td>Unknown consent included</td><td>Steel update · 500 recipients · acknowledged</td></tr>
+          <tr><td>1 Nov, 19:40</td><td>Ravi</td><td>—</td><td>Contact erased</td><td>Personal data not recorded</td></tr>
+          <tr><td>1 Nov, 18:20</td><td>Ravi</td><td>Both</td><td>Import committed</td><td>expo_leads.csv · 10,902 new</td></tr>
           <tr><td>1 Nov, 16:02</td><td>Ravi</td><td>WhatsApp</td><td>Template submitted</td><td>festive_offer_nov26</td></tr>
           <tr><td>1 Nov, 10:14</td><td>Asha</td><td>Email</td><td>Resend key changed</td><td>Value not recorded</td></tr>
           <tr><td>31 Oct, 09:30</td><td>Asha</td><td>—</td><td>Team member added</td><td>ravi@example.com</td></tr>
@@ -374,7 +399,7 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
           <tbody>
             <tr>
               <th>Map to <span class="pin">5</span></th>
-              <td><select aria-label="Col A maps to"><option>Phone *</option></select></td>
+              <td><select aria-label="Col A maps to"><option>Phone</option></select></td>
               <td><select aria-label="Col B maps to"><option>First name</option></select></td>
               <td><select aria-label="Col C maps to"><option>Email</option></select></td>
               <td><select aria-label="Col D maps to"><option>Tags</option></select></td>
@@ -384,16 +409,20 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
             <tr><th>Fill / unique <span class="pin">6</span></th><td>99% / 98%</td><td>97% / 61%</td><td>82% / 80%</td><td>100% / 4</td><td>12% / 11%</td></tr>
             <tr><th>Row 1</th><td>98765 43210</td><td>Asha</td><td>asha@example.com</td><td>steel;export</td><td>called twice</td></tr>
             <tr><th>Row 2</th><td>+91 98450 12345</td><td>Ravi</td><td><span class="warn">ravi@example</span> <span class="pin">7</span></td><td>steel</td><td></td></tr>
-            <tr><th>Row 3</th><td><span class="bad">9.19876E+11</span> <span class="pin">8</span></td><td>Priya</td><td>priya@example.com</td><td>export</td><td></td></tr>
+            <tr><th>Row 3</th><td><span class="warn">9.19876E+11</span> <span class="pin">8</span></td><td>Priya</td><td>priya@example.com</td><td>export</td><td></td></tr>
+            <tr><th>Row 4</th><td><span class="bad">12345</span> <span class="pin">11</span></td><td>Joe</td><td class="muted">—</td><td>export</td><td></td></tr>
             <tr><th>…</th><td colspan="5" class="muted">Virtualised, first 200 rows</td></tr>
           </tbody>
         </table></div>
         <div class="row">
+          <span class="pin">12</span>
+          <label>Default country for this file<select><option>India (+91)</option><option>United Kingdom (+44)</option><option>Other…</option></select></label>
           <span class="pin">9</span>
           <label>Tag separator<input placeholder=";" style="width: 60px"></label>
           <label>Apply tags to every row<input placeholder="expo-2026"></label>
           <label>WhatsApp opt-in<select><option>Whole file: unknown</option><option>Whole file: opted in</option><option>Use a column</option></select></label>
           <label>Email opt-in<select><option>Whole file: unknown</option><option>Whole file: opted in</option><option>Use a column</option></select></label>
+          <label>Consent proof reference<input placeholder="expo-form-2026"></label>
         </div>
         <div class="row between"><button type="button">Back</button><div class="row"><span class="pin">10</span><button type="button" class="pri">Next: Validate</button></div></div>
       </section>
@@ -408,12 +437,14 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
       <li><span class="pin">2</span><div><b>Detected settings</b>Encoding, delimiter and header are detected automatically, and each can be overridden.</div></li>
       <li><span class="pin">3</span><div><b>Duplicate file warning</b>Shown when the file's SHA-256 matches a committed import.</div></li>
       <li><span class="pin">4</span><div><b>Presets</b>Shared across the team and applied automatically when the headers match.</div></li>
-      <li><span class="pin">5</span><div><b>Column mapping</b>Each column maps to a standard field, a custom field or Ignore. Headers are auto-suggested, so "Mobile No" becomes Phone.</div></li>
+      <li><span class="pin">5</span><div><b>Column mapping</b>Each column maps to a standard field (including Country and Time zone), a custom field or Ignore. Headers are auto-suggested, so "Mobile No" becomes Phone.</div></li>
       <li><span class="pin">6</span><div><b>Column stats</b>How full and how unique each column is, to help spot the right one.</div></li>
-      <li><span class="pin">7</span><div><b>Amber: invalid email</b>A warning only. The row is still imported, without the email.</div></li>
-      <li><span class="pin">8</span><div><b>Red: invalid phone</b>This row will be rejected. Here, Excel has damaged the number.</div></li>
-      <li><span class="pin">9</span><div><b>Separate consent</b>WhatsApp and email opt-in are set independently, from a column or for the whole file.</div></li>
-      <li><span class="pin">10</span><div><b>Phone is required</b>Next stays disabled until a column is mapped to Phone.</div></li>
+      <li><span class="pin">7</span><div><b>Amber: invalid email</b>A warning only. The row is still imported without the email, if its phone is usable.</div></li>
+      <li><span class="pin">8</span><div><b>Amber: unusable phone, usable email</b>Excel has damaged this number, but the row has an email, so it imports as an email-only contact.</div></li>
+      <li><span class="pin">9</span><div><b>Separate consent</b>WhatsApp and email opt-in are set independently, from a column or for the whole file. A reference can say where the proof is kept.</div></li>
+      <li><span class="pin">10</span><div><b>Phone or email is required</b>Next stays disabled until a column is mapped to Phone or Email.</div></li>
+      <li><span class="pin">11</span><div><b>Red: no usable phone or email</b>This row will be rejected.</div></li>
+      <li><span class="pin">12</span><div><b>Default country</b>Numbers without a + use this. Check it for overseas lists.</div></li>
     </ol>
   </aside>
 </div>
@@ -441,11 +472,14 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
             <tr><td>Total rows</td><td class="num">12,480</td><td class="muted"></td></tr>
             <tr><td>Valid new</td><td class="num">10,902</td><td class="muted"></td></tr>
             <tr><td>Valid, already in store</td><td class="num">1,201</td><td class="muted">Handled by the policy below</td></tr>
+            <tr><td>Of these, email-only</td><td class="num">310</td><td class="muted">No usable phone. 40 had an unusable phone</td></tr>
             <tr><td>Duplicates within file</td><td class="num">212</td><td class="muted">First occurrence kept</td></tr>
             <tr><td>Suppressed numbers <span class="pin">2</span></td><td class="num">34</td><td class="muted">Imported but kept opted out</td></tr>
-            <tr><td>Invalid</td><td class="num">165</td><td class="muted">INVALID_PHONE 140, SCIENTIFIC_NOTATION 20, EMPTY_PHONE 5</td></tr>
+            <tr><td>Invalid (no usable phone or email)</td><td class="num">165</td><td class="muted">INVALID_PHONE 140, SCIENTIFIC_NOTATION 20, EMPTY_PHONE 5</td></tr>
             <tr><td>Email warnings</td><td class="num">96</td><td class="muted">INVALID_EMAIL 90 (value dropped), role address 6</td></tr>
             <tr><td>Suppressed emails</td><td class="num">12</td><td class="muted">Imported but kept email opted out</td></tr>
+            <tr><td>No country known</td><td class="num">28</td><td class="muted">These use the fallback time zone</td></tr>
+            <tr><td>Restricted country</td><td class="num">57</td><td class="muted">Imported; excluded from WhatsApp marketing</td></tr>
           </tbody>
         </table></div>
         <div class="row">
@@ -465,14 +499,14 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
 
       <section class="card">
         <div class="row"><h3>Step 4: Import complete</h3><span class="pin">6</span></div>
-        <div class="row"><span>10,902 added · 1,201 updated · 165 rejected · store version v000124</span></div>
+        <div class="row"><span>10,902 added · 1,201 updated · 165 rejected</span></div>
         <div class="row">
           <button type="button">View imported contacts</button>
           <button type="button" class="pri">Start campaign for these</button>
           <span class="pin">7</span>
           <button type="button">Undo this import</button>
         </div>
-        <span class="small muted">Undo is available only while this import is the latest write. If it isn't, the button explains why it's disabled.</span>
+        <span class="small muted">Undo is available until someone makes another change to contacts. After that, the button explains why it's disabled. New opt-outs don't block it.</span>
       </section>
 
       <div class="banner row"><span class="pin">8</span><span>An import by Ravi is in progress. You can commit yours when it finishes.</span></div>
@@ -488,8 +522,8 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
       <li><span class="pin">3</span><div><b>Existing-contact policy</b>Decides what happens to rows already in the store. Tags are always merged.</div></li>
       <li><span class="pin">4</span><div><b>Rejected rows</b>Downloads rejects.csv with a reject_reason column, so the list can be fixed and re-imported.</div></li>
       <li><span class="pin">5</span><div><b>Consent checkboxes</b>Required when importing as opted in on that channel. The person and time are recorded. The proof itself stays outside the app.</div></li>
-      <li><span class="pin">6</span><div><b>Result card</b>Shows the final counts and the new store version, and links to the imported contacts or a campaign.</div></li>
-      <li><span class="pin">7</span><div><b>Undo</b>Returns to the previous version. Suppressions are re-applied afterwards, so opt-outs survive.</div></li>
+      <li><span class="pin">6</span><div><b>Result card</b>Shows the final counts, and links to the imported contacts or a campaign.</div></li>
+      <li><span class="pin">7</span><div><b>Undo</b>Reverts the rows this import changed. Opt-outs survive, because undo never re-enables anyone.</div></li>
       <li><span class="pin">8</span><div><b>One import at a time</b>Only one commit runs at once. Anyone else sees who holds it.</div></li>
     </ol>
   </aside>
@@ -522,6 +556,8 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
         <label>WhatsApp opt-in<select><option>Opted in</option></select></label>
         <label>Email opt-in<select><option>Any</option></select></label>
         <label>Has email<select><option>Any</option></select></label>
+        <label>Has phone<select><option>Any</option></select></label>
+        <label>Country<select><option>Any</option></select></label>
         <label>Last messaged<select><option>Older than 30 days</option></select></label>
         <label>Last emailed<select><option>Any</option></select></label>
         <button type="button" style="align-self: flex-end">More filters</button>
@@ -542,13 +578,14 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
       </div>
 
       <div class="tblbox"><table>
-        <thead><tr><th>☑</th><th>Name</th><th>Phone</th><th>Email</th><th>Tags</th><th>WhatsApp <span class="pin">6</span></th><th>Email opt-in</th><th>Company</th><th>City</th><th>Last messaged</th><th>Last emailed</th></tr></thead>
+        <thead><tr><th>☑</th><th>Name</th><th>Phone</th><th>Email</th><th>Country</th><th>Tags</th><th>WhatsApp <span class="pin">6</span></th><th>Email opt-in</th><th>Company</th><th>City</th><th>Last messaged</th><th>Last emailed</th></tr></thead>
         <tbody>
-          <tr><td>☑</td><td><a href="#S04-Contact-Drawer">Asha Rao</a> <span class="pin">7</span></td><td class="mono">+919876543210</td><td>asha@example.com</td><td><span class="chip">steel</span></td><td><span class="chip dark">Opted in</span></td><td><span class="chip dark">Opted in</span></td><td>Rao Steel</td><td>Pune</td><td>42 days ago</td><td>Never</td></tr>
-          <tr><td>☑</td><td>Ravi Shah</td><td class="mono">+919845012345</td><td>ravi@example.com</td><td><span class="chip">steel</span></td><td><span class="chip dark">Opted in</span></td><td><span class="chip">Unknown</span></td><td>Shah Metals</td><td>Surat</td><td>Never</td><td>Never</td></tr>
-          <tr><td>☑</td><td>Priya Nair</td><td class="mono">+919900112233</td><td class="muted">—</td><td><span class="chip">steel</span></td><td><span class="chip dark">Opted in</span></td><td><span class="chip">Unknown</span></td><td>Nair Traders</td><td>Kochi</td><td>35 days ago</td><td>Never</td></tr>
-          <tr><td>☑</td><td>Kiran Das</td><td class="mono">+919812345678</td><td>kiran@example.com</td><td><span class="chip">steel</span></td><td><span class="chip">Opted out</span></td><td><span class="chip">Suppressed</span></td><td>Das &amp; Co</td><td>Kolkata</td><td>60 days ago</td><td>31 days ago</td></tr>
-          <tr><td>☐</td><td>Meena Iyer</td><td class="mono">+919833344455</td><td>meena@example.com</td><td><span class="chip">steel</span></td><td><span class="chip dark">Opted in</span></td><td><span class="chip">Opted out</span></td><td>Iyer Exports</td><td>Chennai</td><td>Never</td><td>45 days ago</td></tr>
+          <tr><td>☑</td><td><a href="#S04-Contact-Drawer">Asha Rao</a> <span class="pin">7</span></td><td class="mono">+919876543210</td><td>asha@example.com</td><td>IN</td><td><span class="chip">steel</span></td><td><span class="chip dark">Opted in</span></td><td><span class="chip dark">Opted in</span></td><td>Rao Steel</td><td>Pune</td><td>42 days ago</td><td>Never</td></tr>
+          <tr><td>☑</td><td>Ravi Shah</td><td class="mono">+919845012345</td><td>ravi@example.com</td><td>IN</td><td><span class="chip">steel</span></td><td><span class="chip dark">Opted in</span></td><td><span class="chip">Unknown</span></td><td>Shah Metals</td><td>Surat</td><td>Never</td><td>Never</td></tr>
+          <tr><td>☑</td><td>Priya Nair</td><td class="mono">+919900112233</td><td class="muted">—</td><td>IN</td><td><span class="chip">steel</span></td><td><span class="chip dark">Opted in</span></td><td><span class="chip">Unknown</span></td><td>Nair Traders</td><td>Kochi</td><td>35 days ago</td><td>Never</td></tr>
+          <tr><td>☑</td><td>Kiran Das</td><td class="mono">+919812345678</td><td>kiran@example.com</td><td>IN</td><td><span class="chip">steel</span></td><td><span class="chip">Opted out</span></td><td><span class="chip">Suppressed</span></td><td>Das &amp; Co</td><td>Kolkata</td><td>60 days ago</td><td>31 days ago</td></tr>
+          <tr><td>☐</td><td>Meena Iyer</td><td class="mono">+919833344455</td><td>meena@example.com</td><td>IN</td><td><span class="chip">steel</span></td><td><span class="chip dark">Opted in</span></td><td><span class="chip">Opted out</span></td><td>Iyer Exports</td><td>Chennai</td><td>Never</td><td>45 days ago</td></tr>
+          <tr><td>☐</td><td>Hans Weber</td><td class="muted">—</td><td>hans@example.de</td><td>DE</td><td><span class="chip">export</span></td><td><span class="chip">No phone</span></td><td><span class="chip dark">Opted in</span></td><td>Weber Stahl</td><td>Hamburg</td><td>Never</td><td>12 days ago</td></tr>
         </tbody>
       </table></div>
       <div class="row between"><span class="small muted">Page 1 of 85 · 100 per page</span><div class="row"><span class="pin">8</span><button type="button">Previous</button><button type="button">Next</button></div></div>
@@ -563,8 +600,8 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
       <li><span class="pin">2</span><div><b>Search and columns</b>Search matches any part of a name, phone or email. The column chooser adds custom attributes.</div></li>
       <li><span class="pin">3</span><div><b>Filters</b>Also covers import batch, date created, email suppressed and attribute equals. Every column can be sorted.</div></li>
       <li><span class="pin">4</span><div><b>Select all matching</b>Switches from a page of rows to "this filter, minus these exclusions", so selection doesn't depend on paging. The selection stays in the URL, ready to share.</div></li>
-      <li><span class="pin">5</span><div><b>Bulk action bar</b>Send campaign is the main action and opens S-07 with the channel preset. Each bulk change creates one new store version.</div></li>
-      <li><span class="pin">6</span><div><b>Consent per channel</b>Two separate badges, each overlaid with its suppression list, so an opt-out shows before the Parquet file catches up.</div></li>
+      <li><span class="pin">5</span><div><b>Bulk action bar</b>Send campaign is the main action and opens S-07 with the channel preset. Each bulk change runs as one transaction.</div></li>
+      <li><span class="pin">6</span><div><b>Consent per channel</b>Two separate badges, and an opt-out shows immediately. An email-only contact shows "No phone" for WhatsApp.</div></li>
       <li><span class="pin">7</span><div><b>Open a contact</b>Clicking a row opens the S-04 drawer.</div></li>
       <li><span class="pin">8</span><div><b>Server paging</b>100 rows per page, with shift-click for ranges. Selection and phone columns stay visible when scrolling sideways.</div></li>
     </ol>
@@ -596,6 +633,8 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
         <label>Email<input placeholder="asha@example.com"></label>
         <label>Company<input placeholder="Rao Steel"></label>
         <label>City<input placeholder="Pune"></label>
+        <label>Country<input placeholder="IN"></label>
+        <label>Time zone<input placeholder="Asia/Kolkata"></label>
       </section>
 
       <section class="card">
@@ -607,7 +646,7 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
             <tr><td>Email</td><td><span class="chip dark">Opted in</span></td><td>csv:expo_leads.csv</td><td class="muted">None</td><td><button type="button">Mark opted out</button></td></tr>
           </tbody>
         </table></div>
-        <div class="row"><span class="pin">5</span><button type="button">Opt out of all channels</button></div>
+        <div class="row"><span class="pin">5</span><button type="button">Opt out of all channels</button><span class="small muted">Consent proof: expo-form-2026</span></div>
       </section>
 
       <div class="row">
@@ -629,7 +668,7 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
         </table></div>
       </section>
 
-      <div class="row between"><button type="button">Delete contact</button><button type="button" class="pri">Save</button></div>
+      <div class="row between"><div class="row"><button type="button">Delete contact</button><span class="pin">7</span><button type="button">Erase now</button><button type="button">Export data</button></div><button type="button" class="pri">Save</button></div>
     </div>
   </div>
 
@@ -638,11 +677,12 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
     <p>Everything about one person, opened from a row in the contacts list. Spec §5.5.</p>
     <ol>
       <li><span class="pin">1</span><div><b>Drawer, not a new page</b>Slides over the list, so the filters and selection stay in place behind it.</div></li>
-      <li><span class="pin">2</span><div><b>Same validation as import</b>Phones and emails are normalised the same way. A phone that belongs to another contact is rejected.</div></li>
+      <li><span class="pin">2</span><div><b>Same rules as import</b>Phones and emails are normalised the same way. A contact must keep a phone or email, and a phone belonging to another contact is rejected. Changing a phone or email resets that channel's consent to unknown, unless the change is confirmed.</div></li>
       <li><span class="pin">3</span><div><b>One row per channel</b>A WhatsApp STOP leaves email consent unchanged, and an email unsubscribe leaves WhatsApp unchanged.</div></li>
-      <li><span class="pin">4</span><div><b>Removing a suppression</b>Asks for a reason, which is audit-logged. A complaint entry needs an extra confirmation.</div></li>
+      <li><span class="pin">4</span><div><b>Removing a suppression</b>Asks for a reason, which is audit-logged. A complaint entry needs an extra confirmation. The status becomes unknown, not opted in.</div></li>
       <li><span class="pin">5</span><div><b>All channels</b>The one action that opts someone out of both channels at once.</div></li>
       <li><span class="pin">6</span><div><b>Combined history</b>Messages from both channels, with status, timestamps and any error or bounce reason.</div></li>
+      <li><span class="pin">7</span><div><b>Delete, erase and export</b>Delete is a soft delete, purged after 30 days. Erase now removes personal data at once, keeping only an opt-out entry if there is one. Export supports an access request.</div></li>
     </ol>
   </aside>
 </div>
@@ -790,7 +830,7 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
       <li><span class="pin">5</span><div><b>Samples</b>Required for every variable, since Meta needs them to review the template.</div></li>
       <li><span class="pin">6</span><div><b>Buttons</b>Up to 10, with quick replies grouped together. A "Stop promotions" button also opts people out automatically.</div></li>
       <li><span class="pin">7</span><div><b>Live validation</b>Errors block submitting; warnings don't. For example, missing opt-out wording is a warning.</div></li>
-      <li><span class="pin">8</span><div><b>Submit to Meta</b>Disabled, with the reason, when no credentials are set. Drafts always work. In Mock mode, templates are approved for testing.</div></li>
+      <li><span class="pin">8</span><div><b>Submit to Meta</b>Disabled, with the reason, when no credentials are set. Drafts always work. In Mock mode (local dev and previews only), templates are approved for testing.</div></li>
       <li><span class="pin">9</span><div><b>Live preview</b>Updates on every keystroke, using the sample values.</div></li>
     </ol>
   </aside>
@@ -835,7 +875,7 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
 
           <section class="card" style="background: #F2F2EE">
             <div class="row"><span class="pin">5</span><h3>Footer (fixed)</h3></div>
-            <span class="small">Example Exports · [YOUR BUSINESS ADDRESS] · Unsubscribe</span>
+            <span class="small">Grace Ferro Exports · Door No 29-12, Second floor, RS Plaza, Palakkad Main Road, Kasturi Nagar, Kuniamuthur PO, Coimbatore 641008, Tamil Nadu, India · Unsubscribe · Privacy notice</span>
           </section>
 
           <div class="banner row"><span class="pin">6</span><span>0 errors · 1 warning: subject is in all caps.</span></div>
@@ -849,14 +889,14 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
           <div class="row"><span class="pin">8</span><h3>Preview</h3></div>
           <div class="steps"><span class="on">Desktop</span><span>Mobile</span><span>Plain text</span></div>
           <div class="card">
-            <b class="small">Example Exports</b>
+            <b class="small">Grace Ferro Exports</b>
             <span class="small">Asha, our festive offer is live</span>
             <div class="ph">Banner image</div>
             <b>Festive offer</b>
             <span class="small">Hi Asha, get 15% off all orders placed this week.</span>
             <button type="button" class="pri">View offer</button>
-            <span class="small muted">Example Exports, [YOUR BUSINESS ADDRESS]</span>
-            <span class="small"><u>Unsubscribe</u></span>
+            <span class="small muted">Grace Ferro Exports, Door No 29-12, Second floor, RS Plaza, Palakkad Main Road, Kasturi Nagar, Kuniamuthur PO, Coimbatore 641008, Tamil Nadu, India</span>
+            <span class="small"><u>Unsubscribe</u> · <u>Privacy notice</u></span>
           </div>
         </aside>
       </div>
@@ -871,7 +911,7 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
       <li><span class="pin">2</span><div><b>Preheader</b>The hidden preview text beside the subject. Leaving it out gives a warning.</div></li>
       <li><span class="pin">3</span><div><b>Blocks</b>Heading, Text, Image, Button, Divider and Spacer. Drag to reorder, up to 30 blocks.</div></li>
       <li><span class="pin">4</span><div><b>Image rules</b>Up to 1 MB, and alt text is required. A missing alt blocks Mark ready.</div></li>
-      <li><span class="pin">5</span><div><b>Fixed footer</b>Business name, postal address and unsubscribe link. It can't be edited or removed, because the sender rules require it.</div></li>
+      <li><span class="pin">5</span><div><b>Fixed footer</b>Business name, postal address, unsubscribe link and, when set, a privacy notice link. It can't be edited or removed, because the sender rules require it.</div></li>
       <li><span class="pin">6</span><div><b>Live validation</b>Errors include a button without https and HTML over 100 KB, where Gmail starts clipping. Warnings cover spam risks such as all caps.</div></li>
       <li><span class="pin">7</span><div><b>Test and ready</b>Send test uses the sample values. Mark ready needs zero errors. Running campaigns keep their own snapshot, so later edits never change an email mid-send.</div></li>
       <li><span class="pin">8</span><div><b>Three previews</b>Desktop, mobile and plain text all update as you type.</div></li>
@@ -884,22 +924,22 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
   <div class="stack grow" style="gap: 16px">
     <div class="frame" style="flex: none; align-self: stretch">
       <div class="main" style="align-items: center; padding: 32px; text-align: center">
-        <b>Example Exports</b>
-        <div class="row" style="justify-content: center"><span class="pin">1</span><h2>Unsubscribe a••••@example.com from marketing emails from Example Exports?</h2></div>
+        <b>Grace Ferro Exports</b>
+        <div class="row" style="justify-content: center"><span class="pin">1</span><h2>Unsubscribe a••••@example.com from marketing emails from Grace Ferro Exports?</h2></div>
         <div class="row" style="justify-content: center"><span class="pin">2</span><button type="button" class="pri">Unsubscribe</button></div>
       </div>
     </div>
     <div class="frame" style="flex: none; align-self: stretch">
       <div class="main" style="align-items: center; padding: 32px; text-align: center">
-        <b>Example Exports</b>
+        <b>Grace Ferro Exports</b>
         <div class="row" style="justify-content: center"><span class="pin">3</span><h2>You're unsubscribed. You won't receive marketing emails from us any more.</h2></div>
       </div>
     </div>
     <div class="frame" style="flex: none; align-self: stretch">
       <div class="main" style="align-items: center; padding: 32px; text-align: center">
-        <b>Example Exports</b>
+        <b>Grace Ferro Exports</b>
         <div class="row" style="justify-content: center"><span class="pin">4</span><h2>This link isn't valid.</h2></div>
-        <span>To unsubscribe, contact sales@example.com.</span>
+        <span>To unsubscribe, contact info@graceferroexports.com.</span>
       </div>
     </div>
   </div>
@@ -913,7 +953,7 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
       <li><span class="pin">3</span><div><b>Done</b>Repeating it is harmless and shows the same message. WhatsApp consent isn't affected.</div></li>
       <li><span class="pin">4</span><div><b>Invalid link</b>A tampered link writes nothing and shows the reply-to address instead. The wording here is a placeholder; the spec only calls it a generic page.</div></li>
     </ol>
-    <p class="small muted">Deliberately minimal, accessible, and free of tracking scripts.</p>
+    <p class="small muted">Deliberately minimal, accessible, and free of tracking scripts. A link from a test email shows this page and writes nothing.</p>
   </aside>
 </div>
 </section>
@@ -944,11 +984,13 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
         <div class="tblbox"><table>
           <tbody>
             <tr><td>Selected from Contacts</td><td class="num">8,412</td></tr>
+            <tr><td>No phone number</td><td class="num">− 120</td></tr>
             <tr><td>Suppressed or opted out</td><td class="num">− 212</td></tr>
-            <tr><td>Unknown opt-in <span class="pin">4</span> <label class="inline" style="display: inline-flex; margin-left: 8px"><input type="checkbox"> Include (needs acknowledgement)</label></td><td class="num">− 640</td></tr>
+            <tr><td>Restricted country (US)</td><td class="num">− 57</td></tr>
+            <tr><td>Unknown opt-in <span class="pin">4</span> <label class="inline" style="display: inline-flex; margin-left: 8px"><input type="checkbox"> Include up to 500 (needs acknowledgement)</label></td><td class="num">− 640</td></tr>
             <tr><td>Messaged within the frequency cap</td><td class="num">− 310</td></tr>
             <tr><td>Deleted</td><td class="num">− 10</td></tr>
-            <tr><td><b>Final recipients</b></td><td class="num"><b>7,240</b></td></tr>
+            <tr><td><b>Final recipients</b></td><td class="num"><b>7,063</b></td></tr>
           </tbody>
         </table></div>
       </section>
@@ -961,7 +1003,7 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
         </section>
         <section class="card">
           <div class="row"><h3>Step 4: Preview</h3><span class="pin">7</span></div>
-          <div class="row"><button type="button" aria-label="Previous recipient">◀</button><span class="grow small">Recipient 1 of 7,240: Asha Rao</span><button type="button" aria-label="Next recipient">▶</button></div>
+          <div class="row"><button type="button" aria-label="Previous recipient">◀</button><span class="grow small">Recipient 1 of 7,063: Asha Rao</span><button type="button" aria-label="Next recipient">▶</button></div>
           <div class="phone"><div class="bubble"><span class="small">Hi Asha, our festive offer is live! Get 15% off all orders placed this week.</span></div></div>
         </section>
       </div>
@@ -981,10 +1023,19 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
       <section class="card">
         <div class="row"><h3>Step 5: Review and send</h3></div>
         <div class="row">
-          <div class="stat grow"><b>7,220</b><span class="small muted">Recipients</span></div>
-          <div class="stat grow"><b>[EST. COST]</b><span class="small muted">Estimate, from Settings price</span></div>
-          <div class="stat grow"><b>6 min</b><span class="small muted">At 20 messages/s</span></div>
+          <div class="stat grow"><b>7,043</b><span class="small muted">Recipients</span></div>
+          <div class="stat grow"><b>[EST. COST]</b><span class="small muted">Estimate, by country from Settings</span></div>
+          <div class="stat grow"><b>6 min + windows</b><span class="small muted">At 20 messages/s, plus waits</span></div>
         </div>
+        <div class="tblbox"><table>
+          <thead><tr><th>Recipient time zone <span class="pin">11</span></th><th class="num">Recipients</th><th>Send window</th></tr></thead>
+          <tbody>
+            <tr><td>Europe/Berlin</td><td class="num">3,120</td><td>Open now</td></tr>
+            <tr><td>Asia/Dubai</td><td class="num">2,410</td><td>Open now</td></tr>
+            <tr><td>America/Chicago</td><td class="num">1,485</td><td>Opens 15:00 UTC</td></tr>
+            <tr><td>Asia/Kolkata (fallback: no country known)</td><td class="num">28</td><td>Open now</td></tr>
+          </tbody>
+        </table></div>
         <div class="banner row"><span class="pin">8</span><span>This is over your messaging limit for the next 24 hours.</span><button type="button">Split across days</button></div>
         <div class="row">
           <span class="pin">9</span>
@@ -994,7 +1045,7 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
         </div>
         <div class="row">
           <span class="pin">10</span>
-          <label class="grow">Type 7220 to confirm<input placeholder="7220"></label>
+          <label class="grow">Type 7043 to confirm<input placeholder="7043"></label>
           <a href="#S08-Campaign-Monitor" style="align-self: flex-end; padding: 6px 14px; background: #1F1F1C; color: #fff; border-radius: 4px; text-decoration: none; font-size: 13px">Send</a>
         </div>
       </section>
@@ -1007,14 +1058,15 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
     <ol>
       <li><span class="pin">1</span><div><b>Six steps</b>The steps adapt to the channel chosen first.</div></li>
       <li><span class="pin">2</span><div><b>Channel</b>Preset from the Contacts split button, and fixed once the campaign is created.</div></li>
-      <li><span class="pin">3</span><div><b>Exclusions with counts</b>Shows exactly who is removed and why. Email adds: no address, email suppressed and duplicate address.</div></li>
-      <li><span class="pin">4</span><div><b>Unknown opt-in</b>Excluded by default. Including these contacts needs a toggle and an acknowledgement, and is audit-logged on email.</div></li>
+      <li><span class="pin">3</span><div><b>Exclusions with counts</b>Shows exactly who is removed and why. WhatsApp removes contacts with no phone and in restricted countries. Email adds: no address, email suppressed and duplicate address.</div></li>
+      <li><span class="pin">4</span><div><b>Unknown opt-in</b>Excluded by default. Including these contacts needs a toggle and an acknowledgement, up to the limit in Settings, and is audit-logged. Strict-consent countries and contacts with no known country always stay excluded.</div></li>
       <li><span class="pin">5</span><div><b>Template</b>Only APPROVED MARKETING templates, or READY email templates, are offered.</div></li>
       <li><span class="pin">6</span><div><b>Variables</b>Each maps to a field, attribute or static value, with a fallback. Recipients still empty are listed, then skipped.</div></li>
       <li><span class="pin">7</span><div><b>Preview</b>Step through real rendered messages, or search for one contact. Email also shows the inbox line, HTML and plain text.</div></li>
-      <li><span class="pin">8</span><div><b>Limit check</b>Compares recipients plus the last 24 hours with Meta's tier, and offers to split. Email checks the daily send cap, and blocks sending without a key, verified domain or postal address.</div></li>
-      <li><span class="pin">9</span><div><b>Test and timing</b>Test goes to the numbers in Settings and isn't recorded in the campaign. A send outside the window waits until it reopens.</div></li>
-      <li><span class="pin">10</span><div><b>Typed confirmation</b>Send stays disabled until the count is typed. Recipients are then frozen, and suppression and the frequency cap are re-checked before each send.</div></li>
+      <li><span class="pin">8</span><div><b>Limit check</b>Compares recipients plus the last 24 hours with Meta's tier, and offers to split. Email checks the daily send cap and new-domain ramp, adds stage waits to the duration, and blocks sending without a key, verified domain or postal address.</div></li>
+      <li><span class="pin">9</span><div><b>Test and timing</b>Test goes to the numbers in Settings and isn't recorded in the campaign. A recipient outside their local window waits until it opens.</div></li>
+      <li><span class="pin">10</span><div><b>Typed confirmation</b>Send stays disabled until the count is typed. Recipients are then frozen, and suppression, restricted countries and the frequency cap are re-checked before each send.</div></li>
+      <li><span class="pin">11</span><div><b>Recipient time zones</b>Each recipient gets the send window in their local time, so a campaign can span many hours and holds its channel until done. The fallback row shows contacts with no known country.</div></li>
     </ol>
   </aside>
 </div>
@@ -1047,6 +1099,8 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
       </div>
 
       <div class="banner row"><span class="pin">3</span><span>Paused automatically: failure rate above 25% over the last 200 attempts.</span><button type="button">Resume</button></div>
+
+      <div class="banner row"><span class="pin">7</span><span>Waiting: 1,485 recipients in America/Chicago until 15:00 UTC. Email campaigns also show the stage: Stage 3 of 7, next release 15:10.</span></div>
 
       <div class="row"><span class="pin">4</span><h3>WhatsApp counters</h3><span class="small muted">Polled every 2 s while running</span></div>
       <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px">
@@ -1107,7 +1161,8 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
       <li><span class="pin">3</span><div><b>Auto-pause banner</b>Explains why the circuit breaker stopped the campaign. This banner is an example; a campaign shows Running or Paused, not both.</div></li>
       <li><span class="pin">4</span><div><b>Live counters</b>Accepted only means Meta queued the message; webhooks confirm delivery. Delivered and read also show as a percentage of accepted. Polling drops to every 30 s after the run, since webhooks keep arriving for days.</div></li>
       <li><span class="pin">5</span><div><b>Email version</b>Different counters, rates that turn amber then red near the thresholds, and clicks per link. Opens are approximate because of Apple Mail Privacy Protection.</div></li>
-      <li><span class="pin">6</span><div><b>Failures table</b>Error code plus a plain explanation, exportable as CSV. Email shows the address, bounce type and Resend error.</div></li>
+      <li><span class="pin">6</span><div><b>Failures table</b>Error code plus a plain explanation, exportable as CSV, including failures that arrive later by webhook. Email shows the address, bounce type and Resend error.</div></li>
+      <li><span class="pin">7</span><div><b>Hold line</b>Explains any wait: a time zone's window, the messaging limit, the daily or hourly cap, or the next email stage. This one combines examples.</div></li>
     </ol>
     <p><b>Resend unknown</b> needs an explicit choice. These messages may already have reached people, so the app never resends them by itself.</p>
   </aside>
@@ -1134,7 +1189,7 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
       <div class="cols2">
         <section class="card">
           <div class="row"><span class="pin">1</span><h3>WhatsApp queue</h3></div>
-          <span class="small">Sending: Festive offer · Next: Steel update</span>
+          <span class="small">Sending: Festive offer · Next: Steel update (expected 3 Nov, 15:00 UTC)</span>
         </section>
         <section class="card">
           <h3>Email queue</h3>
@@ -1162,7 +1217,7 @@ body>section{scroll-margin-top:84px;border-bottom:1px solid #8A8A85}
     <h1>S-09 Campaign list</h1>
     <p>Every campaign on both channels, and what's next to send. Spec §5.10.</p>
     <ol>
-      <li><span class="pin">1</span><div><b>One queue per channel</b>Only one campaign per channel sends at a time, and queued ones start automatically. WhatsApp and email can run together.</div></li>
+      <li><span class="pin">1</span><div><b>One queue per channel</b>Only one campaign per channel sends at a time, and queued ones start automatically, with an expected start. A campaign waiting for a time zone still holds its channel. WhatsApp and email can run together.</div></li>
       <li><span class="pin">2</span><div><b>Channel filter</b>Each row also shows its channel with an icon, drawn here as text.</div></li>
       <li><span class="pin">3</span><div><b>Metrics by channel</b>WhatsApp shows read %. Email shows opened % and clicked %, and bounced % in place of failed %.</div></li>
       <li><span class="pin">4</span><div><b>Opt-outs caused</b>Shows how many people left after a campaign. For email, it counts unsubscribes plus complaints.</div></li>

@@ -26,6 +26,8 @@
     { "id": "ES-22", "current": "failed",    "incoming": "email.delivered",        "expect": "failed",     "suppress": false, "note": "Same assumption as G-05 for WhatsApp" },
     { "id": "ES-23", "current": "delivered", "incoming": "email.scheduled",        "expect": "delivered",  "suppress": false, "note": "Stored, ignored" },
     { "id": "ES-24", "current": "accepted",  "incoming": "email.received",         "expect": "accepted",   "suppress": false, "note": "Inbound email event: stored, ignored" },
-    { "id": "ES-25", "current": "skipped",   "incoming": "email.delivered",        "expect": "skipped",    "suppress": false, "note": "Never sent; logged as unmatched" }
+    { "id": "ES-25", "current": "skipped",   "incoming": "email.delivered",        "expect": "skipped",    "suppress": false, "note": "Never sent; logged as unmatched" },
+    { "id": "ES-26", "current": "sending", "incoming": "email.delivered", "expect": "delivered", "suppress": false, "note": "Matched through the message_id tag; webhook beat the send step" },
+    { "id": "ES-27", "current": "delivered", "incoming": "engine_accepted", "expect": "delivered", "suppress": false, "also": "accepted_at and resend_id are set if null" }
   ]
 }
