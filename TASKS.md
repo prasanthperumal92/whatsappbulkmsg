@@ -272,7 +272,7 @@ Email consent columns are built here, not in P8, because the IS-* goldens need t
 
 ## P4 Templates
 
-- [ ] **T4.1 Template validator**
+- [x] **T4.1 Template validator**
   - **Depends:** T1.1
   - **Spec:** §5.7
   - **Build:** pure validator used by browser and server, mapping internal errors to the golden codes in one place.
