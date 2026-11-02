@@ -9,7 +9,7 @@ import { runMigrations } from '../lib/db/migrate';
 const port = Number(process.env.E2E_PORT ?? 3100);
 const pgPort = port + 20000;
 const dir = mkdtempSync(path.join(tmpdir(), 'wa-e2e-'));
-const pg = new EmbeddedPostgres({ databaseDir: dir, user: 'postgres', password: 'postgres', port: pgPort, persistent: false, onLog: () => {} });
+const pg = new EmbeddedPostgres({ databaseDir: path.join(dir, 'pg'), user: 'postgres', password: 'postgres', port: pgPort, persistent: false, onLog: () => {} });
 
 async function main() {
   await pg.initialise();
@@ -19,7 +19,7 @@ async function main() {
 
   const next = spawn('npx', ['next', 'dev', '--port', String(port)], {
     stdio: 'inherit',
-    env: { ...process.env, DATABASE_URL: url, E2E_FAKE_CLERK: '1' },
+    env: { ...process.env, DATABASE_URL: url, E2E_FAKE_CLERK: '1', LOCAL_BLOB_DIR: path.join(dir, 'blob') },
   });
 
   const stop = async () => {

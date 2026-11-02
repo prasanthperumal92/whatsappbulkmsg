@@ -15,6 +15,8 @@ export default function config(phase: string): NextConfig {
     // Local dev only: uploads go through the app because there is no Blob store. Deployments upload straight to Blob.
     ...(phase === PHASE_DEVELOPMENT_SERVER && { experimental: { proxyClientMaxBodySize: '60mb' } }),
     ...(fakeClerk && {
+      // Its own build directory, so these tests can run beside a `next dev` you already have open.
+      distDir: '.next-e2e',
       turbopack: {
         resolveAlias: {
           '@clerk/nextjs/server': './tests/support/fake-clerk/server.ts',

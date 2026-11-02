@@ -2,6 +2,7 @@ evals/fixtures/large-50k.csv
 .local.bin
 node_modules/
 .next/
+.next-e2e/
 next-env.d.ts
 *.tsbuildinfo
 .env*

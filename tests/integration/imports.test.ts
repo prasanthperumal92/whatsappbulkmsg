@@ -443,7 +443,7 @@ describe('AU-01 import routes each write exactly one audit row', () => {
 });
 
 describe('T2.3 WP-05 the database rejects bad contacts', () => {
-  const attempt = (values: Parameters<ReturnType<typeof db.insert<typeof contacts>>['values']>[0]) =>
+  const attempt = (values: typeof contacts.$inferInsert) =>
     db.transaction(async (tx) => {
       await tx.insert(contacts).values(values);
     });
