@@ -294,7 +294,7 @@ Constraints: `CHECK (phone_e164 IS NOT NULL OR email IS NOT NULL)`; partial uniq
 
 **Undo import** is allowed only while `contact_revision` still equals the import's `post_revision`. It reverts the rows from `contact_import_changes` in one transaction. New suppressions do not block undo, and undo never changes an opted-out status back (§4.4).
 
-**Snapshots.** `SnapshotService` streams non-deleted contacts to a ZSTD Parquet file in `/tmp`, checks the row count and that `phone_e164` is unique, uploads it to `{env}/snapshots/` and inserts a `contact_snapshots` row. It runs hourly when `contact_revision` has changed (§10), before every restore, and on demand from S-01. Parquet key/value metadata: `app.schema_version`, `app.version` (snapshot number), `app.row_count`, `app.written_by`. A failed snapshot raises a banner and never affects live contacts.
+**Snapshots.** `SnapshotService` streams non-deleted contacts to a ZSTD Parquet file in `/tmp`, checks the row count and that `phone_e164` is unique, uploads it to `{env}/snapshots/` and inserts a `contact_snapshots` row. It runs on the §10 schedule when `contact_revision` has changed, before every restore, and on demand from S-01. Parquet key/value metadata: `app.schema_version`, `app.version` (snapshot number), `app.row_count`, `app.written_by`. A failed snapshot raises a banner and never affects live contacts.
 
 **Restore** (S-01): take a snapshot, take the advisory lock, then replace `contacts` from the chosen snapshot in one transaction. It skips IDs in `contact_erasures` (§12A) and re-applies both suppression lists. Older snapshots are read with defaults for missing columns.
 
@@ -1221,7 +1221,7 @@ Next.js route handlers under `/api`. JSON. Every route needs a Clerk session **e
 | Job | Schedule | Purpose |
 |---|---|---|
 | `sync-templates` | every 15 min | Pull template statuses (fallback for the webhook) |
-| `snapshot-contacts` | hourly | Write a Parquet snapshot if `contact_revision` has changed (§4.2) |
+| `snapshot-contacts` | daily until the plan allows hourly (T5.13), then hourly | Write a Parquet snapshot if `contact_revision` has changed (§4.2) |
 | `reconcile-campaigns` | every 5 min | Start runs whose `wait_until` or `scheduled_at` has passed; resume stalled runs; reprocess failed webhook events (both sources); start queued campaigns on each channel |
 | `reconcile-emails` | every 15 min | For email rows `accepted` > 2 h with no webhook, `GET /emails/{id}` and apply `last_event` (covers missed webhooks and local dev without a public URL); max 500 lookups per run |
 | `check-email-domain` | hourly | Refresh the Resend domain status; a domain that drops out of `verified` pauses email campaigns and shows a banner |

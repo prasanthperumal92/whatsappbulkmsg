@@ -14,7 +14,7 @@ Date: 2026-11-02. Branch: `p2/import`, based on `p1/foundation`, not pushed.
 | T2.3 ContactStore, T2.4 Suppression, T2.7 Mapping | Code done, own checks pass | T1.4, T1.7 and T1.8 |
 | T2.5 Upload, T2.6 Detection | Code done, own checks pass locally | T1.3 (SPK-05), and the Blob stores (H-2) |
 | T2.8 Validate, T2.9 Commit and undo | Code done, own checks pass locally | Dependencies above |
-| T2.10 Snapshots | Code done, own checks pass locally | T1.3 (SPK-04 on a deployment), Blob stores, and the hourly cron (H-1) |
+| T2.10 Snapshots | Code done, own checks pass locally | T1.3 (SPK-04 on a deployment), Blob stores, and the crons running on Vercel (daily until H-1) |
 | T2.11 Wizard | Code done, E2E-02…04 pass locally with the Clerk stand-in | A real deployment |
 | T2.13 Gate | Can't pass yet | See below |
 
@@ -68,7 +68,7 @@ From a fresh clone at `a40881e`: type check and `evals:check` pass, 358 Vitest t
 
 TASKS.md says to report mismatches rather than resolve them quietly. No golden or scenario was changed.
 
-1. **The Vercel team is on Hobby (needs a decision).** Vercel's API reports the plan as `hobby`. Vercel documents Hobby as daily crons only, with deployments asking for more refused, though I haven't tried one on this account. So §10's hourly `snapshot-contacts` runs **daily** for now. P5 needs crons every 5 minutes, so H-1 will block that regardless. Hobby is also for non-commercial use, which this isn't.
+1. **The Vercel team is on Hobby (decided: stay on Hobby with daily snapshots, and defer H-1 to P5).** Vercel's API reports the plan as `hobby`. Vercel documents Hobby as daily crons only, with deployments asking for more refused, though I haven't tried one on this account. So §10's hourly `snapshot-contacts` runs **daily** for now. P5 needs crons every 5 minutes, so H-1 will block that regardless. Hobby is also for non-commercial use, which this isn't.
 2. **`rejects.csv` isn't escaped against formula injection.** §12 requires this for "CSV export", and the rejects file repeats untrusted cells that someone will open in Excel. IS-01 asks it to keep the original columns, and CE-* is wired in P3, so I left it. I recommend applying the P3 escaper to this file too (T3.3).
 3. **Adding a phone under the Skip policy.** §4.7 says a phone is added to a matching email-only contact, with no exception for Skip, so it's added. Someone who chose Skip might not expect that.
 4. **A later row in the same file adds a phone to an email-only contact created earlier.** It counts as a duplicate, but the phone is kept, not dropped. "First occurrence kept" could be read as dropping it, and that would lose data.
@@ -103,7 +103,7 @@ Spike results are in `docs/spikes/platform.md`. E2E-02's "no 4.5 MB error" is st
 
 ## Next steps
 
-1. **You:** the seven items above, and decide on the plan (H-1). P5 can't run its 5-minute crons on Hobby.
+1. **You:** the seven items above. H-1 is deferred to P5, whose 5-minute crons can't run on Hobby.
 2. Connect Git, push, and confirm a preview gets its own Neon branch. That closes T1.2.
 3. Rerun the gates on that preview, including a real browser upload, then tick T1.3–T1.9 and T2.3–T2.11.
 4. Build T1.10, then run T1.11 and T2.13.

@@ -23,6 +23,8 @@ The build plan for the coding agent, derived from [`SPEC.md`](SPEC.md) v2.3 and 
 - `[HUMAN]`: needs a person with account access.
 - `[LIVE]`: needs real credentials from a `[HUMAN]` task.
 
+**Status lines** on open tasks say what's built and what's left, as of 2 November 2026. Only the tick means done.
+
 ## Suggested order
 
 ```
@@ -39,7 +41,7 @@ Phases keep their numbers from SPEC §14. P8 comes before P6 because it needs no
 
 | ID | Who | What | Blocks |
 |---|---|---|---|
-| H-1 | Vercel account owner | Create or choose the Vercel team, and confirm a plan that allows crons every 5 minutes (§10) | T1.2, T5.13 |
+| H-1 | Vercel account owner | Create or choose the Vercel team, and confirm a plan that allows crons every 5 minutes (§10). Deferred to P5: the team stays on Hobby until then, with daily snapshots | T5.13 |
 | H-2 | Vercel account owner | Authorise the Clerk and Neon Marketplace installs and the two Blob stores | T1.2 |
 | H-3 | Team | Give the first allowlist email(s) | T1.5 |
 | H-4 | Team | Attach `wa.graceferroexports.com` to the Vercel project and add its DNS records. Clerk production cannot run on `*.vercel.app` | T1.5 (production sign-in), T6.4, T9.2 |
@@ -60,61 +62,71 @@ Phases keep their numbers from SPEC §14. P8 comes before P6 because it needs no
   - **Done when:** `build`, `test` and `evals:check` pass, and one Vitest case loads a golden file through the import shown in `evals/README.md`.
 
 - [ ] **T1.2 `[HUMAN]` Link Vercel and provision services**
-  - **Depends:** T1.1, H-1, H-2
+  - **Depends:** T1.1, H-2
   - **Spec:** §3.1, §3.5, §14 P1
   - **Build:** `vercel link` with `master` as the production branch, Clerk, Neon (with a branch per preview) and Blob. Set `APP_ENCRYPTION_KEY`, `CRON_SECRET` and `EMAIL_UNSUBSCRIBE_SECRET` per environment. Pull them locally with `vercel env pull`. Production secrets never go on previews.
   - **Done when:** a pushed branch gets a preview deployment that connects to its own Neon branch.
+  - **Status:** Partly done. Vercel is linked; Clerk (development), Neon and both Blob stores exist, in Singapore. Still open: Git connection, a Neon branch per preview, Production variables, the Clerk settings in `docs/clerk-setup.md`, and connecting the public store. Previews and Production also share one Blob token, which breaks "Production secrets never go on previews".
 
 - [ ] **T1.3 Spike the platform**
   - **Depends:** T1.2
   - **Spec:** §3.2, §3.4, §8.2, C13, R7, R15
   - **Build:** throwaway routes, plus `docs/spikes/platform.md` recording the results. Answer: how does Vercel Workflow retry a killed step? How does pinning behave across deploys, and does a parked campaign restart on the new deployment? How many events does the §8.2 loop use? Which Parquet writer works, DuckDB or `hyparquet-writer`? Do private client uploads, signed downloads and the public `email-assets/` store work?
   - **Done when:** SPK-01…05 and WP-11 pass on a preview deployment, and the document names the Parquet writer and the hand-off count.
+  - **Status:** SPK-01, SPK-02, SPK-03, SPK-04 and WP-11 pass on preview deployments; results are in `docs/spikes/platform.md`. Writer: `hyparquet-writer`. Hand-off stays at 1,000 batches. Still open: SPK-05's public store read, and a browser upload to Blob. T1.2 is also open.
 
 - [ ] **T1.4 Database schema**
   - **Depends:** T1.2
   - **Spec:** §4.1, §4.3
   - **Build:** Drizzle schema and migrations for every table in §4.1 and §4.3, with a pooled or WebSocket Postgres driver that supports interactive transactions. Include the partial unique indexes and `CHECK` on `contacts`, and the partial unique index on `campaigns(channel) WHERE status = 'running'`.
   - **Done when:** migrations apply to an empty Neon branch, and an integration test proves `UNIQUE(campaign_id, contact_id)`, the partial `UNIQUE(campaign_id, email_to)` and the one-running-campaign index.
+  - **Status:** Code done. Migrations apply and the tests pass on a Neon branch. Waiting on T1.2.
 
 - [ ] **T1.5 Sign-in and allowlist**
   - **Depends:** T1.4, H-3
   - **Spec:** §3.5, §5.1, §5.2 (Team), §9, §12
   - **Build:** Clerk with email code and Google, no public sign-up, allowlist check backed by `team_allowlist`. Use a development instance on previews; production needs H-4 and H-8. Exempt only `/api/webhooks/*`, `/api/cron/*` and `/u/*`. A `requireCron` helper checks `CRON_SECRET`. `GET/POST/DELETE /team` and the S-01 Team section.
   - **Done when:** FR-SET-01, SEC-01, SEC-02 and SEC-03 pass. Add a route-table test that fails if a new route is left unauthenticated.
+  - **Status:** Code done. SEC-02 and SEC-03 pass on a preview with real Clerk. SEC-01 isn't proven: Clerk still has public sign-up and required passwords. Waiting on T1.4 and the Clerk settings.
 
 - [ ] **T1.6 App shell**
   - **Depends:** T1.5
   - **Spec:** §5.1
   - **Build:** sidebar, user menu, and a banner system fed by one status endpoint. Banners for missing credentials and Mock mode work now; the rest plug in later.
   - **Done when:** all sidebar routes render with empty states, and the Mock banner always shows on previews.
+  - **Status:** Code done. The Mock banner hasn't been seen on a real preview. Waiting on T1.5.
 
 - [ ] **T1.7 Audit log and safe logging**
   - **Depends:** T1.5
   - **Spec:** §5.11, §11, FR-SET-05, G4
   - **Build:** `withAudit` route helper; structured logger that redacts tokens and keys and masks phones and emails; `GET /audit`; S-10 Activity log with filters.
   - **Done when:** SEC-10 and SEC-18 pass, and AU-01 passes for the routes that exist so far. Extend AU-01 as routes are added.
+  - **Status:** Code done. AU-01 passes on Neon for existing routes. Waiting on T1.5.
 
 - [ ] **T1.8 Environment and settings layer**
   - **Depends:** T1.4
   - **Spec:** §3.4, §3.5, §7.1.2, D16
   - **Build:** `lib/env.ts` for environment detection, Blob prefix (`prod/`, `preview/<branch>/`, `dev/`) and whether Mock is allowed; typed settings store with defaults; AES-256-GCM secrets store; `GET/PUT /settings`.
   - **Done when:** unit tests cover encrypt/decrypt round trips and each environment's prefix and Mock rule, and settings defaults match §5.2.
+  - **Status:** Code done; its own checks pass. Waiting on T1.4.
 
 - [ ] **T1.9 CI and deploy-time migrations**
   - **Depends:** T1.2, T1.4
   - **Spec:** §3.1, §13
   - **Build:** required pull request checks (type check, unit and integration tests, `evals:check`), protection on `master`, migrations as a deploy step, and a short note in the repo on expand-then-contract changes.
   - **Done when:** a failing test blocks a merge, and a merged migration reaches its environment.
+  - **Status:** Files only. The workflow has never run on GitHub, and branch protection and the merge-blocking proof are outstanding. Waiting on T1.2 and T1.4.
 
 - [ ] **T1.10 Test harness**
   - **Depends:** T1.3, T1.5, T1.9
   - **Spec:** §13
   - **Build:** controllable clock in Workflow steps, fault injection at a chosen row, Clerk test users, Deployment Protection bypass for Playwright, seeding and reset per test branch.
   - **Done when:** HN-01…03 pass.
+  - **Status:** Not started. Waiting on T1.3, T1.5 and T1.9.
 
 - [ ] **T1.11 Gate P1**
   - **Done when:** SEC-01…03, SEC-10, AU-01 (existing routes), SPK-01…05, HN-01…03 and WP-11 pass on a preview deployment.
+  - **Status:** Can't pass yet. SEC-01, SPK-05 and HN-01…03 are open.
 
 ---
 
@@ -139,54 +151,63 @@ Email consent columns are built here, not in P8, because the IS-* goldens need t
   - **Spec:** §4.1, §4.2, §4.7
   - **Build:** `ContactStore` on Postgres: transactions, `contact_revision`, list and write methods, and a pure `matchContact` function for the §4.7 rules.
   - **Done when:** MA-* and WP-05 pass.
+  - **Status:** Code done; MA-* and WP-05 pass on Neon. Waiting on T1.4 and T1.8.
 
 - [ ] **T2.4 Suppression service**
   - **Depends:** T1.7, T2.3
   - **Spec:** §4.4, §9
   - **Build:** one service for both lists, updating contact statuses in the same transaction, and storing opt-outs that have no contact yet; `GET/POST/DELETE /suppression?channel=`; removal needs a reason and sets status to `unknown`.
   - **Done when:** AU-02 passes, and tests show one channel's opt-out leaves the other unchanged.
+  - **Status:** Code done; AU-02 passes on Neon. Waiting on T1.7 and T2.3.
 
 - [ ] **T2.5 File upload**
   - **Depends:** T1.3, T1.8
   - **Spec:** §5.3 Step 1, §9, §12
   - **Build:** `POST /imports/upload-token` with session, size and type checks; `POST /imports` with SHA-256 duplicate detection; `GET /imports/{id}`.
   - **Done when:** FR-IMP-01 and SEC-09 pass, and a repeat upload returns `duplicate_of`.
+  - **Status:** Code done; SEC-09 passes on Neon. The browser's direct upload to Blob hasn't run. Waiting on T1.3 and T1.8.
 
 - [ ] **T2.6 Detection and analysis**
   - **Depends:** T2.5
   - **Spec:** §5.3 Step 1, §12
   - **Build:** PapaParse Web Worker preview; `POST /imports/{id}/analyze` for encoding, delimiter, quote, header and skip detection, column stats and limits.
   - **Done when:** FR-IMP-02 and SEC-11 pass, and the analyze parts of `import-summaries.json` pass for each fixture.
+  - **Status:** Code done; passes on Neon. Waiting on T2.5.
 
 - [ ] **T2.7 Mapping engine and presets**
   - **Depends:** T2.6
   - **Spec:** §5.3 Step 2
   - **Build:** header synonyms, target-field rules, header signature matching, `GET/POST/DELETE /mapping-presets`.
   - **Done when:** FR-IMP-03, FR-IMP-04 and FR-IMP-09 pass at unit level ("Mobile No" maps to Phone).
+  - **Status:** Code done; passes at unit level and on Neon. Waiting on T2.6.
 
 - [ ] **T2.8 Validate**
   - **Depends:** T2.1, T2.2, T2.3, T2.4, T2.7, T2.12
   - **Spec:** §4.7, §4.8, §5.3 Step 3
   - **Build:** `POST /imports/{id}/validate` and `GET /imports/{id}/rejects`: full-file normalisation, matching, all three existing-contact policies, suppression, email-only, no-country and restricted-country counts, `rejects.csv`.
   - **Done when:** FR-IMP-04, FR-IMP-06 and FR-IMP-07 pass, and the validate parts of IS-01…18 pass.
+  - **Status:** Code done; passes on Neon. Waiting on T2.3, T2.4 and T2.7.
 
 - [ ] **T2.9 Commit and undo**
   - **Depends:** T2.8
   - **Spec:** §4.2, §5.3 Steps 3–4
   - **Build:** `POST /imports/{id}/commit` (advisory lock, re-matching, change log, both consent confirmations) and `POST /imports/{id}/undo`, which never re-enables an opted-out contact.
   - **Done when:** FR-IMP-08, FR-IMP-10, FR-IMP-11, WP-01…04, WP-06…08, NFR-01 and all of IS-01…18 pass.
+  - **Status:** Code done; passes on Neon. NFR-01 took 9.5 s against 60 s, over a direct connection from a local machine, not from a function. Waiting on T2.8.
 
 - [ ] **T2.10 Snapshots, restore and `cleanup` cron**
   - **Depends:** T1.3, T2.9
   - **Spec:** §4.2, §10, §12A.2
   - **Build:** `SnapshotService` with the writer chosen in T1.3; `GET/POST /snapshots`; `POST /snapshots/{version}/restore`; `snapshot-contacts` cron; `/api/cron/cleanup` with a job lock, deleting snapshots over 30 days, orphan blobs, and import sources and rejects over 7 days. T5.13 adds the rest.
   - **Done when:** WP-09…14, CR-01 and EM-02 pass.
+  - **Status:** Code done; WP-09…14, CR-01 and EM-02 pass on Neon. The crons haven't run on Vercel, and `snapshot-contacts` runs daily, as agreed, until H-1 allows hourly. Waiting on T1.3 and T2.9.
 
 - [ ] **T2.11 S-02 Import wizard**
   - **Depends:** T2.9
   - **Spec:** §5.3, §5.2 (Import)
   - **Build:** all four steps, including the virtualised mapping grid, default country for the file, red and amber cell highlights, consent checkboxes, result card and the "import in progress" state. Add the S-01 Import section.
   - **Done when:** E2E-02, E2E-03 and E2E-04 pass.
+  - **Status:** Code done; E2E-02…04 pass locally with a Clerk stand-in. E2E-02's "no 4.5 MB error" isn't proven, because no browser has uploaded to Blob. Waiting on T2.9.
 
 - [x] **T2.12 Country and time zone**
   - **Depends:** T2.1
@@ -196,6 +217,7 @@ Email consent columns are built here, not in P8, because the IS-* goldens need t
 
 - [ ] **T2.13 Gate P2**
   - **Done when:** PN-*, EN-*, MA-*, TZ-*, IS-01…18, WP-01…14, CR-01, EM-02, E2E-02…04, NFR-01, SEC-09 and SEC-11 pass.
+  - **Status:** Can't pass yet. Waiting on the tasks above.
 
 ---
 
@@ -320,7 +342,7 @@ Email consent columns are built here, not in P8, because the IS-* goldens need t
 - [ ] **T5.7 Workflow engine**
   - **Depends:** T1.10, T5.1, T5.5, T5.6
   - **Spec:** §8.1–8.4, §7.5, C13
-  - **Build:** `runCampaign` with Vercel Workflow per §8.2: `run_token` ownership, heartbeat, parking long waits, hand-offs, claims with `SKIP LOCKED` and expiry, safe finalisation; `sendBatch` with re-checks and row-level persistence; `rate_limits`; per-channel queue; scheduling started by cron; per-zone send windows; one media upload per campaign.
+  - **Build:** `runCampaign` with Vercel Workflow per §8.2: `run_token` ownership, heartbeat, parking long waits, hand-offs, claims with `SKIP LOCKED` and expiry, safe finalisation; `sendBatch` with re-checks and row-level persistence; `rate_limits`; per-channel queue; scheduling started by cron; per-zone send windows; one media upload per campaign. Setup found in the T1.3 spike: install `workflow`, wrap the Next config in `withWorkflow`, and exclude `.well-known/workflow/` from the `proxy.ts` matcher.
   - **Done when:** FR-CMP-04, FR-CMP-08, CM-03…07, CM-09, CM-10, CM-18, CM-19, CM-21, CM-26, CM-30, CM-32…38, CM-41 and CM-42 pass.
 
 - [ ] **T5.8 Retries, controls and circuit breaker**
@@ -356,7 +378,7 @@ Email consent columns are built here, not in P8, because the IS-* goldens need t
 - [ ] **T5.13 Remaining crons**
   - **Depends:** T2.10, T5.8, H-1
   - **Spec:** §8.2, §8.3, §10
-  - **Build:** `sync-templates` and `reconcile-campaigns` (due parked and scheduled campaigns, stalled runs, failed webhook events, queues), the remaining cleanup work, a shared job lock, and the full schedule in `vercel.ts`.
+  - **Build:** `sync-templates` and `reconcile-campaigns` (due parked and scheduled campaigns, stalled runs, failed webhook events, queues), the remaining cleanup work, a shared job lock, and the full schedule in `vercel.ts`, which moves `snapshot-contacts` from daily to hourly.
   - **Done when:** CR-02, CR-03 and CR-04 pass.
 
 - [ ] **T5.14 Gate P5**

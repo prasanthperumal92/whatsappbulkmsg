@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TODO – WhatsApp Bulk Messenger</title>
+  <style>
+    body { font: 15px/1.5 system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 16px; color: #222; background: #fff; }
+    h1 { color: #D42427; } h2 { border-bottom: 2px solid #D42427; padding-bottom: 3px; margin-top: 1.8rem; }
+    code { background: #f3f3f3; padding: 1px 4px; border-radius: 3px; }
+    .task { margin: .5rem 0; } .task label { font-weight: 600; } .task p { margin: .1rem 0 .1rem 1.6rem; }
+    ul, ol { margin: .3rem 0 .8rem; }
+    .scroll { overflow-x: auto; }
+    table { border-collapse: collapse; margin: .4rem 0 1rem; font-size: 14px; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 3px 7px; text-align: left; vertical-align: top; }
+    th { background: #f3f3f3; }
+    .note { color: #555; }
+  </style>
+</head>
+<body>
+
+<h1>TODO: WhatsApp Bulk Messenger</h1>
+<p class="note">Status on 2026-11-02, branch <code>p2/import</code>, not pushed. This page is a summary. <code>TASKS.md</code> is the build plan, and its ticks decide what is done.</p>
+
+<h2>Where things stand</h2>
+<p><b>P1 and P2 code is written and passes on real infrastructure, but neither phase is finished.</b> Their tasks depend on T1.2, the setup task below. Ticked in <code>TASKS.md</code>: T1.1, T2.1, T2.2 and T2.12. P3 onwards has not started.</p>
+
+<h2>Your tasks, in order</h2>
+
+<div class="task"><label><input type="checkbox"> Rotate the development <code>CLERK_SECRET_KEY</code></label>
+<p>Part of it was printed into a Claude session by mistake. It is a test-instance key. Update Vercel and <code>.env.local</code> afterwards.</p></div>
+
+<div class="task"><label><input type="checkbox"> Fix the Clerk settings</label>
+<p>Follow <code>docs/clerk-setup.md</code>: restrict sign-up and turn off passwords. The instance currently has public sign-up and required passwords, so only the app's allowlist keeps outsiders out.</p></div>
+
+<div class="task"><label><input type="checkbox"> Connect the Vercel project to GitHub</label>
+<p>Set <code>master</code> as the production branch. Until then, a pushed branch gets no preview.</p></div>
+
+<div class="task"><label><input type="checkbox"> Give each preview its own Neon branch</label>
+<p>Use an empty schema-only parent. Previews share the development database today.</p></div>
+
+<div class="task"><label><input type="checkbox"> Add the Production variables</label>
+<p>Database, Clerk and app secrets. Only <code>RESEND_API_KEY</code> and the Blob token are set there now.</p></div>
+
+<div class="task"><label><input type="checkbox"> Connect the public Blob store</label>
+<p>Connect <code>whatsappbulkmsg-public</code> under a different variable name, so it doesn't clash with <code>BLOB_READ_WRITE_TOKEN</code>.</p></div>
+
+<div class="task"><label><input type="checkbox"> Replace the Resend key once the domain is verified</label>
+<p>Create a key restricted to <code>mail.graceferroexports.com</code> and revoke the current one, because its value appeared in a Claude session.</p></div>
+
+<h2>Decisions for you</h2>
+<div class="scroll"><table>
+<tr><th>Question</th><th>Recommendation or effect</th></tr>
+<tr><td>Should previews get their own private Blob store?</td><td>Yes: a third store for Preview and Development. They share a token with Production today, which breaks the rule on production secrets. The spec lists only two stores, and the store is empty, so it's easy to change now.</td></tr>
+<tr><td>Can Claude push <code>p2/import</code> once Git is connected?</td><td>T1.2 needs a pushed branch. The gates then rerun on that preview.</td></tr>
+<tr><td>Can Claude delete the Neon branch <code>test-p2-gate</code>?</td><td>It was only for test runs, and the free plan limits branches.</td></tr>
+<tr><td>Should <code>rejects.csv</code> be escaped against formula injection?</td><td>Recommended, using the P3 escaper. It repeats untrusted cells that someone will open in Excel.</td></tr>
+<tr><td>Should Skip policy still add a phone to a matching email-only contact?</td><td>It does today, because §4.7 makes no exception. Someone who chose Skip might not expect it.</td></tr>
+</table></div>
+
+<h2>Human prerequisites</h2>
+<div class="scroll"><table>
+<tr><th>ID</th><th>What</th><th>State</th></tr>
+<tr><td>H-1</td><td>Vercel plan that allows 5-minute crons</td><td>Deferred to P5: the team stays on Hobby, with daily snapshots. Needed before T5.13</td></tr>
+<tr><td>H-2</td><td>Clerk, Neon and two Blob stores</td><td>Mostly done: all exist in Singapore, but the public store isn't connected</td></tr>
+<tr><td>H-3</td><td>First allowlist emails</td><td>Done for development: one allowlist row</td></tr>
+<tr><td>H-4</td><td>Attach <code>wa.graceferroexports.com</code> and its DNS</td><td>Open: no domains on the Vercel team</td></tr>
+<tr><td>H-6</td><td>Resend account, key and DNS for <code>mail.graceferroexports.com</code></td><td>Partly done: key stored, no domain added</td></tr>
+<tr><td>H-5, H-7, H-8, H-9, H-10</td><td>Meta setup and verification, privacy policy, Google OAuth, price table and legal review</td><td>Not checked. See <code>TASKS.md</code></td></tr>
+</table></div>
+
+<h2>P1 Foundation</h2>
+<div class="scroll"><table>
+<tr><th>Task</th><th>State</th><th>What's left</th></tr>
+<tr><td>T1.1 Scaffold</td><td>Done, ticked</td><td>Nothing</td></tr>
+<tr><td>T1.2 Vercel and services</td><td>Partly done</td><td>Your tasks above, then a pushed branch that gets its own Neon branch</td></tr>
+<tr><td>T1.3 Platform spike</td><td>SPK-01 to SPK-04 and WP-11 pass on previews</td><td>SPK-05: public store read, and a browser upload to Blob</td></tr>
+<tr><td>T1.4 Schema</td><td>Code done; migrations and tests pass on a Neon branch</td><td>Tick after T1.2</td></tr>
+<tr><td>T1.5 Sign-in and allowlist</td><td>Code done; SEC-02 and SEC-03 pass on a preview</td><td>Clerk settings, then SEC-01 with real Clerk</td></tr>
+<tr><td>T1.6 App shell</td><td>Code done</td><td>See the Mock banner on a real preview</td></tr>
+<tr><td>T1.7 Audit and logging</td><td>Code done</td><td>Depends on T1.5</td></tr>
+<tr><td>T1.8 Environment and settings</td><td>Code done; its own checks pass</td><td>Depends on T1.4</td></tr>
+<tr><td>T1.9 CI and migrations</td><td>Files only</td><td>First GitHub run, branch protection, and proof that a failing test blocks a merge</td></tr>
+<tr><td>T1.10 Test harness</td><td>Not started</td><td>HN-01 to HN-03. Depends on T1.3, T1.5 and T1.9</td></tr>
+<tr><td>T1.11 Gate</td><td>Can't pass yet</td><td>All of the above</td></tr>
+</table></div>
+
+<h2>P2 Import</h2>
+<div class="scroll"><table>
+<tr><th>Task</th><th>State</th><th>What's left</th></tr>
+<tr><td>T2.1 Phone, T2.2 Email, T2.12 Country and zone</td><td>Done, ticked</td><td>Nothing</td></tr>
+<tr><td>T2.3 ContactStore, T2.4 Suppression, T2.7 Mapping</td><td>Code done; tests pass on Neon</td><td>Depend on T1.4, T1.7 and T1.8</td></tr>
+<tr><td>T2.5 Upload, T2.6 Detection</td><td>Code done; tests pass on Neon</td><td>Depend on T1.3 and T1.8</td></tr>
+<tr><td>T2.8 Validate, T2.9 Commit and undo</td><td>Code done; tests pass on Neon. NFR-01 took 9.5 s against 60 s, from this machine</td><td>Depend on the tasks above</td></tr>
+<tr><td>T2.10 Snapshots</td><td>Code done; tests pass on Neon</td><td>Depends on T1.3. Crons have not run on Vercel. Runs daily until H-1, as agreed</td></tr>
+<tr><td>T2.11 Wizard</td><td>Code done; E2E-02 to E2E-04 pass locally with a Clerk stand-in</td><td>Run on a real preview, including a browser upload to Blob</td></tr>
+<tr><td>T2.13 Gate</td><td>Can't pass yet</td><td>All of the above</td></tr>
+</table></div>
+
+<h2>After your tasks</h2>
+<ol>
+  <li>Push the branch and confirm a preview gets its own Neon branch. That closes T1.2.</li>
+  <li>Rerun the gates on that preview, then tick T1.3 to T1.9 and T2.3 to T2.11.</li>
+  <li>Build T1.10, then run T1.11 and T2.13.</li>
+  <li>Start P3 Contacts.</li>
+</ol>
+
+<p class="note">Details: <code>docs/spikes/platform.md</code> and <code>docs/reflections/p2-import.md</code>.</p>
+
+</body>
+</html>
