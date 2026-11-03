@@ -1,4 +1,6 @@
 import { PageHeader } from '@/components/shell/page-header';
+import { WhatsAppSection } from '@/components/settings/whatsapp-section';
+import { WhatsAppWebhookSection } from '@/components/settings/whatsapp-webhook-section';
 import { EmailSection } from '@/components/settings/email-section';
 import { SignatureSection } from '@/components/settings/signature-section';
 import { WebhookSection } from '@/components/settings/webhook-section';
@@ -10,6 +12,8 @@ export default function SettingsPage() {
     <>
       <PageHeader title="Settings" description="More sections arrive as each channel is built." />
       <div className="max-w-2xl space-y-6">
+        <WhatsAppSection />
+        <WhatsAppWebhookSection />
         <EmailSection />
         <SignatureSection />
         <WebhookSection />

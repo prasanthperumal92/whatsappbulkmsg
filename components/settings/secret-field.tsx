@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { fetchJson } from '@/lib/client/fetch-json';
 
 export type CredentialSource = 'local_bin' | 'env' | 'settings' | 'none';
-export type Credentials = { RESEND_API_KEY: CredentialSource; RESEND_WEBHOOK_SECRET: CredentialSource };
+export type Credentials = Record<'WHATSAPP_ACCESS_TOKEN' | 'WHATSAPP_WABA_ID' | 'WHATSAPP_PHONE_NUMBER_ID' | 'META_APP_SECRET' | 'RESEND_API_KEY' | 'RESEND_WEBHOOK_SECRET', CredentialSource>;
 
 const SOURCE_TEXT: Record<CredentialSource, string> = {
   local_bin: 'Loaded from .local.bin',
@@ -19,7 +19,7 @@ const SOURCE_TEXT: Record<CredentialSource, string> = {
 };
 
 /** Write-only: the value is never read back, only where it came from. */
-export function SecretField({ id, label, name, placeholder, source, hint }: { id: string; label: string; name: keyof Credentials; placeholder: string; source?: CredentialSource; hint?: string }) {
+export function SecretField({ id, label, name, placeholder, source, hint, plain = false }: { id: string; label: string; name: keyof Credentials; placeholder: string; source?: CredentialSource; hint?: string; /** An ID rather than a secret, so it's readable while being typed. */ plain?: boolean }) {
   const client = useQueryClient();
   const [value, setValue] = useState('');
   const save = useMutation({
@@ -29,6 +29,7 @@ export function SecretField({ id, label, name, placeholder, source, hint }: { id
       client.setQueryData(['credentials'], next);
       void client.invalidateQueries({ queryKey: ['status'] });
       void client.invalidateQueries({ queryKey: ['email-webhook'] });
+      void client.invalidateQueries({ queryKey: ['whatsapp-webhook'] });
     },
   });
   return (
@@ -41,7 +42,7 @@ export function SecretField({ id, label, name, placeholder, source, hint }: { id
     >
       <Label htmlFor={id}>{label}</Label>
       <div className="flex gap-2">
-        <Input id={id} type="password" autoComplete="off" placeholder={placeholder} value={value} onChange={(e) => setValue(e.target.value)} />
+        <Input id={id} type={plain ? 'text' : 'password'} autoComplete="off" placeholder={placeholder} value={value} onChange={(e) => setValue(e.target.value)} />
         <Button type="submit" variant="outline" disabled={!value.trim() || save.isPending}>Save</Button>
       </div>
       <p className="text-xs text-muted-foreground" role="status">

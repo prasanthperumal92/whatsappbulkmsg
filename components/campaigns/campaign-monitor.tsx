@@ -30,13 +30,14 @@ const FILTERS: [MessageFilter, string][] = [
 ];
 
 const MESSAGE_STATUS: Record<string, string> = {
-  pending: 'Pending', claimed: 'Pending', retry_wait: 'Retrying', sending: 'Sending', accepted: 'Accepted', sent: 'Sent', delayed: 'Delayed', delivered: 'Delivered',
+  pending: 'Pending', claimed: 'Pending', retry_wait: 'Retrying', sending: 'Sending', accepted: 'Accepted', sent: 'Sent', delayed: 'Delayed', delivered: 'Delivered', read: 'Read',
   opened: 'Opened', clicked: 'Clicked', bounced: 'Bounced', complained: 'Complained', failed: 'Failed', skipped: 'Skipped', unknown: 'Unknown',
 };
 const SKIP_REASON: Record<string, string> = {
   SUPPRESSED: 'On the suppression list',
   EMPTY_VARIABLE: 'A variable had no value',
   NO_EMAIL: 'No email address',
+  RESTRICTED_COUNTRY: 'WhatsApp doesn’t deliver marketing messages to this country',
   SEND_STOPPED: 'The send stopped first',
 };
 
@@ -69,7 +70,7 @@ function describeMessage(m: CampaignMessage) {
   if (m.status === 'skipped') return SKIP_REASON[m.error_code ?? ''] ?? m.error_code ?? '';
   if (m.status === 'unknown') return 'May or may not have gone out';
   if (m.bounce_type) return [m.bounce_type, m.bounce_subtype, m.error_detail].filter(Boolean).join(' · ');
-  return m.error_detail ?? (m.unsubscribed ? 'Unsubscribed' : '');
+  return (m.error_code && m.error_detail ? `${m.error_code}: ${m.error_detail}` : m.error_detail) ?? (m.unsubscribed ? 'Unsubscribed' : '');
 }
 
 function Recipients({ id, running }: { id: string; running: boolean }) {
@@ -124,7 +125,7 @@ function Recipients({ id, running }: { id: string; running: boolean }) {
               )}
               {messages.data.items.map((m) => (
                 <TableRow key={m.id}>
-                  <TableCell>{m.email_to ?? '—'}</TableCell>
+                  <TableCell>{m.email_to ?? m.phone_e164 ?? '—'}</TableCell>
                   <TableCell>{[m.first_name, m.last_name].filter(Boolean).join(' ') || '—'}</TableCell>
                   <TableCell>{MESSAGE_STATUS[m.status] ?? m.status}</TableCell>
                   <TableCell className="max-w-80 whitespace-normal text-muted-foreground">{describeMessage(m)}</TableCell>
@@ -146,7 +147,7 @@ function Recipients({ id, running }: { id: string; running: boolean }) {
   );
 }
 
-/** §5.9 S-08, for email. A send finishes within its own request, so it has no pause or resume to offer. */
+/** §5.9 S-08. A send finishes within its own request, so it has no pause or resume to offer. */
 export function CampaignMonitor({ id }: { id: string }) {
   const campaign = useQuery({
     queryKey: ['campaign', id],
@@ -172,6 +173,7 @@ export function CampaignMonitor({ id }: { id: string }) {
   if (!campaign.data) return <Skeleton className="h-64 w-full" />;
   const c = campaign.data;
   const n = c.counts;
+  const isWhatsApp = c.channel === 'whatsapp';
 
   return (
     <>
@@ -189,20 +191,30 @@ export function CampaignMonitor({ id }: { id: string }) {
         {!c.webhook_connected && n.accepted > 0 && (
           <Alert>
             <AlertDescription>
-              Delivered, opened and bounced counts stay at zero until Resend can report them. <Link className="underline underline-offset-2" href="/settings">Connect the webhook in Settings</Link>.
+              {isWhatsApp ? 'Delivered and read counts stay at zero, and STOP replies aren’t recorded, until Meta can report them.' : 'Delivered, opened and bounced counts stay at zero until Resend can report them.'} <Link className="underline underline-offset-2" href="/settings">Connect the webhook in Settings</Link>.
             </AlertDescription>
           </Alert>
         )}
         <DeliveryBar counts={n} />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           <Tile label="Recipients" value={n.total} />
-          <Tile label="Accepted by Resend" value={n.accepted} />
-          <Tile label="Delivered" value={n.delivered} note={`${share(n.delivered, n.accepted)} of accepted`} />
-          <Tile label="Opened (approximate)" value={n.opened} note={`${share(n.opened, n.delivered)} of delivered`} />
-          <Tile label="Clicked" value={n.clicked} note={`${share(n.clicked, n.delivered)} of delivered`} />
-          <Tile label="Bounced" value={n.bounced} note={`${share(n.bounced, n.accepted)} of accepted`} level={levelOf(n.bounced, n.accepted, c.thresholds.bounce)} />
-          <Tile label="Complained" value={n.complained} note={`${share(n.complained, n.accepted)} of accepted`} level={levelOf(n.complained, n.accepted, c.thresholds.complaint)} />
-          <Tile label="Unsubscribed" value={n.unsubscribed} />
+          {isWhatsApp ? (
+            <>
+              <Tile label="Accepted by Meta" value={n.accepted} />
+              <Tile label="Delivered" value={n.delivered} note={`${share(n.delivered, n.accepted)} of accepted`} />
+              <Tile label="Read" value={n.read} note={`${share(n.read, n.accepted)} of accepted`} />
+            </>
+          ) : (
+            <>
+              <Tile label="Accepted by Resend" value={n.accepted} />
+              <Tile label="Delivered" value={n.delivered} note={`${share(n.delivered, n.accepted)} of accepted`} />
+              <Tile label="Opened (approximate)" value={n.opened} note={`${share(n.opened, n.delivered)} of delivered`} />
+              <Tile label="Clicked" value={n.clicked} note={`${share(n.clicked, n.delivered)} of delivered`} />
+              <Tile label="Bounced" value={n.bounced} note={`${share(n.bounced, n.accepted)} of accepted`} level={levelOf(n.bounced, n.accepted, c.thresholds.bounce)} />
+              <Tile label="Complained" value={n.complained} note={`${share(n.complained, n.accepted)} of accepted`} level={levelOf(n.complained, n.accepted, c.thresholds.complaint)} />
+              <Tile label="Unsubscribed" value={n.unsubscribed} />
+            </>
+          )}
           <Tile label="Failed" value={n.failed} />
           <Tile label="Skipped" value={n.skipped} />
           <Tile label="Unknown" value={n.unknown} note="May or may not have gone out" />

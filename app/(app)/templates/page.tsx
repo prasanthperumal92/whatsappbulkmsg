@@ -1,6 +1,7 @@
-import { FileText, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { EmptyState } from '@/components/shell/empty-state';
 import { PageHeader } from '@/components/shell/page-header';
+import { WhatsAppTemplates } from '@/components/templates/whatsapp-templates';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function TemplatesPage() {
@@ -13,7 +14,7 @@ export default function TemplatesPage() {
           <TabsTrigger value="email">Email</TabsTrigger>
         </TabsList>
         <TabsContent value="whatsapp" className="mt-4">
-          <EmptyState icon={FileText} title="No WhatsApp templates yet" description="WhatsApp templates you design will appear here." />
+          <WhatsAppTemplates />
         </TabsContent>
         <TabsContent value="email" className="mt-4">
           <EmptyState icon={Mail} title="No email templates yet" description="Email templates you design will appear here." />

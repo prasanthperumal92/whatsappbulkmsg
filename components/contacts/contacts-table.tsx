@@ -14,6 +14,7 @@ import type { ContactRow } from '@/lib/contacts/store';
 import type { Selection } from '@/lib/email/audience';
 import type { SendSummary } from '@/lib/email/send';
 import { EmailCompose } from './email-compose';
+import { WhatsAppCompose } from './whatsapp-compose';
 
 type Row = ContactRow & { last_email_at: string | null };
 type Page = { items: Row[]; total: number };
@@ -30,7 +31,7 @@ function ConsentBadge({ status }: { status: string }) {
 
 function resultMessage({ accepted, failed, skipped, unknown }: SendSummary) {
   const parts = [`Sent to ${accepted} ${accepted === 1 ? 'contact' : 'contacts'}.`];
-  if (skipped) parts.push(`${skipped} skipped, because they unsubscribed or a variable in the email had no value for them.`);
+  if (skipped) parts.push(`${skipped} skipped, because they opted out or a variable in the message had no value for them.`);
   if (failed) parts.push(`${failed} failed.`);
   if (unknown) parts.push(`${unknown} may or may not have gone out.`);
   return parts.join(' ');
@@ -44,7 +45,7 @@ export function ContactsTable() {
   const [ids, setIds] = useState<ReadonlySet<string>>(new Set());
   /** "Select all matching": everyone the search finds, except the ones unticked since. */
   const [all, setAll] = useState<{ q: string; total: number; excluded: ReadonlySet<string> } | null>(null);
-  const [composing, setComposing] = useState(false);
+  const [composing, setComposing] = useState<'email' | 'whatsapp' | null>(null);
   const [result, setResult] = useState<SendSummary | null>(null);
   const lastClicked = useRef<number | null>(null);
   const headerBox = useRef<HTMLInputElement>(null);
@@ -94,7 +95,7 @@ export function ContactsTable() {
   const clear = () => {
     setIds(new Set());
     setAll(null);
-    setComposing(false);
+    setComposing(null);
     lastClicked.current = null;
   };
 
@@ -103,6 +104,12 @@ export function ContactsTable() {
     const to = shift && lastClicked.current !== null ? Math.max(lastClicked.current, index) : index;
     setMany(items.slice(from, to + 1).map((c) => c.contact_id), on);
     lastClicked.current = index;
+  };
+
+  const onSent = (summary: SendSummary) => {
+    setResult(summary);
+    clear();
+    void contacts.refetch();
   };
 
   const selection: Selection = all ? { mode: 'filter', q: all.q, exclude_ids: [...all.excluded] } : { mode: 'ids', ids: [...ids] };
@@ -119,18 +126,8 @@ export function ContactsTable() {
         </Alert>
       )}
 
-      {composing && selectedCount > 0 && (
-        <EmailCompose
-          selection={selection}
-          selectedCount={selectedCount}
-          onCancel={() => setComposing(false)}
-          onSent={(summary) => {
-            setResult(summary);
-            clear();
-            void contacts.refetch();
-          }}
-        />
-      )}
+      {composing === 'email' && selectedCount > 0 && <EmailCompose selection={selection} selectedCount={selectedCount} onCancel={() => setComposing(null)} onSent={onSent} />}
+      {composing === 'whatsapp' && selectedCount > 0 && <WhatsAppCompose selection={selection} selectedCount={selectedCount} onCancel={() => setComposing(null)} onSent={onSent} />}
 
       <div className="flex flex-wrap items-center gap-3">
         <Input
@@ -144,7 +141,12 @@ export function ContactsTable() {
         {selectedCount > 0 && (
           <div className="flex items-center gap-2" role="status">
             <span className="text-sm font-medium">{selectedCount.toLocaleString('en-IN')} selected</span>
-            {!composing && <Button onClick={() => setComposing(true)}>Email selected</Button>}
+            {!composing && (
+              <>
+                <Button onClick={() => setComposing('whatsapp')}>WhatsApp selected</Button>
+                <Button variant="outline" onClick={() => setComposing('email')}>Email selected</Button>
+              </>
+            )}
             <Button variant="ghost" onClick={clear}>Clear</Button>
           </div>
         )}
@@ -185,6 +187,7 @@ export function ContactsTable() {
                 <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
                 <TableHead>Company</TableHead>
+                <TableHead>WhatsApp opt-in</TableHead>
                 <TableHead>Email opt-in</TableHead>
                 <TableHead>Last emailed</TableHead>
               </TableRow>
@@ -192,7 +195,7 @@ export function ContactsTable() {
             <TableBody>
               {items.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">No contacts match this search.</TableCell>
+                  <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">No contacts match this search.</TableCell>
                 </TableRow>
               )}
               {items.map((contact, index) => (
@@ -210,6 +213,7 @@ export function ContactsTable() {
                   <TableCell>{contact.email ?? '—'}</TableCell>
                   <TableCell>{contact.phone_e164 ?? '—'}</TableCell>
                   <TableCell>{contact.company ?? '—'}</TableCell>
+                  <TableCell><ConsentBadge status={contact.opt_in_status} /></TableCell>
                   <TableCell><ConsentBadge status={contact.email_opt_in_status} /></TableCell>
                   <TableCell className="text-muted-foreground">{contact.last_email_at ? dateFormat.format(new Date(contact.last_email_at)) : 'Never'}</TableCell>
                 </TableRow>

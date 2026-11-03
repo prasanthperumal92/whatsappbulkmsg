@@ -2,7 +2,7 @@
 
 import { resolveValue, type ValueSource, type VariableContact } from '@/lib/campaigns/variables';
 
-export type HeaderMapping = { media_id: string } | ValueSource;
+export type HeaderMapping = { media_id: string } | { media_link: string } | ValueSource;
 /** Keys are body variable names, `header`, and `button_{index}` for a URL suffix. */
 export type VariableMapping = Record<string, ValueSource | HeaderMapping>;
 
@@ -38,7 +38,7 @@ export type SendPayload = {
 export type PayloadResult = { body: SendPayload } | { skip_reason: 'EMPTY_VARIABLE' };
 
 function resolve(source: ValueSource | HeaderMapping | undefined, contact: PayloadContact): string | null {
-  return !source || 'media_id' in source ? null : resolveValue(source, contact);
+  return !source || 'media_id' in source || 'media_link' in source ? null : resolveValue(source, contact);
 }
 
 /** Returns the request body, or a skip reason: a recipient is never sent an empty variable. */
@@ -57,9 +57,14 @@ export function buildSendPayload(template: PayloadTemplate, mapping: VariableMap
     }
   } else if (format) {
     const header = mapping.header;
-    if (!header || !('media_id' in header) || !header.media_id) return skip;
     const key = format.toLowerCase();
-    components.push({ type: 'header', parameters: [{ type: key, [key]: { id: header.media_id } }] });
+    if (header && 'media_link' in header && header.media_link) {
+      components.push({ type: 'header', parameters: [{ type: key, [key]: { link: header.media_link } }] });
+    } else if (header && 'media_id' in header && header.media_id) {
+      components.push({ type: 'header', parameters: [{ type: key, [key]: { id: header.media_id } }] });
+    } else {
+      return skip;
+    }
   }
 
   if (template.body_vars.length > 0) {

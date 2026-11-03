@@ -61,18 +61,18 @@ export function emailSettingsFrom(settings: Pick<Settings, 'email' | 'audience'>
 }
 
 /** A send whose function died mid-way stops holding the channel. Rows that were in flight may have gone out. */
-async function releaseStaleSends(db: Db, now: Date) {
+export async function releaseStaleSends(db: Db, now: Date, channel: 'email' | 'whatsapp' = 'email') {
   await db.transaction(async (tx) => {
     const stale = await tx
       .update(campaigns)
       .set({ status: 'failed', finishedAt: now, pauseReason: 'The send was interrupted' })
-      .where(and(eq(campaigns.channel, 'email'), eq(campaigns.status, 'running'), sql`${campaigns.workflowRunId} IS NULL`, lt(campaigns.heartbeatAt, new Date(now.getTime() - STALE_SEND_MS))))
+      .where(and(eq(campaigns.channel, channel), eq(campaigns.status, 'running'), sql`${campaigns.workflowRunId} IS NULL`, lt(campaigns.heartbeatAt, new Date(now.getTime() - STALE_SEND_MS))))
       .returning({ id: campaigns.id });
     if (stale.length) await settleUnsent(tx, stale.map((c) => c.id));
   });
 }
 
-async function settleUnsent(tx: Tx, ids: string[]) {
+export async function settleUnsent(tx: Tx, ids: string[]) {
   await tx.update(campaignMessages).set({ status: 'unknown', updatedAt: new Date() }).where(and(inArray(campaignMessages.campaignId, ids), eq(campaignMessages.status, 'sending')));
   await tx.update(campaignMessages).set({ status: 'skipped', errorCode: 'SEND_STOPPED', updatedAt: new Date() }).where(and(inArray(campaignMessages.campaignId, ids), eq(campaignMessages.status, 'pending')));
 }

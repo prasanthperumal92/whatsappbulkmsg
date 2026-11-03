@@ -16,6 +16,7 @@ export type CampaignCounts = {
   failed: number;
   accepted: number;
   delivered: number;
+  read: number;
   opened: number;
   clicked: number;
   bounced: number;
@@ -34,19 +35,20 @@ const COUNT_COLUMNS = sql`
   count(*) FILTER (WHERE status = 'unknown')::int AS unknown,
   count(*) FILTER (WHERE status = 'skipped')::int AS skipped,
   count(*) FILTER (WHERE status = 'failed')::int AS failed,
-  count(*) FILTER (WHERE resend_id IS NOT NULL)::int AS accepted,
-  count(*) FILTER (WHERE delivered_at IS NOT NULL OR status IN ('delivered', 'opened', 'clicked'))::int AS delivered,
+  count(*) FILTER (WHERE resend_id IS NOT NULL OR wamid IS NOT NULL OR accepted_at IS NOT NULL)::int AS accepted,
+  count(*) FILTER (WHERE delivered_at IS NOT NULL OR status IN ('delivered', 'read', 'opened', 'clicked'))::int AS delivered,
+  count(*) FILTER (WHERE read_at IS NOT NULL OR status = 'read')::int AS read,
   count(*) FILTER (WHERE opened_at IS NOT NULL OR status IN ('opened', 'clicked'))::int AS opened,
   count(*) FILTER (WHERE clicked_at IS NOT NULL OR status = 'clicked')::int AS clicked,
   count(*) FILTER (WHERE status = 'bounced' OR bounce_type = 'Permanent')::int AS bounced,
   count(*) FILTER (WHERE complained_at IS NOT NULL OR status = 'complained')::int AS complained,
   count(*) FILTER (WHERE unsubscribed_at IS NOT NULL)::int AS unsubscribed,
-  count(*) FILTER (WHERE status IN ('delivered', 'opened', 'clicked'))::int AS seg_delivered,
-  count(*) FILTER (WHERE status NOT IN ('delivered', 'opened', 'clicked', 'bounced', 'complained', 'failed', 'skipped'))::int AS seg_waiting,
+  count(*) FILTER (WHERE status IN ('delivered', 'read', 'opened', 'clicked'))::int AS seg_delivered,
+  count(*) FILTER (WHERE status NOT IN ('delivered', 'read', 'opened', 'clicked', 'bounced', 'complained', 'failed', 'skipped'))::int AS seg_waiting,
   count(*) FILTER (WHERE status IN ('bounced', 'complained', 'failed'))::int AS seg_problem,
   count(*) FILTER (WHERE status = 'skipped')::int AS seg_skipped`;
 
-const EMPTY_COUNTS = { total: 0, pending: 0, unknown: 0, skipped: 0, failed: 0, accepted: 0, delivered: 0, opened: 0, clicked: 0, bounced: 0, complained: 0, unsubscribed: 0, seg_delivered: 0, seg_waiting: 0, seg_problem: 0, seg_skipped: 0 } satisfies CampaignCounts;
+const EMPTY_COUNTS = { total: 0, pending: 0, unknown: 0, skipped: 0, failed: 0, accepted: 0, delivered: 0, read: 0, opened: 0, clicked: 0, bounced: 0, complained: 0, unsubscribed: 0, seg_delivered: 0, seg_waiting: 0, seg_problem: 0, seg_skipped: 0 } satisfies CampaignCounts;
 
 /** A percentage, or null when there's nothing to divide by, so the page shows a dash and not a misleading 0%. */
 export const percent = (part: number, whole: number) => (whole > 0 ? Math.round((part / whole) * 1000) / 10 : null);
@@ -81,7 +83,7 @@ const SELECT_CAMPAIGN = sql`
   SELECT c.id, c.channel, c.name, c.status, c.heartbeat_at, c.workflow_run_id, c.created_at, c.finished_at, c.pause_reason, c.template_snapshot_json, a.user_email AS created_by_email, s.*
   FROM campaigns c
   LEFT JOIN LATERAL (SELECT ${COUNT_COLUMNS} FROM campaign_messages m WHERE m.campaign_id = c.id) s ON true
-  LEFT JOIN LATERAL (SELECT user_email FROM audit_log WHERE entity_id = c.id AND action = 'email.send' ORDER BY at LIMIT 1) a ON true`;
+  LEFT JOIN LATERAL (SELECT user_email FROM audit_log WHERE entity_id = c.id AND action IN ('email.send', 'whatsapp.send') ORDER BY at LIMIT 1) a ON true`;
 
 export async function listCampaigns(db: Tx, { channel, page, pageSize }: { channel?: string; page: number; pageSize: number }) {
   const { rows: counted } = await db.execute<{ n: number }>(sql`SELECT count(*)::int AS n FROM campaigns ${channel ? sql`WHERE channel = ${channel}` : sql``}`);
@@ -89,7 +91,7 @@ export async function listCampaigns(db: Tx, { channel, page, pageSize }: { chann
   return { items: rows.map(toSummary), total: counted[0]!.n };
 }
 
-type Snapshot = { template?: { blocks?: { type: string; text?: string }[] }; settings?: { from?: string; reply_to?: string | null } };
+type Snapshot = { body?: string; template?: { blocks?: { type: string; text?: string }[] }; settings?: { from?: string; reply_to?: string | null } };
 
 export async function getCampaign(db: Tx, id: string) {
   const { rows } = await db.execute<CampaignRow & { template_snapshot_json: Snapshot | null }>(sql`${SELECT_CAMPAIGN} WHERE c.id = ${id}`);
@@ -102,10 +104,10 @@ export async function getCampaign(db: Tx, id: string) {
     ...toSummary(row),
     from: snapshot?.settings?.from ?? null,
     reply_to: snapshot?.settings?.reply_to ?? null,
-    message: (snapshot?.template?.blocks ?? []).flatMap((b) => (b.text ? [b.text] : [])).join('\n\n'),
+    message: snapshot?.body ?? (snapshot?.template?.blocks ?? []).flatMap((b) => (b.text ? [b.text] : [])).join('\n\n'),
     top_links: links,
     thresholds: { bounce: sending.bounceRatePercent, complaint: sending.complaintRatePercent },
-    webhook_connected: sources.RESEND_WEBHOOK_SECRET !== 'none',
+    webhook_connected: (row.channel === 'whatsapp' ? sources.META_APP_SECRET : sources.RESEND_WEBHOOK_SECRET) !== 'none',
   };
 }
 export type CampaignDetail = Awaited<ReturnType<typeof getCampaign>>;
@@ -116,7 +118,7 @@ export type MessageFilter = (typeof MESSAGE_FILTERS)[number];
 const FILTER_SQL: Record<MessageFilter, ReturnType<typeof sql>> = {
   all: sql`true`,
   problems: sql`m.status IN ('failed', 'bounced', 'complained')`,
-  delivered: sql`m.status IN ('delivered', 'opened', 'clicked')`,
+  delivered: sql`m.status IN ('delivered', 'read', 'opened', 'clicked')`,
   waiting: sql`m.status IN ('pending', 'claimed', 'retry_wait', 'sending', 'accepted', 'sent', 'delayed')`,
   skipped: sql`m.status = 'skipped'`,
   unknown: sql`m.status = 'unknown'`,
@@ -125,6 +127,7 @@ const FILTER_SQL: Record<MessageFilter, ReturnType<typeof sql>> = {
 export type CampaignMessage = {
   id: string;
   email_to: string | null;
+  phone_e164: string | null;
   first_name: string | null;
   last_name: string | null;
   status: string;
@@ -138,7 +141,7 @@ export type CampaignMessage = {
 };
 
 const SELECT_MESSAGE = sql`
-  SELECT m.id, m.email_to, c.first_name, c.last_name, m.status, m.error_code, m.error_detail, m.bounce_type, m.bounce_subtype, m.attempts,
+  SELECT m.id, m.email_to, m.phone_e164, c.first_name, c.last_name, m.status, m.error_code, m.error_detail, m.bounce_type, m.bounce_subtype, m.attempts,
          m.unsubscribed_at IS NOT NULL AS unsubscribed, m.updated_at
   FROM campaign_messages m LEFT JOIN contacts c ON c.contact_id = m.contact_id`;
 

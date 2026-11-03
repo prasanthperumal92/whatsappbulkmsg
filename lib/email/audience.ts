@@ -81,7 +81,7 @@ export function planAudience({ contacts, suppressed, lastEmailed, frequencyCapDa
   return { selected: contacts.length, recipients, excluded, role_addresses };
 }
 
-async function loadSelection(db: Tx, chosen: Selection): Promise<ContactRow[]> {
+export async function loadSelection(db: Tx, chosen: Selection): Promise<ContactRow[]> {
   const store = new ContactStore(db);
   if (chosen.mode === 'ids') return store.getMany([...new Set(chosen.ids)]);
   const excluded = new Set(chosen.exclude_ids);

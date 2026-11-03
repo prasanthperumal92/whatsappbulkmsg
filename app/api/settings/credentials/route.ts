@@ -5,11 +5,16 @@ import type { Tx } from '@/lib/db';
 import { LOCAL_BIN_KEYS } from '@/lib/local-bin';
 import { credentialSources, deleteSecret, setSecret } from '@/lib/settings/secrets';
 
+const accountId = z.string().trim().regex(/^\d+$/, 'This ID is made of digits only').nullable().optional();
 const body = z.object({
+  WHATSAPP_ACCESS_TOKEN: z.string().trim().regex(/^\S{20,}$/, 'That doesn’t look like an access token. Paste the whole token, with no spaces.').nullable().optional(),
+  WHATSAPP_WABA_ID: accountId,
+  WHATSAPP_PHONE_NUMBER_ID: accountId,
+  META_APP_SECRET: z.string().trim().regex(/^\S{16,}$/, 'That doesn’t look like an App Secret. Copy it from App settings → Basic.').nullable().optional(),
   RESEND_API_KEY: z.string().trim().regex(/^re_\S+$/, 'A Resend API key starts with re_').nullable().optional(),
   RESEND_WEBHOOK_SECRET: z.string().trim().regex(/^whsec_\S+$/, 'A webhook signing secret starts with whsec_').nullable().optional(),
 });
-const NAMES = ['RESEND_API_KEY', 'RESEND_WEBHOOK_SECRET'] as const;
+const NAMES = ['WHATSAPP_ACCESS_TOKEN', 'WHATSAPP_WABA_ID', 'WHATSAPP_PHONE_NUMBER_ID', 'META_APP_SECRET', 'RESEND_API_KEY', 'RESEND_WEBHOOK_SECRET'] as const;
 
 /** Where each credential comes from. Never its value. */
 async function describe(db: Tx) {
