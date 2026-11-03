@@ -1,0 +1,16 @@
+# Secrets: the CLI uploads the working tree, so these must never leave this machine.
+.local.bin
+.env*
+!.env.example
+.mcp.json
+
+# Local build output and test artefacts
+.next
+.next-e2e
+.local-blob
+test-results
+playwright-report
+coverage
+*.tsbuildinfo
+.DS_Store
+evals/fixtures/large-50k.csv

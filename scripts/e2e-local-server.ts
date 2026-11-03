@@ -20,7 +20,8 @@ async function main() {
   const next = spawn('npx', ['next', 'dev', '--port', String(port)], {
     stdio: 'inherit',
     // BLOB_READ_WRITE_TOKEN is blanked because Next would otherwise load it from .env.local and use the real store.
-    env: { ...process.env, DATABASE_URL: url, E2E_FAKE_CLERK: '1', LOCAL_BLOB_DIR: path.join(dir, 'blob'), BLOB_READ_WRITE_TOKEN: '' },
+    // LOCAL_BIN_FILE points nowhere so a real Resend key in .local.bin can't reach these tests (§7A.1).
+    env: { ...process.env, DATABASE_URL: url, E2E_FAKE_CLERK: '1', LOCAL_BLOB_DIR: path.join(dir, 'blob'), BLOB_READ_WRITE_TOKEN: '', LOCAL_BIN_FILE: process.env.LOCAL_BIN_FILE ?? path.join(dir, 'no-local-bin') },
   });
 
   const stop = async () => {

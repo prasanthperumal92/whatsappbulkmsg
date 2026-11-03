@@ -1,6 +1,6 @@
 'use client';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -36,6 +36,7 @@ function addedMessage(c: ContactRow) {
 
 export function AddContact() {
   const router = useRouter();
+  const client = useQueryClient();
   const [open, setOpen] = useState(false);
   const [values, setValues] = useState(EMPTY);
   const [whatsappConsent, setWhatsappConsent] = useState(false);
@@ -58,6 +59,7 @@ export function AddContact() {
       setWhatsappConsent(false);
       setEmailConsent(false);
       setOpen(false);
+      void client.invalidateQueries({ queryKey: ['contacts'] });
       router.refresh();
     },
   });

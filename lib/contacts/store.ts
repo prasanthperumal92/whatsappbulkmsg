@@ -60,6 +60,14 @@ function fromDb(row: Record<string, unknown>): ContactRow {
   return out as ContactRow;
 }
 
+/** §5.4 search: name, phone or email, contains. */
+function liveMatching(q: string) {
+  const term = q.trim();
+  if (!term) return sql`is_deleted = false`;
+  const like = `%${term.replace(/[\\%_]/g, '\\$&')}%`;
+  return sql`is_deleted = false AND (first_name ILIKE ${like} OR last_name ILIKE ${like} OR display_name ILIKE ${like} OR concat_ws(' ', first_name, last_name) ILIKE ${like} OR phone_e164 ILIKE ${like} OR email ILIKE ${like})`;
+}
+
 export const IMPORT_LOCK = 727_001;
 
 export class ContactStore {
@@ -123,6 +131,25 @@ export class ContactStore {
   async count(): Promise<number> {
     const { rows } = await this.tx.execute<{ n: number }>(sql`SELECT count(*)::int AS n FROM contacts WHERE is_deleted = false`);
     return rows[0]!.n;
+  }
+
+  /** One page of live contacts, newest first, for the S-03 grid. */
+  async listPage({ q, page, pageSize }: { q: string; page: number; pageSize: number }): Promise<{ items: (ContactRow & { last_email_at: string | null })[]; total: number }> {
+    const where = liveMatching(q);
+    const { rows: counted } = await this.tx.execute<{ n: number }>(sql`SELECT count(*)::int AS n FROM contacts WHERE ${where}`);
+    const { rows } = await this.tx.execute(sql`SELECT ${COLUMN_LIST} FROM contacts WHERE ${where} ORDER BY contact_id DESC LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}`);
+    const items = rows.map(fromDb);
+    const { rows: activity } = await this.tx.execute<{ contact_id: string; last_email_at: Date | string | null }>(
+      sql`SELECT contact_id, last_email_at FROM contact_activity WHERE contact_id IN (SELECT value::uuid FROM jsonb_array_elements_text(${JSON.stringify(items.map((c) => c.contact_id))}::jsonb))`,
+    );
+    const lastEmail = new Map(activity.map((a) => [a.contact_id, a.last_email_at ? new Date(a.last_email_at).toISOString() : null]));
+    return { items: items.map((c) => ({ ...c, last_email_at: lastEmail.get(c.contact_id) ?? null })), total: counted[0]!.n };
+  }
+
+  /** Every live contact the search matches, for a selection made with "select all matching". */
+  async listMatching(q: string): Promise<ContactRow[]> {
+    const { rows } = await this.tx.execute(sql`SELECT ${COLUMN_LIST} FROM contacts WHERE ${liveMatching(q)} ORDER BY contact_id`);
+    return rows.map(fromDb);
   }
 
   async insertMany(contacts: Partial<ContactRow>[]) {

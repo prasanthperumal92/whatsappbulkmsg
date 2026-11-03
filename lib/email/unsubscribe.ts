@@ -33,3 +33,11 @@ export function verifyToken(token: string, secret: string, previousSecrets: stri
   if (!matched) return { valid: false };
   return value.startsWith(TEST_PREFIX) ? { valid: true, is_test: true } : { valid: true, is_test: false, message_id: value };
 }
+
+/** The signing secret and the old ones that still verify. Null secret: links can't be made, so nothing may be sent. */
+export function unsubscribeSecrets(env: Record<string, string | undefined> = process.env) {
+  return {
+    secret: env.EMAIL_UNSUBSCRIBE_SECRET || null,
+    previous: (env.EMAIL_UNSUBSCRIBE_SECRETS_PREVIOUS ?? '').split(',').map((s) => s.trim()).filter(Boolean),
+  };
+}

@@ -38,7 +38,8 @@ export const settingsSchema = {
     fromName: z.string().nullable().default(null),
     fromAddress: z.email().nullable().default(null),
     replyTo: z.email().nullable().default(null),
-    postalAddress: z.string().nullable().default(null),
+    postalAddress: z.string().max(500).nullable().default(null),
+    signature: z.string().max(2000).nullable().default(null),
     unsubscribeWording: z.string().nullable().default(null),
   }),
   emailSending: z.strictObject({

@@ -31,3 +31,10 @@ export function mockPolicy(env: Env = process.env): { allowed: boolean; forced: 
   const environment = getEnvironment(env);
   return { allowed: environment !== 'production', forced: environment === 'preview' };
 }
+
+/** The base URL for links in emails. Falls back to the request's origin, which is localhost on local dev. */
+export function appUrl(requestUrl: string, env: Env = process.env): string {
+  if (env.APP_URL) return env.APP_URL.replace(/\/+$/, '');
+  if (getEnvironment(env) === 'production' && env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  return new URL(requestUrl).origin;
+}

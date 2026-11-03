@@ -1,10 +1,11 @@
 // §5.12 and §7A.4: blocks → React Email → HTML, plus a plain-text part. Same input, byte-identical output, because a
 // retried batch must match its idempotency key. Values are HTML-escaped by React in the HTML part, raw in the text
-// part and subject, and URL-encoded in URLs. The footer isn't a block, so a template can't remove it.
+// part and subject, and URL-encoded in URLs. The footer isn't a block, so a template can't remove it. The signature
+// comes from Settings, so its {{…}} stay literal and it can't pull in a contact's values.
 
 import { Body, Button, Container, Head, Heading, Hr, Html, Img, Link, Preview, Section, Text } from '@react-email/components';
 import { render } from '@react-email/render';
-import type { CSSProperties, ReactNode } from 'react';
+import { Fragment, type CSSProperties, type ReactNode } from 'react';
 
 export type EmailBlock =
   | { type: 'heading'; text: string }
@@ -14,7 +15,7 @@ export type EmailBlock =
   | { type: 'divider' }
   | { type: 'spacer'; height?: number };
 
-export type EmailFooter = { businessName: string; postalAddress: string; unsubscribeUrl: string; privacyUrl?: string | null };
+export type EmailFooter = { businessName: string; postalAddress: string; unsubscribeUrl: string; privacyUrl?: string | null; signature?: string | null };
 
 /** Fills a template string. `url` is true when the value lands in a URL and must be encoded. */
 export type Fill = (template: string, url?: boolean) => string;
@@ -58,13 +59,21 @@ export function parseInline(template: string): Inline[] {
   return parts;
 }
 
+const literal: Fill = (text) => text;
+
+/** Marks can't span lines, so only plain text can hold a line break. */
+function withBreaks(text: string): ReactNode {
+  if (!text.includes('\n')) return text;
+  return text.split('\n').map((line, i) => <Fragment key={i}>{i > 0 && <br />}{line}</Fragment>);
+}
+
 function inlineHtml(template: string, fill: Fill): ReactNode {
   return parseInline(template).map((part, i) => {
     const text = fill(part.text);
     if (part.kind === 'bold') return <strong key={i}>{text}</strong>;
     if (part.kind === 'italic') return <em key={i}>{text}</em>;
     if (part.kind === 'link') return <Link key={i} href={fill(part.url, true)} style={styles.link}>{text}</Link>;
-    return text;
+    return <Fragment key={i}>{withBreaks(text)}</Fragment>;
   });
 }
 
@@ -98,6 +107,7 @@ export function renderHtml({ blocks, preheader, footer, fill }: { blocks: EmailB
       <Body style={styles.body}>
         <Container style={styles.container}>
           {blocks.map((block, i) => blockHtml(block, i, fill))}
+          {footer.signature ? <Text style={styles.text}>{inlineHtml(footer.signature, literal)}</Text> : null}
           <Hr style={styles.rule} />
           <Text style={styles.footer}>{`${footer.businessName}, ${footer.postalAddress}`}</Text>
           <Text style={styles.footer}>
@@ -134,6 +144,7 @@ function blockText(block: EmailBlock, fill: Fill): string | null {
 
 export function renderText({ blocks, footer, fill }: { blocks: EmailBlock[]; footer: EmailFooter; fill: Fill }): string {
   const body = blocks.map((block) => blockText(block, fill)).filter((part) => part !== null);
+  if (footer.signature) body.push(inlineText(footer.signature, literal));
   const lines = [`—`, `${footer.businessName}, ${footer.postalAddress}`, `Unsubscribe: ${footer.unsubscribeUrl}`];
   if (footer.privacyUrl) lines.push(`Privacy notice: ${footer.privacyUrl}`);
   return [...body, lines.join('\n')].join('\n\n');

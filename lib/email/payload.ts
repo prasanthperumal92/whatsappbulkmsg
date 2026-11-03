@@ -15,6 +15,7 @@ export type EmailSettings = {
   /** Defaults to the display name in `from`. */
   business_name?: string | null;
   privacy_url?: string | null;
+  signature?: string | null;
 };
 
 export type EmailBatchElement = {
@@ -38,9 +39,10 @@ export type EmailPayloadInput = {
   secret: string;
 } & ({ test_send?: false; message_id: string; campaign_id?: string } | { test_send: true; test_random?: string });
 
-const VARIABLE = /\{\{\s*([^{}]+?)\s*\}\}/g;
+export const VARIABLE = /\{\{\s*([^{}]+?)\s*\}\}/g;
 
-function templateStrings({ subject, preheader, blocks }: EmailTemplate): string[] {
+/** Every string in a template that can hold a variable. */
+export function templateStrings({ subject, preheader, blocks }: EmailTemplate): string[] {
   const fromBlock = (block: EmailBlock): (string | undefined)[] => {
     switch (block.type) {
       case 'heading':
@@ -84,9 +86,11 @@ export async function buildEmailElement(input: EmailPayloadInput): Promise<Email
   const unsubscribeUrl = `${settings.app_url.replace(/\/+$/, '')}/u/${token}`;
   const footer: EmailFooter = {
     businessName: settings.business_name || displayName(settings.from),
-    postalAddress: settings.postal_address,
+    // Typed on several lines in Settings, but one line in the footer.
+    postalAddress: settings.postal_address.split(/\r?\n/).map((line) => line.trim()).filter(Boolean).join(', '),
     unsubscribeUrl,
     privacyUrl: settings.privacy_url,
+    signature: settings.signature,
   };
 
   const tags = input.test_send

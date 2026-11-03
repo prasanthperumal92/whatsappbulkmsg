@@ -77,8 +77,6 @@ test('team changes appear in the activity log, and filters work', async ({ page,
   await expect(rows.filter({ hasText: 'Team member added' })).toHaveCount(0);
   await expect(rows.filter({ hasText: 'Team member removed' })).toHaveCount(1);
 
-  await page.getByLabel('Action').click();
-  await page.getByRole('option', { name: 'All actions' }).click();
   await page.getByLabel('Channel').click();
   await page.getByRole('option', { name: 'Email' }).click();
   await expect(page.getByText('No activity matches these filters.')).toBeVisible();

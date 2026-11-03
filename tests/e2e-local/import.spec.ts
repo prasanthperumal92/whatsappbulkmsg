@@ -151,8 +151,9 @@ test('a file imported twice warns about the duplicate', async ({ page }) => {
 test('S-01 Import settings save and reach the wizard', async ({ page }) => {
   await page.goto('/settings');
   await page.getByLabel('Default country (ISO code)').fill('GB');
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
-  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+  const card = page.getByRole('heading', { name: 'Import', exact: true }).locator('xpath=ancestor::*[@data-slot="card"]');
+  await card.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(card.getByText('Saved', { exact: true })).toBeVisible();
 
   await page.goto('/import');
   await fileInput(page).setInputFiles(csvFile('country.csv', `phone\n+447400${unique().slice(-6)}\n`));
@@ -162,6 +163,6 @@ test('S-01 Import settings save and reach the wizard', async ({ page }) => {
 
   await page.goto('/settings');
   await page.getByLabel('Default country (ISO code)').fill('IN');
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
-  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+  await card.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(card.getByText('Saved', { exact: true })).toBeVisible();
 });
